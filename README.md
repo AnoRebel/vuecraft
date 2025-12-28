@@ -7,30 +7,36 @@ Inspired by [ui.shadcn.com/create](https://ui.shadcn.com/create) and built for t
 ## Features
 
 - **Real-time Preview**: See changes instantly as you customize
-- **Grouped Configuration**: Organize settings by Theme, Typography, Components, Icons, Layout, and Export
+- **Preset Themes**: Quick-start with 10 curated preset themes (Default, Ocean, Forest, Sunset, etc.)
+- **Component Selection**: Choose which components to include in your export
+- **Live CSS Editor**: Edit and preview CSS variables in real-time
+- **CLI Integration**: Generate shadcn-vue CLI commands and setup scripts
+- **PWA Support**: Install as a Progressive Web App for offline access
 - **Multiple Themes**: Choose from 20+ accent colors with OKLCH color format
 - **Component Styles**: Default, New York, Miami, Brutal, and Soft styles
 - **Font Selection**: Configure both primary and monospace fonts
-- **Export Options**: Export CSS variables and/or JSON configuration for Vue and Nuxt
+- **Export Options**: Export CSS variables, JSON configuration, CLI commands, and README
 - **Import/Export**: Save configurations to localStorage, share via URL, or export as JSON
 - **Dark Mode**: Full dark mode support with system preference detection
 - **Tailwind CSS v4**: Uses the latest config-less Tailwind CSS v4
 
 ## Tech Stack
 
-- **Framework**: [Nuxt 4](https://nuxt.com/) with Vue 3.5
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (config-less)
-- **Components**: [Reka UI](https://reka-ui.com/) (Vue port of Radix UI)
+- **Framework**: [Nuxt 4.2](https://nuxt.com/) with Vue 3.5
+- **Styling**: [Tailwind CSS v4.1](https://tailwindcss.com/) (config-less)
+- **Components**: [Reka UI 2.7](https://reka-ui.com/) (Vue port of Radix UI)
 - **Icons**: [@nuxt/icon](https://nuxt.com/modules/icon)
 - **Fonts**: [@nuxt/fonts](https://nuxt.com/modules/fonts)
-- **State**: [VueUse](https://vueuse.org/) utilities
-- **Package Manager**: [Bun](https://bun.sh/)
+- **State**: [VueUse 14](https://vueuse.org/) utilities
+- **Validation**: [Valibot](https://valibot.dev/)
+- **PWA**: [@vite-pwa/nuxt](https://vite-pwa-org.netlify.app/frameworks/nuxt)
+- **Package Manager**: [Bun 1.3](https://bun.sh/)
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) >= 1.0.0 (or Node.js >= 18)
+- [Bun](https://bun.sh/) >= 1.3.0 (or Node.js >= 20)
 
 ### Installation
 
@@ -52,10 +58,10 @@ The app will be available at `http://localhost:3000`.
 
 ```bash
 # Build the application
-bun build
+bun run build
 
 # Preview the production build
-bun preview
+bun run preview
 ```
 
 ## Configuration Groups
@@ -98,6 +104,21 @@ bun preview
 - TypeScript support
 - CSS variables prefix
 
+## Preset Themes
+
+Quick-start with curated preset themes:
+
+- **Default** - Clean neutral theme
+- **Ocean** - Cool blue tones
+- **Forest** - Natural green palette
+- **Sunset** - Warm orange hues
+- **Midnight** - Dark purple accent
+- **Rose** - Soft pink theme
+- **Lavender** - Light purple tones
+- **Ember** - Bold red accent
+- **Mint** - Fresh teal colors
+- **Slate** - Professional gray theme
+
 ## Preview Templates
 
 - **Dashboard**: Full dashboard layout with sidebar and charts
@@ -105,6 +126,22 @@ bun preview
 - **Forms**: Form inputs and validation
 - **Auth**: Login and signup forms
 - **Components**: Component gallery view
+
+## Export Options
+
+### CSS Tab
+Export generated CSS variables compatible with Tailwind CSS v4.
+
+### Config Tab
+Export `components.json` for shadcn-vue CLI configuration.
+
+### CLI Tab
+- **Init Command**: `npx shadcn-vue@latest init` with your settings
+- **Add Command**: Component installation command
+- **Setup Script**: Full bash script to create a new project
+
+### README Tab
+Auto-generated README with your configuration details.
 
 ## Import/Export
 
@@ -117,6 +154,14 @@ Export your configuration as JSON for version control or backup.
 ### Save/Load
 Save multiple named configurations to localStorage for quick access.
 
+## PWA Support
+
+This app can be installed as a Progressive Web App:
+
+1. Look for the install prompt at the bottom of the screen
+2. Click "Install" to add to your device
+3. Access offline with cached resources
+
 ## Scripts
 
 ```bash
@@ -124,53 +169,63 @@ Save multiple named configurations to localStorage for quick access.
 bun dev
 
 # Build
-bun build
+bun run build
 
 # Preview production build
-bun preview
+bun run preview
 
 # Lint
-bun lint
+bun run lint
 
 # Lint and fix
-bun lint:fix
+bun run lint:fix
 
 # Format with Prettier
-bun format
+bun run format
 
 # Type check
-bun typecheck
+bun run typecheck
 ```
 
 ## Project Structure
 
 ```
 shadcn-vue-create/
-├── app/
-│   └── app.vue           # Main app component
 ├── assets/
 │   └── css/
-│       └── main.css      # Global styles with Tailwind
+│       └── main.css          # Global styles with Tailwind
 ├── components/
-│   ├── config/           # Configuration panel components
-│   ├── preview/          # Preview template components
-│   └── ui/               # Reusable UI components
+│   ├── config/               # Configuration panel components
+│   │   ├── ColorPicker.vue
+│   │   ├── ComponentSelection.vue
+│   │   ├── ConfigPanel.vue
+│   │   ├── LiveCSSEditor.vue
+│   │   ├── OptionPicker.vue
+│   │   ├── PresetThemes.vue
+│   │   └── ...
+│   ├── preview/              # Preview template components
+│   │   ├── PreviewPanel.vue
+│   │   ├── PreviewDashboard.vue
+│   │   └── ...
+│   ├── ui/                   # Reusable UI components
+│   ├── ExportDialog.vue      # Export modal with tabs
+│   └── PWAInstallPrompt.vue  # PWA install UI
 ├── composables/
-│   ├── useColorMode.ts   # Color mode management
-│   └── useDesignSystem.ts # Design system state
+│   └── useDesignSystem.ts    # Design system state management
 ├── config/
-│   ├── defaults.ts       # Default configuration values
-│   └── themes.ts         # Theme color definitions
+│   ├── defaults.ts           # Default values, presets, components
+│   └── themes.ts             # Theme color definitions (OKLCH)
 ├── lib/
-│   └── utils.ts          # Utility functions (cn, etc.)
+│   └── utils.ts              # Utility functions (cn, etc.)
 ├── pages/
-│   └── index.vue         # Main page
-├── plugins/
-│   └── click-outside.ts  # Click outside directive
+│   └── index.vue             # Main page
 ├── types/
-│   └── config.ts         # TypeScript type definitions
-└── utils/
-    └── cssGenerator.ts   # CSS variable generation
+│   └── config.ts             # TypeScript type definitions
+├── utils/
+│   ├── cliGenerator.ts       # CLI command generation
+│   └── cssGenerator.ts       # CSS variable generation
+├── app.vue                   # Root component
+└── nuxt.config.ts            # Nuxt configuration
 ```
 
 ## Contributing
@@ -186,3 +241,4 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 - [shadcn/ui](https://ui.shadcn.com/) for the original inspiration
 - [shadcn-vue](https://www.shadcn-vue.com/) for the Vue port
 - [Reka UI](https://reka-ui.com/) for the headless UI components
+- [Vite PWA](https://vite-pwa-org.netlify.app/) for PWA support
