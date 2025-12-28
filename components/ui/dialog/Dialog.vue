@@ -6,7 +6,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  open: false
+  open: false,
 })
 
 const emit = defineEmits<{
@@ -19,7 +19,7 @@ function close() {
 
 provide('dialog', {
   open: toRef(props, 'open'),
-  close
+  close,
 })
 </script>
 

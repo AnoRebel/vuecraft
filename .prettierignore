@@ -1,0 +1,17 @@
+# Build outputs
+.output
+.nuxt
+dist
+node_modules
+
+# Lock files
+bun.lock
+pnpm-lock.yaml
+package-lock.json
+
+# Generated files
+*.min.js
+*.min.css
+
+# Cache
+.cache

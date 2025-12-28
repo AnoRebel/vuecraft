@@ -20,7 +20,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   placeholder: 'Select an option',
-  disabled: false
+  disabled: false,
 })
 
 const emit = defineEmits<{
@@ -30,9 +30,7 @@ const emit = defineEmits<{
 const isOpen = ref(false)
 const triggerRef = ref<HTMLButtonElement>()
 
-const selectedOption = computed(() =>
-  props.options.find(opt => opt.value === props.modelValue)
-)
+const selectedOption = computed(() => props.options.find((opt) => opt.value === props.modelValue))
 
 function toggle() {
   if (!props.disabled) {
@@ -53,17 +51,19 @@ function close() {
 </script>
 
 <template>
-  <div class="relative" v-click-outside="close">
+  <div v-click-outside="close" class="relative">
     <button
       ref="triggerRef"
       type="button"
       role="combobox"
       :aria-expanded="isOpen"
       :disabled="disabled"
-      :class="cn(
-        'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
-        props.class
-      )"
+      :class="
+        cn(
+          'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+          props.class
+        )
+      "
       @click="toggle"
     >
       <span :class="{ 'text-muted-foreground': !selectedOption }">
@@ -103,11 +103,13 @@ function close() {
           :key="option.value"
           role="option"
           :aria-selected="option.value === modelValue"
-          :class="cn(
-            'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
-            { 'bg-accent': option.value === modelValue },
-            { 'opacity-50 cursor-not-allowed': option.disabled }
-          )"
+          :class="
+            cn(
+              'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
+              { 'bg-accent': option.value === modelValue },
+              { 'opacity-50 cursor-not-allowed': option.disabled }
+            )
+          "
           @click="select(option)"
         >
           <span>{{ option.label }}</span>

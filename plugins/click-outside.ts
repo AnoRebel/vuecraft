@@ -10,6 +10,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     },
     unmounted(el) {
       document.removeEventListener('click', el._clickOutside)
-    }
+    },
   })
 })

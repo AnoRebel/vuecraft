@@ -17,9 +17,10 @@ useHead({
   meta: [
     {
       name: 'description',
-      content: 'Create and customize your shadcn-vue design system. Export to Vue or Nuxt projects with Tailwind CSS v4.'
-    }
-  ]
+      content:
+        'Create and customize your shadcn-vue design system. Export to Vue or Nuxt projects with Tailwind CSS v4.',
+    },
+  ],
 })
 </script>
 

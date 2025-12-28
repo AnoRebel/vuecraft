@@ -14,7 +14,7 @@ interface Props {
   label?: string
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -44,12 +44,14 @@ function getColorStyle(option: ColorOption): string {
         :key="option.name"
         type="button"
         :title="option.label"
-        :class="cn(
-          'h-8 w-full rounded-md border-2 transition-all hover:scale-105',
-          modelValue === option.name
-            ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
-            : 'border-transparent'
-        )"
+        :class="
+          cn(
+            'h-8 w-full rounded-md border-2 transition-all hover:scale-105',
+            modelValue === option.name
+              ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
+              : 'border-transparent'
+          )
+        "
         :style="{ backgroundColor: getColorStyle(option) }"
         @click="selectColor(option.name)"
       >
@@ -57,7 +59,7 @@ function getColorStyle(option: ColorOption): string {
       </button>
     </div>
     <p class="text-xs text-muted-foreground">
-      {{ options.find(o => o.name === modelValue)?.label ?? 'Select a color' }}
+      {{ options.find((o) => o.name === modelValue)?.label ?? 'Select a color' }}
     </p>
   </div>
 </template>

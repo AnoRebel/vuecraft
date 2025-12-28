@@ -9,7 +9,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  defaultOpen: true
+  defaultOpen: true,
 })
 
 const isOpen = ref(props.defaultOpen)

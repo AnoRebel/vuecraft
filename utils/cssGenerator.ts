@@ -1,97 +1,118 @@
-import type { DesignSystemConfig, RadiusValue, ShadowIntensity, FontScale, SpacingScale, AnimationSpeed, BorderWidth } from '~/types/config'
+import type {
+  DesignSystemConfig,
+  RadiusValue,
+  ShadowIntensity,
+  FontScale,
+  SpacingScale,
+  AnimationSpeed,
+  BorderWidth,
+} from '~/types/config'
 import { getThemeColors } from '~/config/themes'
 import { RADIUS_OPTIONS, ANIMATION_SPEEDS, BORDER_WIDTHS } from '~/config/defaults'
 
 // Font family mappings
 const FONT_FAMILY_MAP: Record<string, string> = {
-  'inter': '"Inter", ui-sans-serif, system-ui, sans-serif',
+  inter: '"Inter", ui-sans-serif, system-ui, sans-serif',
   'noto-sans': '"Noto Sans", ui-sans-serif, system-ui, sans-serif',
   'nunito-sans': '"Nunito Sans", ui-sans-serif, system-ui, sans-serif',
-  'figtree': '"Figtree", ui-sans-serif, system-ui, sans-serif',
-  'roboto': '"Roboto", ui-sans-serif, system-ui, sans-serif',
-  'raleway': '"Raleway", ui-sans-serif, system-ui, sans-serif',
+  figtree: '"Figtree", ui-sans-serif, system-ui, sans-serif',
+  roboto: '"Roboto", ui-sans-serif, system-ui, sans-serif',
+  raleway: '"Raleway", ui-sans-serif, system-ui, sans-serif',
   'dm-sans': '"DM Sans", ui-sans-serif, system-ui, sans-serif',
   'public-sans': '"Public Sans", ui-sans-serif, system-ui, sans-serif',
-  'outfit': '"Outfit", ui-sans-serif, system-ui, sans-serif',
-  'geist': '"Geist", ui-sans-serif, system-ui, sans-serif'
+  outfit: '"Outfit", ui-sans-serif, system-ui, sans-serif',
+  geist: '"Geist", ui-sans-serif, system-ui, sans-serif',
 }
 
 const MONO_FONT_FAMILY_MAP: Record<string, string> = {
   'jetbrains-mono': '"JetBrains Mono", ui-monospace, monospace',
   'geist-mono': '"Geist Mono", ui-monospace, monospace',
   'fira-code': '"Fira Code", ui-monospace, monospace',
-  'source-code-pro': '"Source Code Pro", ui-monospace, monospace'
+  'source-code-pro': '"Source Code Pro", ui-monospace, monospace',
 }
 
 // Get radius value
 function getRadiusValue(radius: RadiusValue): string {
-  const option = RADIUS_OPTIONS.find(r => r.name === radius)
+  const option = RADIUS_OPTIONS.find((r) => r.name === radius)
   return option?.value ?? '0.5rem'
 }
 
 // Get shadow values based on intensity
-function getShadowValues(intensity: ShadowIntensity): { sm: string; md: string; lg: string; xl: string } {
+function getShadowValues(intensity: ShadowIntensity): {
+  sm: string
+  md: string
+  lg: string
+  xl: string
+} {
   switch (intensity) {
     case 'none':
       return {
         sm: 'none',
         md: 'none',
         lg: 'none',
-        xl: 'none'
+        xl: 'none',
       }
     case 'subtle':
       return {
         sm: '0 1px 1px 0 rgb(0 0 0 / 0.03)',
         md: '0 2px 3px -1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05)',
         lg: '0 4px 6px -2px rgb(0 0 0 / 0.05), 0 2px 3px -2px rgb(0 0 0 / 0.05)',
-        xl: '0 8px 10px -3px rgb(0 0 0 / 0.05), 0 4px 5px -3px rgb(0 0 0 / 0.05)'
+        xl: '0 8px 10px -3px rgb(0 0 0 / 0.05), 0 4px 5px -3px rgb(0 0 0 / 0.05)',
       }
     case 'default':
       return {
         sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
         md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
         lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+        xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
       }
     case 'strong':
       return {
         sm: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
         md: '0 6px 10px -2px rgb(0 0 0 / 0.15), 0 3px 6px -3px rgb(0 0 0 / 0.15)',
         lg: '0 15px 20px -5px rgb(0 0 0 / 0.15), 0 6px 8px -6px rgb(0 0 0 / 0.15)',
-        xl: '0 25px 35px -8px rgb(0 0 0 / 0.2), 0 10px 15px -8px rgb(0 0 0 / 0.15)'
+        xl: '0 25px 35px -8px rgb(0 0 0 / 0.2), 0 10px 15px -8px rgb(0 0 0 / 0.15)',
       }
   }
 }
 
-// Get font scale multiplier
-function getFontScaleMultiplier(scale: FontScale): number {
+// Get font scale multiplier (exported for future use)
+export function getFontScaleMultiplier(scale: FontScale): number {
   switch (scale) {
-    case 'compact': return 0.875
-    case 'default': return 1
-    case 'relaxed': return 1.125
-    case 'spacious': return 1.25
+    case 'compact':
+      return 0.875
+    case 'default':
+      return 1
+    case 'relaxed':
+      return 1.125
+    case 'spacious':
+      return 1.25
   }
 }
 
-// Get spacing scale multiplier
-function getSpacingScaleMultiplier(scale: SpacingScale): number {
+// Get spacing scale multiplier (exported for future use)
+export function getSpacingScaleMultiplier(scale: SpacingScale): number {
   switch (scale) {
-    case 'compact': return 0.875
-    case 'default': return 1
-    case 'comfortable': return 1.125
-    case 'spacious': return 1.25
+    case 'compact':
+      return 0.875
+    case 'default':
+      return 1
+    case 'comfortable':
+      return 1.125
+    case 'spacious':
+      return 1.25
   }
 }
 
 // Get animation duration
 function getAnimationDuration(speed: AnimationSpeed): string {
-  const option = ANIMATION_SPEEDS.find(a => a.name === speed)
+  const option = ANIMATION_SPEEDS.find((a) => a.name === speed)
   return option?.duration ?? '200ms'
 }
 
 // Get border width
 function getBorderWidth(width: BorderWidth): string {
-  const option = BORDER_WIDTHS.find(b => b.name === width)
+  const option = BORDER_WIDTHS.find((b) => b.name === width)
   return option?.value ?? '1px'
 }
 
@@ -101,7 +122,8 @@ export function generateCSSVariables(config: DesignSystemConfig): string {
   const radius = getRadiusValue(config.theme.radius)
   const shadows = getShadowValues(config.theme.shadowIntensity)
   const fontFamily = FONT_FAMILY_MAP[config.typography.fontFamily] ?? FONT_FAMILY_MAP['inter']
-  const monoFontFamily = MONO_FONT_FAMILY_MAP[config.typography.monoFontFamily] ?? MONO_FONT_FAMILY_MAP['jetbrains-mono']
+  const monoFontFamily =
+    MONO_FONT_FAMILY_MAP[config.typography.monoFontFamily] ?? MONO_FONT_FAMILY_MAP['jetbrains-mono']
   const animationDuration = getAnimationDuration(config.components.animationSpeed)
   const borderWidth = getBorderWidth(config.components.borderWidth)
 
@@ -294,7 +316,7 @@ export function generateComponentsJson(config: DesignSystemConfig): string {
     tailwind: {
       config: '',
       css: 'src/assets/css/main.css',
-      baseColor: config.theme.baseColor
+      baseColor: config.theme.baseColor,
     },
     framework: config.export.framework,
     typescript: config.export.typescript,
@@ -303,9 +325,9 @@ export function generateComponentsJson(config: DesignSystemConfig): string {
       utils: '@/lib/utils',
       ui: '@/components/ui',
       lib: '@/lib',
-      hooks: '@/composables'
+      hooks: '@/composables',
     },
-    iconLibrary: config.icons.library
+    iconLibrary: config.icons.library,
   }
 
   return JSON.stringify(json, null, 2)

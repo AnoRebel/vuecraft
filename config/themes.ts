@@ -107,7 +107,7 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.967 0.001 286.375)',
       sidebarAccentForeground: 'oklch(0.21 0.006 285.885)',
       sidebarBorder: 'oklch(0.92 0.004 286.32)',
-      sidebarRing: 'oklch(0.708 0.022 261.325)'
+      sidebarRing: 'oklch(0.708 0.022 261.325)',
     },
     dark: {
       background: 'oklch(0.141 0.005 285.823)',
@@ -141,8 +141,8 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.274 0.006 286.033)',
       sidebarAccentForeground: 'oklch(0.985 0 0)',
       sidebarBorder: 'oklch(0.274 0.006 286.033)',
-      sidebarRing: 'oklch(0.552 0.016 285.938)'
-    }
+      sidebarRing: 'oklch(0.552 0.016 285.938)',
+    },
   },
   stone: {
     light: {
@@ -177,7 +177,7 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.97 0.001 106.424)',
       sidebarAccentForeground: 'oklch(0.216 0.006 56.043)',
       sidebarBorder: 'oklch(0.923 0.003 48.717)',
-      sidebarRing: 'oklch(0.709 0.01 56.259)'
+      sidebarRing: 'oklch(0.709 0.01 56.259)',
     },
     dark: {
       background: 'oklch(0.147 0.004 49.25)',
@@ -211,8 +211,8 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.268 0.007 34.298)',
       sidebarAccentForeground: 'oklch(0.985 0.001 106.423)',
       sidebarBorder: 'oklch(0.268 0.007 34.298)',
-      sidebarRing: 'oklch(0.553 0.013 58.071)'
-    }
+      sidebarRing: 'oklch(0.553 0.013 58.071)',
+    },
   },
   zinc: {
     light: {
@@ -247,7 +247,7 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.967 0.001 286.375)',
       sidebarAccentForeground: 'oklch(0.21 0.006 285.885)',
       sidebarBorder: 'oklch(0.92 0.004 286.32)',
-      sidebarRing: 'oklch(0.705 0.015 286.067)'
+      sidebarRing: 'oklch(0.705 0.015 286.067)',
     },
     dark: {
       background: 'oklch(0.141 0.005 285.823)',
@@ -281,8 +281,8 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.274 0.006 286.033)',
       sidebarAccentForeground: 'oklch(0.985 0 0)',
       sidebarBorder: 'oklch(0.274 0.006 286.033)',
-      sidebarRing: 'oklch(0.552 0.014 247.839)'
-    }
+      sidebarRing: 'oklch(0.552 0.014 247.839)',
+    },
   },
   gray: {
     light: {
@@ -317,7 +317,7 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.968 0.007 247.896)',
       sidebarAccentForeground: 'oklch(0.21 0.034 264.665)',
       sidebarBorder: 'oklch(0.918 0.011 264.531)',
-      sidebarRing: 'oklch(0.707 0.022 261.325)'
+      sidebarRing: 'oklch(0.707 0.022 261.325)',
     },
     dark: {
       background: 'oklch(0.13 0.028 261.692)',
@@ -351,8 +351,8 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.279 0.029 260.031)',
       sidebarAccentForeground: 'oklch(0.984 0.003 247.858)',
       sidebarBorder: 'oklch(0.279 0.029 260.031)',
-      sidebarRing: 'oklch(0.551 0.018 264.436)'
-    }
+      sidebarRing: 'oklch(0.551 0.018 264.436)',
+    },
   },
   slate: {
     light: {
@@ -387,7 +387,7 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.968 0.007 247.896)',
       sidebarAccentForeground: 'oklch(0.208 0.042 265.755)',
       sidebarBorder: 'oklch(0.918 0.011 264.531)',
-      sidebarRing: 'oklch(0.704 0.04 256.788)'
+      sidebarRing: 'oklch(0.704 0.04 256.788)',
     },
     dark: {
       background: 'oklch(0.129 0.042 264.695)',
@@ -421,9 +421,9 @@ export const BASE_COLOR_THEMES: Record<BaseColorName, ThemeColors> = {
       sidebarAccent: 'oklch(0.279 0.041 260.873)',
       sidebarAccentForeground: 'oklch(0.984 0.003 247.858)',
       sidebarBorder: 'oklch(0.279 0.041 260.873)',
-      sidebarRing: 'oklch(0.554 0.022 257.417)'
-    }
-  }
+      sidebarRing: 'oklch(0.554 0.022 257.417)',
+    },
+  },
 }
 
 // Accent colors that can be applied on top of base colors
@@ -445,11 +445,17 @@ export const ACCENT_COLORS: Record<ThemeName, { primary: string; primaryForegrou
   cyan: { primary: 'oklch(0.715 0.143 199.769)', primaryForeground: 'oklch(0.981 0.013 204.687)' },
   sky: { primary: 'oklch(0.685 0.169 222.689)', primaryForeground: 'oklch(0.977 0.013 236.62)' },
   blue: { primary: 'oklch(0.623 0.214 259.815)', primaryForeground: 'oklch(0.97 0.014 254.604)' },
-  indigo: { primary: 'oklch(0.585 0.233 277.117)', primaryForeground: 'oklch(0.962 0.018 272.314)' },
+  indigo: {
+    primary: 'oklch(0.585 0.233 277.117)',
+    primaryForeground: 'oklch(0.962 0.018 272.314)',
+  },
   violet: { primary: 'oklch(0.606 0.25 292.717)', primaryForeground: 'oklch(0.969 0.016 293.756)' },
   purple: { primary: 'oklch(0.627 0.265 303.9)', primaryForeground: 'oklch(0.977 0.016 308.852)' },
-  fuchsia: { primary: 'oklch(0.667 0.295 322.15)', primaryForeground: 'oklch(0.973 0.016 325.612)' },
-  pink: { primary: 'oklch(0.656 0.241 354.308)', primaryForeground: 'oklch(0.971 0.014 343.198)' }
+  fuchsia: {
+    primary: 'oklch(0.667 0.295 322.15)',
+    primaryForeground: 'oklch(0.973 0.016 325.612)',
+  },
+  pink: { primary: 'oklch(0.656 0.241 354.308)', primaryForeground: 'oklch(0.971 0.014 343.198)' },
 }
 
 // Get theme colors for a specific base color and accent theme
@@ -471,7 +477,7 @@ export function getThemeColors(baseColor: BaseColorName, accentTheme: ThemeName)
       ring: accent.primary,
       sidebarPrimary: accent.primary,
       sidebarPrimaryForeground: accent.primaryForeground,
-      sidebarRing: accent.primary
+      sidebarRing: accent.primary,
     },
     dark: {
       ...base.dark,
@@ -480,7 +486,7 @@ export function getThemeColors(baseColor: BaseColorName, accentTheme: ThemeName)
       ring: accent.primary,
       sidebarPrimary: accent.primary,
       sidebarPrimaryForeground: accent.primaryForeground,
-      sidebarRing: accent.primary
-    }
+      sidebarRing: accent.primary,
+    },
   }
 }

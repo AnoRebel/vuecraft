@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '~/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -58,9 +65,7 @@ async function copyJson() {
     <DialogContent class="max-w-lg">
       <DialogHeader>
         <DialogTitle>Share Configuration</DialogTitle>
-        <DialogDescription>
-          Share your design system configuration with others.
-        </DialogDescription>
+        <DialogDescription> Share your design system configuration with others. </DialogDescription>
       </DialogHeader>
 
       <div class="space-y-6">
@@ -68,11 +73,7 @@ async function copyJson() {
         <div class="space-y-2">
           <Label>Shareable URL</Label>
           <div class="flex gap-2">
-            <Input
-              :model-value="shareUrl"
-              readonly
-              class="font-mono text-xs"
-            />
+            <Input :model-value="shareUrl" readonly class="font-mono text-xs" />
             <Button @click="copyUrl">
               {{ copied === 'url' ? 'Copied!' : 'Copy' }}
             </Button>
@@ -89,12 +90,7 @@ async function copyJson() {
             <div class="rounded-md border bg-muted/50 p-4 max-h-[200px] overflow-auto">
               <pre class="text-xs font-mono"><code>{{ configJson }}</code></pre>
             </div>
-            <Button
-              size="sm"
-              variant="secondary"
-              class="absolute top-2 right-2"
-              @click="copyJson"
-            >
+            <Button size="sm" variant="secondary" class="absolute top-2 right-2" @click="copyJson">
               {{ copied === 'json' ? 'Copied!' : 'Copy' }}
             </Button>
           </div>
@@ -105,9 +101,7 @@ async function copyJson() {
       </div>
 
       <DialogFooter>
-        <Button variant="outline" @click="emit('update:open', false)">
-          Close
-        </Button>
+        <Button variant="outline" @click="emit('update:open', false)"> Close </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
