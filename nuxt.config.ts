@@ -68,10 +68,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   vite: {
-    plugins: [
-      // @ts-expect-error - tailwindcss vite plugin types
-      (await import('@tailwindcss/vite')).default(),
-    ],
+    plugins: [(await import('@tailwindcss/vite')).default()],
   },
 
   icon: {

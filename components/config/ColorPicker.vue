@@ -10,7 +10,7 @@ interface ColorOption {
 
 interface Props {
   modelValue: string
-  options: ColorOption[]
+  options: readonly ColorOption[]
   label?: string
 }
 

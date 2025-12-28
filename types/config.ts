@@ -123,6 +123,18 @@ export interface DesignSystemConfig {
   export: ExportConfig
 }
 
+// Deep readonly version for config returned from composables
+export type DeepReadonly<T> = {
+  readonly [P in keyof T]: T[P] extends object
+    ? T[P] extends Array<infer U>
+      ? readonly U[]
+      : DeepReadonly<T[P]>
+    : T[P]
+}
+
+// Type that accepts both mutable and readonly config
+export type DesignSystemConfigInput = DeepReadonly<DesignSystemConfig> | DesignSystemConfig
+
 // CSS Variables structure
 export interface CSSVariables {
   light: Record<string, string>

@@ -1,5 +1,5 @@
 import type {
-  DesignSystemConfig,
+  DesignSystemConfigInput,
   RadiusValue,
   ShadowIntensity,
   FontScale,
@@ -117,7 +117,7 @@ function getBorderWidth(width: BorderWidth): string {
 }
 
 // Generate CSS variables from config
-export function generateCSSVariables(config: DesignSystemConfig): string {
+export function generateCSSVariables(config: DesignSystemConfigInput): string {
   const colors = getThemeColors(config.theme.baseColor, config.theme.accentTheme)
   const radius = getRadiusValue(config.theme.radius)
   const shadows = getShadowValues(config.theme.shadowIntensity)
@@ -304,12 +304,12 @@ body {
 }
 
 // Generate Tailwind CSS v4 config-compatible CSS
-export function generateTailwindV4CSS(config: DesignSystemConfig): string {
+export function generateTailwindV4CSS(config: DesignSystemConfigInput): string {
   return generateCSSVariables(config)
 }
 
 // Generate components.json for shadcn-vue CLI
-export function generateComponentsJson(config: DesignSystemConfig): string {
+export function generateComponentsJson(config: DesignSystemConfigInput): string {
   const json = {
     $schema: 'https://shadcn-vue.com/schema.json',
     style: config.components.style,
@@ -334,7 +334,7 @@ export function generateComponentsJson(config: DesignSystemConfig): string {
 }
 
 // Generate full export package
-export function generateExportPackage(config: DesignSystemConfig): {
+export function generateExportPackage(config: DesignSystemConfigInput): {
   css: string
   componentsJson: string
   readme: string
