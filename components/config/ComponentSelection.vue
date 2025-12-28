@@ -47,7 +47,7 @@ const groupedComponents = computed(() => {
     if (!groups[component.category]) {
       groups[component.category] = []
     }
-    groups[component.category].push(component)
+    groups[component.category]!.push(component)
   }
   return groups
 })

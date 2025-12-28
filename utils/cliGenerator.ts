@@ -1,7 +1,7 @@
-import type { DesignSystemConfig } from '~/types/config'
+import type { DesignSystemConfigInput } from '~/types/config'
 
 // Generate shadcn-vue CLI init command
-export function generateInitCommand(config: DesignSystemConfig): string {
+export function generateInitCommand(config: DesignSystemConfigInput): string {
   const style = config.components.style
   const typescript = config.export.typescript
 
@@ -21,7 +21,7 @@ export function generateInitCommand(config: DesignSystemConfig): string {
 }
 
 // Generate component add command
-export function generateAddCommand(components: string[]): string {
+export function generateAddCommand(components: readonly string[]): string {
   if (components.length === 0) {
     return '# No components selected'
   }
@@ -35,7 +35,7 @@ export function generateAddCommand(components: string[]): string {
 }
 
 // Generate full setup script
-export function generateSetupScript(config: DesignSystemConfig): string {
+export function generateSetupScript(config: DesignSystemConfigInput): string {
   const lines: string[] = [
     '#!/bin/bash',
     '',
@@ -82,7 +82,7 @@ export function generateSetupScript(config: DesignSystemConfig): string {
 }
 
 // Generate components.json configuration for CLI
-export function generateCLIComponentsJson(config: DesignSystemConfig): string {
+export function generateCLIComponentsJson(config: DesignSystemConfigInput): string {
   const componentsConfig = {
     $schema: 'https://shadcn-vue.com/schema.json',
     style: config.components.style,
@@ -107,7 +107,7 @@ export function generateCLIComponentsJson(config: DesignSystemConfig): string {
 export function generateDependencies(): Record<string, string> {
   return {
     'class-variance-authority': '^0.7.0',
-    'clsx': '^2.1.0',
+    clsx: '^2.1.0',
     'reka-ui': '^2.0.0',
     'tailwind-merge': '^2.6.0',
   }
@@ -116,7 +116,7 @@ export function generateDependencies(): Record<string, string> {
 // Generate dev dependencies
 export function generateDevDependencies(): Record<string, string> {
   return {
-    'tailwindcss': '^4.0.0',
+    tailwindcss: '^4.0.0',
     '@tailwindcss/vite': '^4.0.0',
   }
 }
