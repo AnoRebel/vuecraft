@@ -200,58 +200,85 @@ export const CONTAINER_WIDTHS = [
   { name: 'full', label: 'Full Width', value: '100%' },
 ] as const
 
-// Component list for selection
-export const AVAILABLE_COMPONENTS = [
-  'accordion',
-  'alert',
-  'alert-dialog',
-  'aspect-ratio',
-  'avatar',
-  'badge',
-  'breadcrumb',
-  'button',
-  'calendar',
-  'card',
-  'carousel',
-  'chart',
-  'checkbox',
-  'collapsible',
-  'combobox',
-  'command',
-  'context-menu',
-  'data-table',
-  'date-picker',
-  'dialog',
-  'drawer',
-  'dropdown-menu',
-  'form',
-  'hover-card',
-  'input',
-  'input-otp',
-  'label',
-  'menubar',
-  'navigation-menu',
-  'pagination',
-  'popover',
-  'progress',
-  'radio-group',
-  'resizable',
-  'scroll-area',
-  'select',
-  'separator',
-  'sheet',
-  'sidebar',
-  'skeleton',
-  'slider',
-  'sonner',
-  'switch',
-  'table',
-  'tabs',
-  'textarea',
-  'toast',
-  'toggle',
-  'toggle-group',
-  'tooltip',
+// Component list for selection with categories
+export interface ComponentInfo {
+  name: string
+  label: string
+  category: 'layout' | 'forms' | 'data-display' | 'feedback' | 'navigation' | 'overlay'
+  description: string
+}
+
+export const AVAILABLE_COMPONENTS: ComponentInfo[] = [
+  // Layout
+  { name: 'accordion', label: 'Accordion', category: 'layout', description: 'Collapsible content sections' },
+  { name: 'aspect-ratio', label: 'Aspect Ratio', category: 'layout', description: 'Maintain aspect ratio of content' },
+  { name: 'card', label: 'Card', category: 'layout', description: 'Container for content' },
+  { name: 'collapsible', label: 'Collapsible', category: 'layout', description: 'Expandable content area' },
+  { name: 'resizable', label: 'Resizable', category: 'layout', description: 'Resizable panels' },
+  { name: 'scroll-area', label: 'Scroll Area', category: 'layout', description: 'Custom scrollable container' },
+  { name: 'separator', label: 'Separator', category: 'layout', description: 'Visual divider' },
+  { name: 'sidebar', label: 'Sidebar', category: 'layout', description: 'Side navigation container' },
+
+  // Forms
+  { name: 'button', label: 'Button', category: 'forms', description: 'Clickable button element' },
+  { name: 'checkbox', label: 'Checkbox', category: 'forms', description: 'Toggle selection input' },
+  { name: 'combobox', label: 'Combobox', category: 'forms', description: 'Searchable select input' },
+  { name: 'date-picker', label: 'Date Picker', category: 'forms', description: 'Date selection input' },
+  { name: 'form', label: 'Form', category: 'forms', description: 'Form validation and submission' },
+  { name: 'input', label: 'Input', category: 'forms', description: 'Text input field' },
+  { name: 'input-otp', label: 'Input OTP', category: 'forms', description: 'One-time password input' },
+  { name: 'label', label: 'Label', category: 'forms', description: 'Form field label' },
+  { name: 'radio-group', label: 'Radio Group', category: 'forms', description: 'Single selection from options' },
+  { name: 'select', label: 'Select', category: 'forms', description: 'Dropdown selection' },
+  { name: 'slider', label: 'Slider', category: 'forms', description: 'Range input control' },
+  { name: 'switch', label: 'Switch', category: 'forms', description: 'Toggle switch input' },
+  { name: 'textarea', label: 'Textarea', category: 'forms', description: 'Multi-line text input' },
+  { name: 'toggle', label: 'Toggle', category: 'forms', description: 'Toggle button' },
+  { name: 'toggle-group', label: 'Toggle Group', category: 'forms', description: 'Group of toggle buttons' },
+
+  // Data Display
+  { name: 'avatar', label: 'Avatar', category: 'data-display', description: 'User profile image' },
+  { name: 'badge', label: 'Badge', category: 'data-display', description: 'Status indicator' },
+  { name: 'calendar', label: 'Calendar', category: 'data-display', description: 'Date calendar view' },
+  { name: 'carousel', label: 'Carousel', category: 'data-display', description: 'Sliding content carousel' },
+  { name: 'chart', label: 'Chart', category: 'data-display', description: 'Data visualization charts' },
+  { name: 'data-table', label: 'Data Table', category: 'data-display', description: 'Sortable data table' },
+  { name: 'progress', label: 'Progress', category: 'data-display', description: 'Progress indicator' },
+  { name: 'skeleton', label: 'Skeleton', category: 'data-display', description: 'Loading placeholder' },
+  { name: 'table', label: 'Table', category: 'data-display', description: 'Data table display' },
+
+  // Feedback
+  { name: 'alert', label: 'Alert', category: 'feedback', description: 'Informational message' },
+  { name: 'alert-dialog', label: 'Alert Dialog', category: 'feedback', description: 'Confirmation dialog' },
+  { name: 'sonner', label: 'Sonner', category: 'feedback', description: 'Toast notifications' },
+  { name: 'toast', label: 'Toast', category: 'feedback', description: 'Notification messages' },
+  { name: 'tooltip', label: 'Tooltip', category: 'feedback', description: 'Hover information' },
+
+  // Navigation
+  { name: 'breadcrumb', label: 'Breadcrumb', category: 'navigation', description: 'Navigation breadcrumbs' },
+  { name: 'command', label: 'Command', category: 'navigation', description: 'Command palette' },
+  { name: 'context-menu', label: 'Context Menu', category: 'navigation', description: 'Right-click menu' },
+  { name: 'dropdown-menu', label: 'Dropdown Menu', category: 'navigation', description: 'Dropdown navigation menu' },
+  { name: 'menubar', label: 'Menubar', category: 'navigation', description: 'Horizontal menu bar' },
+  { name: 'navigation-menu', label: 'Navigation Menu', category: 'navigation', description: 'Main navigation component' },
+  { name: 'pagination', label: 'Pagination', category: 'navigation', description: 'Page navigation' },
+  { name: 'tabs', label: 'Tabs', category: 'navigation', description: 'Tabbed content navigation' },
+
+  // Overlay
+  { name: 'dialog', label: 'Dialog', category: 'overlay', description: 'Modal dialog window' },
+  { name: 'drawer', label: 'Drawer', category: 'overlay', description: 'Sliding panel overlay' },
+  { name: 'hover-card', label: 'Hover Card', category: 'overlay', description: 'Hover information card' },
+  { name: 'popover', label: 'Popover', category: 'overlay', description: 'Floating content container' },
+  { name: 'sheet', label: 'Sheet', category: 'overlay', description: 'Side panel overlay' },
+]
+
+export const COMPONENT_CATEGORIES = [
+  { name: 'layout', label: 'Layout', description: 'Structural components' },
+  { name: 'forms', label: 'Forms', description: 'Input and form components' },
+  { name: 'data-display', label: 'Data Display', description: 'Content presentation' },
+  { name: 'feedback', label: 'Feedback', description: 'User notifications' },
+  { name: 'navigation', label: 'Navigation', description: 'Navigation components' },
+  { name: 'overlay', label: 'Overlay', description: 'Floating elements' },
 ] as const
 
 // Preview templates
@@ -267,3 +294,132 @@ export const PREVIEW_TEMPLATES = [
   { name: 'settings', label: 'Settings', description: 'Settings page layout' },
   { name: 'components', label: 'Components', description: 'Component gallery view' },
 ] as const
+
+// Preset themes with full configurations
+export interface PresetTheme {
+  name: string
+  label: string
+  description: string
+  preview: {
+    primary: string
+    background: string
+  }
+  config: {
+    theme: Partial<ThemeConfig>
+    typography: Partial<TypographyConfig>
+    components: Partial<ComponentsConfig>
+  }
+}
+
+export const PRESET_THEMES: PresetTheme[] = [
+  {
+    name: 'default',
+    label: 'Default',
+    description: 'Clean and minimal shadcn/ui default',
+    preview: { primary: 'oklch(0.21 0.006 285.885)', background: '#ffffff' },
+    config: {
+      theme: { baseColor: 'neutral', accentTheme: 'neutral', radius: 'md', shadowIntensity: 'default' },
+      typography: { fontFamily: 'inter', fontScale: 'default' },
+      components: { style: 'default', animationSpeed: 'default' },
+    },
+  },
+  {
+    name: 'new-york',
+    label: 'New York',
+    description: 'Refined and compact with subtle details',
+    preview: { primary: 'oklch(0.21 0.006 285.885)', background: '#fafafa' },
+    config: {
+      theme: { baseColor: 'zinc', accentTheme: 'zinc', radius: 'sm', shadowIntensity: 'subtle' },
+      typography: { fontFamily: 'geist', fontScale: 'compact' },
+      components: { style: 'new-york', animationSpeed: 'fast' },
+    },
+  },
+  {
+    name: 'miami',
+    label: 'Miami',
+    description: 'Vibrant and colorful with bold accents',
+    preview: { primary: 'oklch(0.656 0.241 354.308)', background: '#fef7f7' },
+    config: {
+      theme: { baseColor: 'stone', accentTheme: 'pink', radius: 'lg', shadowIntensity: 'default' },
+      typography: { fontFamily: 'dm-sans', fontScale: 'relaxed' },
+      components: { style: 'miami', animationSpeed: 'default' },
+    },
+  },
+  {
+    name: 'midnight',
+    label: 'Midnight',
+    description: 'Dark and mysterious with deep blues',
+    preview: { primary: 'oklch(0.623 0.214 259.815)', background: '#0a0a0f' },
+    config: {
+      theme: { baseColor: 'slate', accentTheme: 'blue', radius: 'md', shadowIntensity: 'strong' },
+      typography: { fontFamily: 'inter', fontScale: 'default' },
+      components: { style: 'default', animationSpeed: 'slow' },
+    },
+  },
+  {
+    name: 'forest',
+    label: 'Forest',
+    description: 'Natural and calming with earthy greens',
+    preview: { primary: 'oklch(0.696 0.17 162.48)', background: '#f5f9f5' },
+    config: {
+      theme: { baseColor: 'stone', accentTheme: 'emerald', radius: 'lg', shadowIntensity: 'subtle' },
+      typography: { fontFamily: 'nunito-sans', fontScale: 'relaxed' },
+      components: { style: 'soft', animationSpeed: 'slow' },
+    },
+  },
+  {
+    name: 'sunset',
+    label: 'Sunset',
+    description: 'Warm and inviting with orange tones',
+    preview: { primary: 'oklch(0.705 0.213 47.604)', background: '#fffaf5' },
+    config: {
+      theme: { baseColor: 'stone', accentTheme: 'orange', radius: 'xl', shadowIntensity: 'default' },
+      typography: { fontFamily: 'outfit', fontScale: 'default' },
+      components: { style: 'soft', animationSpeed: 'default' },
+    },
+  },
+  {
+    name: 'lavender',
+    label: 'Lavender',
+    description: 'Soft and elegant with purple hues',
+    preview: { primary: 'oklch(0.606 0.25 292.717)', background: '#faf8ff' },
+    config: {
+      theme: { baseColor: 'gray', accentTheme: 'violet', radius: 'lg', shadowIntensity: 'subtle' },
+      typography: { fontFamily: 'raleway', fontScale: 'relaxed' },
+      components: { style: 'soft', animationSpeed: 'slow' },
+    },
+  },
+  {
+    name: 'brutalist',
+    label: 'Brutalist',
+    description: 'Bold and stark with sharp edges',
+    preview: { primary: '#000000', background: '#ffffff' },
+    config: {
+      theme: { baseColor: 'neutral', accentTheme: 'neutral', radius: 'none', shadowIntensity: 'none' },
+      typography: { fontFamily: 'inter', fontScale: 'default', headingWeight: 'bold' },
+      components: { style: 'brutal', animationSpeed: 'fast', borderWidth: 'thick' },
+    },
+  },
+  {
+    name: 'ocean',
+    label: 'Ocean',
+    description: 'Cool and refreshing with cyan accents',
+    preview: { primary: 'oklch(0.715 0.143 199.769)', background: '#f0f9ff' },
+    config: {
+      theme: { baseColor: 'slate', accentTheme: 'cyan', radius: 'md', shadowIntensity: 'default' },
+      typography: { fontFamily: 'public-sans', fontScale: 'default' },
+      components: { style: 'default', animationSpeed: 'default' },
+    },
+  },
+  {
+    name: 'rose-gold',
+    label: 'Rose Gold',
+    description: 'Luxurious and feminine with rose accents',
+    preview: { primary: 'oklch(0.645 0.246 16.439)', background: '#fff8f8' },
+    config: {
+      theme: { baseColor: 'stone', accentTheme: 'rose', radius: 'full', shadowIntensity: 'subtle' },
+      typography: { fontFamily: 'figtree', fontScale: 'relaxed' },
+      components: { style: 'soft', animationSpeed: 'slow' },
+    },
+  },
+]

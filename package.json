@@ -20,6 +20,7 @@
     "@nuxt/fonts": "^0.10.3",
     "@nuxt/icon": "^1.15.0",
     "@nuxt/image": "^1.9.0",
+    "@vite-pwa/nuxt": "^0.10.8",
     "@vueuse/core": "^12.5.0",
     "@vueuse/nuxt": "^12.5.0",
     "class-variance-authority": "^0.7.1",

@@ -32,7 +32,9 @@ import {
   BORDER_WIDTHS as BORDER_WIDTHS_OPTIONS,
   CONTAINER_WIDTHS as CONTAINER_WIDTHS_OPTIONS,
   AVAILABLE_COMPONENTS as AVAILABLE_COMPONENTS_LIST,
+  COMPONENT_CATEGORIES as COMPONENT_CATEGORIES_LIST,
   PREVIEW_TEMPLATES as PREVIEW_TEMPLATES_OPTIONS,
+  PRESET_THEMES as PRESET_THEMES_LIST,
 } from '~/config/defaults'
 
 // Current version of the config serialization format
@@ -256,6 +258,17 @@ export function useDesignSystem() {
     })
   }
 
+  // Apply a preset theme
+  function applyPreset(presetName: string) {
+    const preset = PRESET_THEMES_LIST.find((p) => p.name === presetName)
+    if (preset) {
+      setTheme(preset.config.theme as Partial<ThemeConfig>)
+      setTypography(preset.config.typography as Partial<TypographyConfig>)
+      setComponents(preset.config.components as Partial<ComponentsConfig>)
+      isDirty.value = true
+    }
+  }
+
   // Import config from JSON
   function importConfig(jsonString: string): boolean {
     try {
@@ -383,6 +396,7 @@ export function useDesignSystem() {
 
     // Utility functions
     randomize,
+    applyPreset,
     importConfig,
     exportConfigJson,
     getShareableUrl,
@@ -419,6 +433,8 @@ export function useConfigOptions() {
     BORDER_WIDTHS: BORDER_WIDTHS_OPTIONS,
     CONTAINER_WIDTHS: CONTAINER_WIDTHS_OPTIONS,
     AVAILABLE_COMPONENTS: AVAILABLE_COMPONENTS_LIST,
+    COMPONENT_CATEGORIES: COMPONENT_CATEGORIES_LIST,
     PREVIEW_TEMPLATES: PREVIEW_TEMPLATES_OPTIONS,
+    PRESET_THEMES: PRESET_THEMES_LIST,
   }
 }
