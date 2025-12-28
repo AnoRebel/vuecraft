@@ -7,6 +7,11 @@ import {
   generateExportPackage,
 } from '~/utils/cssGenerator'
 import {
+  generateInitCommand,
+  generateAddCommand,
+  generateSetupScript,
+} from '~/utils/cliGenerator'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -34,6 +39,11 @@ const copied = ref<string | null>(null)
 const cssOutput = computed(() => generateCSSVariables(config))
 const jsonOutput = computed(() => generateComponentsJson(config))
 const exportPackage = computed(() => generateExportPackage(config))
+
+// CLI commands
+const initCommand = computed(() => generateInitCommand(config))
+const addCommand = computed(() => generateAddCommand(config.export.includeComponents))
+const setupScript = computed(() => generateSetupScript(config))
 
 async function copyToClipboard(content: string, type: string) {
   try {
@@ -78,9 +88,10 @@ function downloadAll() {
       </DialogHeader>
 
       <Tabs v-model="activeTab" class="flex-1 overflow-hidden flex flex-col">
-        <TabsList class="grid w-full grid-cols-3">
+        <TabsList class="grid w-full grid-cols-4">
           <TabsTrigger value="css">CSS</TabsTrigger>
-          <TabsTrigger value="json">components.json</TabsTrigger>
+          <TabsTrigger value="json">Config</TabsTrigger>
+          <TabsTrigger value="cli">CLI</TabsTrigger>
           <TabsTrigger value="readme">README</TabsTrigger>
         </TabsList>
 
@@ -129,6 +140,78 @@ function downloadAll() {
           </div>
           <div class="flex-1 overflow-auto rounded-md border bg-muted/50">
             <pre class="p-4 text-xs font-mono overflow-x-auto"><code>{{ jsonOutput }}</code></pre>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="cli" class="flex-1 overflow-hidden flex flex-col mt-4">
+          <div class="flex-1 overflow-auto space-y-4">
+            <!-- Init Command -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium">Initialize shadcn-vue</span>
+                  <Badge variant="secondary">Step 1</Badge>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  @click="copyToClipboard(initCommand, 'init')"
+                >
+                  {{ copied === 'init' ? 'Copied!' : 'Copy' }}
+                </Button>
+              </div>
+              <div class="rounded-md border bg-muted/50 p-3">
+                <code class="text-xs font-mono">{{ initCommand }}</code>
+              </div>
+            </div>
+
+            <!-- Add Components Command -->
+            <div v-if="config.export.includeComponents.length > 0" class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium">Add Components</span>
+                  <Badge variant="secondary">Step 2</Badge>
+                  <Badge variant="outline">
+                    {{ config.export.includeComponents.length }} components
+                  </Badge>
+                </div>
+                <Button variant="ghost" size="sm" @click="copyToClipboard(addCommand, 'add')">
+                  {{ copied === 'add' ? 'Copied!' : 'Copy' }}
+                </Button>
+              </div>
+              <div class="rounded-md border bg-muted/50 p-3 overflow-x-auto">
+                <code class="text-xs font-mono whitespace-nowrap">{{ addCommand }}</code>
+              </div>
+            </div>
+
+            <!-- Full Setup Script -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium">Full Setup Script</span>
+                  <Badge variant="secondary">All-in-one</Badge>
+                </div>
+                <div class="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="copyToClipboard(setupScript, 'script')"
+                  >
+                    {{ copied === 'script' ? 'Copied!' : 'Copy' }}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="downloadFile(setupScript, 'setup.sh', 'text/x-shellscript')"
+                  >
+                    Download
+                  </Button>
+                </div>
+              </div>
+              <div class="rounded-md border bg-muted/50 max-h-[200px] overflow-auto">
+                <pre class="p-3 text-xs font-mono"><code>{{ setupScript }}</code></pre>
+              </div>
+            </div>
           </div>
         </TabsContent>
 

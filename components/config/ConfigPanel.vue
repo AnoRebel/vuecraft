@@ -2,11 +2,13 @@
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
 import { ScrollArea } from '~/components/ui/scroll-area'
+import PresetThemes from './PresetThemes.vue'
 import ThemeConfig from './ThemeConfig.vue'
 import TypographyConfig from './TypographyConfig.vue'
 import ComponentsConfig from './ComponentsConfig.vue'
 import IconsConfig from './IconsConfig.vue'
 import LayoutConfig from './LayoutConfig.vue'
+import ComponentSelection from './ComponentSelection.vue'
 import ExportConfig from './ExportConfig.vue'
 
 const { resetAll, randomize } = useDesignSystem()
@@ -61,11 +63,13 @@ const { resetAll, randomize } = useDesignSystem()
     <!-- Config Sections -->
     <ScrollArea class="flex-1 px-4">
       <div class="py-2">
+        <PresetThemes />
         <ThemeConfig />
         <TypographyConfig />
         <ComponentsConfig />
         <IconsConfig />
         <LayoutConfig />
+        <ComponentSelection />
         <ExportConfig />
       </div>
     </ScrollArea>
