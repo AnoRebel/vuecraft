@@ -10,7 +10,9 @@ const props = defineProps<Props>()
 
 <template>
   <div :class="cn('relative overflow-hidden', props.class)">
-    <div class="h-full w-full overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border">
+    <div
+      class="h-full w-full overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border"
+    >
       <slot />
     </div>
   </div>

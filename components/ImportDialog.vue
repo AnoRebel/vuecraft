@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '~/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
 
@@ -71,13 +78,7 @@ function handleFileUpload(event: Event) {
           <input
             type="file"
             accept=".json"
-            class="block w-full text-sm text-muted-foreground
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-md file:border-0
-              file:text-sm file:font-medium
-              file:bg-primary file:text-primary-foreground
-              hover:file:bg-primary/90
-              cursor-pointer"
+            class="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
             @change="handleFileUpload"
           />
         </div>
@@ -109,12 +110,8 @@ function handleFileUpload(event: Event) {
       </div>
 
       <DialogFooter>
-        <Button variant="outline" @click="emit('update:open', false)">
-          Cancel
-        </Button>
-        <Button @click="handleImport">
-          Import
-        </Button>
+        <Button variant="outline" @click="emit('update:open', false)"> Cancel </Button>
+        <Button @click="handleImport"> Import </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

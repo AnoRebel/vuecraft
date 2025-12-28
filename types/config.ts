@@ -131,7 +131,13 @@ export interface CSSVariables {
 }
 
 // Preview template types
-export type PreviewTemplate = 'dashboard' | 'cards' | 'forms' | 'authentication' | 'settings' | 'components'
+export type PreviewTemplate =
+  | 'dashboard'
+  | 'cards'
+  | 'forms'
+  | 'authentication'
+  | 'settings'
+  | 'components'
 
 // Serializable config for URL/JSON
 export interface SerializedConfig {

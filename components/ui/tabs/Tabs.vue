@@ -9,7 +9,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  defaultValue: ''
+  defaultValue: '',
 })
 
 const emit = defineEmits<{
@@ -25,7 +25,7 @@ function setActiveTab(value: string) {
 
 provide('tabs', {
   activeTab,
-  setActiveTab
+  setActiveTab,
 })
 </script>
 

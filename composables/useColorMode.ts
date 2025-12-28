@@ -1,72 +1,49 @@
-type ColorMode = 'light' | 'dark' | 'system'
-
-const colorMode = ref<ColorMode>('system')
-const resolvedMode = ref<'light' | 'dark'>('light')
-
-// Initialize color mode from localStorage and system preference
-function initColorMode() {
-  if (import.meta.client) {
-    // Check localStorage first
-    const stored = localStorage.getItem('color-mode') as ColorMode | null
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
-      colorMode.value = stored
-    }
-
-    // Resolve actual mode
-    updateResolvedMode()
-
-    // Listen for system preference changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    mediaQuery.addEventListener('change', updateResolvedMode)
-  }
-}
-
-// Update the resolved mode based on current setting
-function updateResolvedMode() {
-  if (colorMode.value === 'system') {
-    resolvedMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  } else {
-    resolvedMode.value = colorMode.value
-  }
-
-  // Apply to document
-  if (resolvedMode.value === 'dark') {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-
-// Set color mode
-function setColorMode(mode: ColorMode) {
-  colorMode.value = mode
-  if (import.meta.client) {
-    localStorage.setItem('color-mode', mode)
-    updateResolvedMode()
-  }
-}
-
-// Toggle between light and dark
-function toggleColorMode() {
-  const modes: ColorMode[] = ['light', 'dark', 'system']
-  const currentIndex = modes.indexOf(colorMode.value)
-  const nextIndex = (currentIndex + 1) % modes.length
-  setColorMode(modes[nextIndex]!)
-}
+import { useColorMode as useVueUseColorMode, useDark } from '@vueuse/core'
 
 export function useColorMode() {
-  // Initialize on first use
-  onMounted(() => {
-    initColorMode()
+  // Use VueUse's built-in color mode handling
+  const mode = useVueUseColorMode({
+    attribute: 'class',
+    modes: {
+      light: '',
+      dark: 'dark',
+    },
+    storageKey: 'color-mode',
+    initialValue: 'auto',
   })
 
+  // Use useDark for easy dark mode detection
+  const isDark = useDark({
+    storageKey: 'color-mode',
+    valueDark: 'dark',
+    valueLight: 'light',
+  })
+
+  const isLight = computed(() => !isDark.value)
+
+  // Get the resolved mode (actual light/dark, not 'auto')
+  const resolvedMode = computed(() => (isDark.value ? 'dark' : 'light'))
+
+  // Set color mode
+  function setColorMode(newMode: 'light' | 'dark' | 'auto') {
+    mode.value = newMode
+  }
+
+  // Toggle between light, dark, and auto
+  function toggleColorMode() {
+    const modes = ['light', 'dark', 'auto'] as const
+    const currentIndex = modes.indexOf(mode.value as (typeof modes)[number])
+    const nextIndex = (currentIndex + 1) % modes.length
+    mode.value = modes[nextIndex]!
+  }
+
   return {
-    colorMode: readonly(colorMode),
-    resolvedMode: readonly(resolvedMode),
+    colorMode: readonly(mode),
+    resolvedMode,
     preference: resolvedMode,
     setColorMode,
     toggleColorMode,
-    isDark: computed(() => resolvedMode.value === 'dark'),
-    isLight: computed(() => resolvedMode.value === 'light')
+    isDark,
+    isLight,
   }
 }

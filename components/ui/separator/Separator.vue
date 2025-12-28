@@ -9,7 +9,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   orientation: 'horizontal',
-  decorative: true
+  decorative: true,
 })
 </script>
 
@@ -17,10 +17,12 @@ const props = withDefaults(defineProps<Props>(), {
   <div
     :role="decorative ? 'none' : 'separator'"
     :aria-orientation="!decorative ? orientation : undefined"
-    :class="cn(
-      'shrink-0 bg-border',
-      orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
-      props.class
-    )"
+    :class="
+      cn(
+        'shrink-0 bg-border',
+        orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
+        props.class
+      )
+    "
   />
 </template>

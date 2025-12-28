@@ -1,8 +1,19 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
-import { generateCSSVariables, generateComponentsJson, generateExportPackage } from '~/utils/cssGenerator'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '~/components/ui/dialog'
+import {
+  generateCSSVariables,
+  generateComponentsJson,
+  generateExportPackage,
+} from '~/utils/cssGenerator'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs'
 import { Badge } from '~/components/ui/badge'
@@ -80,11 +91,7 @@ function downloadAll() {
               <Badge variant="secondary">Tailwind CSS v4</Badge>
             </div>
             <div class="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="copyToClipboard(cssOutput, 'css')"
-              >
+              <Button variant="ghost" size="sm" @click="copyToClipboard(cssOutput, 'css')">
                 {{ copied === 'css' ? 'Copied!' : 'Copy' }}
               </Button>
               <Button
@@ -108,11 +115,7 @@ function downloadAll() {
               <Badge variant="secondary">shadcn-vue CLI</Badge>
             </div>
             <div class="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="copyToClipboard(jsonOutput, 'json')"
-              >
+              <Button variant="ghost" size="sm" @click="copyToClipboard(jsonOutput, 'json')">
                 {{ copied === 'json' ? 'Copied!' : 'Copy' }}
               </Button>
               <Button
@@ -150,15 +153,15 @@ function downloadAll() {
             </div>
           </div>
           <div class="flex-1 overflow-auto rounded-md border bg-muted/50">
-            <pre class="p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap"><code>{{ exportPackage.readme }}</code></pre>
+            <pre
+              class="p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap"
+            ><code>{{ exportPackage.readme }}</code></pre>
           </div>
         </TabsContent>
       </Tabs>
 
       <DialogFooter class="mt-4">
-        <Button variant="outline" @click="emit('update:open', false)">
-          Close
-        </Button>
+        <Button variant="outline" @click="emit('update:open', false)"> Close </Button>
         <Button @click="downloadAll">
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -35,7 +35,17 @@ const switchValue = ref(true)
           <Button size="default">Default</Button>
           <Button size="lg">Large</Button>
           <Button size="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M5 12h14" />
               <path d="M12 5v14" />
             </svg>
@@ -44,7 +54,18 @@ const switchValue = ref(true)
         <div class="flex flex-wrap gap-4">
           <Button disabled>Disabled</Button>
           <Button>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-2"
+            >
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" x2="12" y1="3" y2="15" />
@@ -162,9 +183,7 @@ const switchValue = ref(true)
         <p class="text-sm text-muted-foreground">
           This is muted text, often used for descriptions or secondary content.
         </p>
-        <p class="text-sm font-mono">
-          const code = "This is monospace text";
-        </p>
+        <p class="text-sm font-mono">const code = "This is monospace text";</p>
       </CardContent>
     </Card>
   </div>

@@ -9,13 +9,13 @@ const { ICON_LIBRARIES } = useConfigOptions()
 const iconSizeOptions = [
   { name: 'sm', label: 'Small', description: '16px' },
   { name: 'md', label: 'Medium', description: '20px' },
-  { name: 'lg', label: 'Large', description: '24px' }
+  { name: 'lg', label: 'Large', description: '24px' },
 ]
 
 const strokeWidthOptions = [
   { name: 'thin', label: 'Thin', description: '1.5' },
   { name: 'default', label: 'Default', description: '2' },
-  { name: 'thick', label: 'Thick', description: '2.5' }
+  { name: 'thick', label: 'Thick', description: '2.5' },
 ]
 </script>
 
@@ -25,11 +25,13 @@ const strokeWidthOptions = [
       <!-- Icon Library -->
       <OptionPicker
         :model-value="config.icons.library"
-        :options="ICON_LIBRARIES.map(i => ({
-          name: i.name,
-          label: i.label,
-          description: i.description
-        }))"
+        :options="
+          ICON_LIBRARIES.map((i) => ({
+            name: i.name,
+            label: i.label,
+            description: i.description,
+          }))
+        "
         label="Icon Library"
         :columns="2"
         @update:model-value="(v) => setIcons({ library: v as any })"

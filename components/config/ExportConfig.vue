@@ -10,13 +10,13 @@ const { config, setExport } = useDesignSystem()
 
 const frameworkOptions = [
   { name: 'vue', label: 'Vue', description: 'Vite + Vue 3' },
-  { name: 'nuxt', label: 'Nuxt', description: 'Nuxt 3/4' }
+  { name: 'nuxt', label: 'Nuxt', description: 'Nuxt 3/4' },
 ]
 
 const formatOptions = [
   { name: 'css', label: 'CSS Only' },
   { name: 'json', label: 'JSON Only' },
-  { name: 'both', label: 'Both' }
+  { name: 'both', label: 'Both' },
 ]
 </script>
 

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Base theme variables */
 @theme {
@@ -48,8 +48,8 @@
   --radius: 0.625rem;
 
   /* Fonts */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Spacing scale */
   --spacing-0: 0px;
@@ -152,25 +152,59 @@ body {
 }
 
 /* Utility classes for theme colors */
-.bg-background { background-color: var(--color-background); }
-.bg-foreground { background-color: var(--color-foreground); }
-.bg-card { background-color: var(--color-card); }
-.bg-primary { background-color: var(--color-primary); }
-.bg-secondary { background-color: var(--color-secondary); }
-.bg-muted { background-color: var(--color-muted); }
-.bg-accent { background-color: var(--color-accent); }
-.bg-destructive { background-color: var(--color-destructive); }
+.bg-background {
+  background-color: var(--color-background);
+}
+.bg-foreground {
+  background-color: var(--color-foreground);
+}
+.bg-card {
+  background-color: var(--color-card);
+}
+.bg-primary {
+  background-color: var(--color-primary);
+}
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+.bg-muted {
+  background-color: var(--color-muted);
+}
+.bg-accent {
+  background-color: var(--color-accent);
+}
+.bg-destructive {
+  background-color: var(--color-destructive);
+}
 
-.text-foreground { color: var(--color-foreground); }
-.text-muted-foreground { color: var(--color-muted-foreground); }
-.text-primary { color: var(--color-primary); }
-.text-primary-foreground { color: var(--color-primary-foreground); }
-.text-secondary-foreground { color: var(--color-secondary-foreground); }
-.text-accent-foreground { color: var(--color-accent-foreground); }
-.text-destructive { color: var(--color-destructive); }
+.text-foreground {
+  color: var(--color-foreground);
+}
+.text-muted-foreground {
+  color: var(--color-muted-foreground);
+}
+.text-primary {
+  color: var(--color-primary);
+}
+.text-primary-foreground {
+  color: var(--color-primary-foreground);
+}
+.text-secondary-foreground {
+  color: var(--color-secondary-foreground);
+}
+.text-accent-foreground {
+  color: var(--color-accent-foreground);
+}
+.text-destructive {
+  color: var(--color-destructive);
+}
 
-.border-border { border-color: var(--color-border); }
-.border-input { border-color: var(--color-input); }
+.border-border {
+  border-color: var(--color-border);
+}
+.border-input {
+  border-color: var(--color-input);
+}
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
@@ -200,46 +234,88 @@ body {
 
 /* Animation keyframes */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slide-in-from-top {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-in-from-bottom {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-in-from-left {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes slide-in-from-right {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes scale-in {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-fade-in { animation: fade-in var(--animate-duration-normal) ease-out; }
-.animate-fade-out { animation: fade-out var(--animate-duration-normal) ease-out; }
-.animate-scale-in { animation: scale-in var(--animate-duration-normal) ease-out; }
-.animate-spin { animation: spin 1s linear infinite; }
+.animate-fade-in {
+  animation: fade-in var(--animate-duration-normal) ease-out;
+}
+.animate-fade-out {
+  animation: fade-out var(--animate-duration-normal) ease-out;
+}
+.animate-scale-in {
+  animation: scale-in var(--animate-duration-normal) ease-out;
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

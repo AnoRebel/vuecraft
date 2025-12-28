@@ -1,4 +1,5 @@
 import { defu } from 'defu'
+import { useStorage, useClipboard, watchDebounced } from '@vueuse/core'
 import type {
   DesignSystemConfig,
   ThemeConfig,
@@ -7,7 +8,7 @@ import type {
   IconsConfig,
   LayoutConfig,
   ExportConfig,
-  SerializedConfig
+  SerializedConfig,
 } from '~/types/config'
 import {
   DEFAULT_CONFIG,
@@ -16,26 +17,59 @@ import {
   DEFAULT_COMPONENTS_CONFIG,
   DEFAULT_ICONS_CONFIG,
   DEFAULT_LAYOUT_CONFIG,
-  DEFAULT_EXPORT_CONFIG
+  DEFAULT_EXPORT_CONFIG,
+  BASE_COLORS as BASE_COLORS_OPTIONS,
+  ACCENT_THEMES as ACCENT_THEMES_OPTIONS,
+  STYLES as STYLES_OPTIONS,
+  RADIUS_OPTIONS as RADIUS_OPTIONS_LIST,
+  ICON_LIBRARIES as ICON_LIBRARIES_OPTIONS,
+  FONT_FAMILIES as FONT_FAMILIES_OPTIONS,
+  MONO_FONT_FAMILIES as MONO_FONT_FAMILIES_OPTIONS,
+  FONT_SCALES as FONT_SCALES_OPTIONS,
+  SPACING_SCALES as SPACING_SCALES_OPTIONS,
+  ANIMATION_SPEEDS as ANIMATION_SPEEDS_OPTIONS,
+  SHADOW_INTENSITIES as SHADOW_INTENSITIES_OPTIONS,
+  BORDER_WIDTHS as BORDER_WIDTHS_OPTIONS,
+  CONTAINER_WIDTHS as CONTAINER_WIDTHS_OPTIONS,
+  AVAILABLE_COMPONENTS as AVAILABLE_COMPONENTS_LIST,
+  PREVIEW_TEMPLATES as PREVIEW_TEMPLATES_OPTIONS,
 } from '~/config/defaults'
 
 // Current version of the config serialization format
 const CONFIG_VERSION = 1
 
-// State
-const config = reactive<DesignSystemConfig>({ ...DEFAULT_CONFIG })
+// Storage key for saved configurations
+const STORAGE_KEY = 'shadcn-vue-create-config'
+const SAVED_CONFIGS_KEY = 'shadcn-vue-create-saved-configs'
+
+// Saved configuration type
+export interface SavedConfig {
+  id: string
+  name: string
+  createdAt: number
+  config: SerializedConfig
+}
+
+// State using VueUse's useStorage for persistence
+const config = reactive<DesignSystemConfig>(structuredClone(DEFAULT_CONFIG))
 const isInitialized = ref(false)
 const isDirty = ref(false)
+
+// Use VueUse's useStorage for saved configurations
+const savedConfigs = useStorage<SavedConfig[]>(SAVED_CONFIGS_KEY, [])
+
+// Use VueUse's useClipboard for clipboard operations
+const { copy, copied, isSupported: isClipboardSupported } = useClipboard()
 
 // Serialize config for URL/JSON
 function serializeConfig(): SerializedConfig {
   return {
     v: CONFIG_VERSION,
-    t: config.theme,
-    ty: config.typography,
-    c: config.components,
-    i: config.icons,
-    l: config.layout
+    t: toRaw(config.theme),
+    ty: toRaw(config.typography),
+    c: toRaw(config.components),
+    i: toRaw(config.icons),
+    l: toRaw(config.layout),
   }
 }
 
@@ -51,7 +85,7 @@ function deserializeConfig(serialized: SerializedConfig): Partial<DesignSystemCo
     typography: serialized.ty,
     components: serialized.c,
     icons: serialized.i,
-    layout: serialized.l
+    layout: serialized.l,
   }
 }
 
@@ -59,15 +93,21 @@ function deserializeConfig(serialized: SerializedConfig): Partial<DesignSystemCo
 function encodeConfig(): string {
   const serialized = serializeConfig()
   const json = JSON.stringify(serialized)
-  return btoa(encodeURIComponent(json))
+  if (import.meta.client) {
+    return btoa(encodeURIComponent(json))
+  }
+  return ''
 }
 
 // Decode config from URL-safe base64
 function decodeConfig(encoded: string): Partial<DesignSystemConfig> | null {
   try {
-    const json = decodeURIComponent(atob(encoded))
-    const serialized = JSON.parse(json) as SerializedConfig
-    return deserializeConfig(serialized)
+    if (import.meta.client) {
+      const json = decodeURIComponent(atob(encoded))
+      const serialized = JSON.parse(json) as SerializedConfig
+      return deserializeConfig(serialized)
+    }
+    return null
   } catch {
     console.error('Failed to decode config')
     return null
@@ -78,15 +118,32 @@ export function useDesignSystem() {
   const route = useRoute()
   const router = useRouter()
 
-  // Initialize from URL params on first load
+  // Initialize from URL params or localStorage on first load
   function initFromUrl() {
     if (isInitialized.value) return
 
+    // First check URL params
     const configParam = route.query.c as string | undefined
     if (configParam) {
       const decoded = decodeConfig(configParam)
       if (decoded) {
         Object.assign(config, defu(decoded, DEFAULT_CONFIG))
+        isInitialized.value = true
+        return
+      }
+    }
+
+    // Then check localStorage
+    if (import.meta.client) {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as SerializedConfig
+          const decoded = deserializeConfig(parsed)
+          Object.assign(config, defu(decoded, DEFAULT_CONFIG))
+        } catch {
+          console.error('Failed to load config from localStorage')
+        }
       }
     }
 
@@ -96,19 +153,24 @@ export function useDesignSystem() {
   // Sync config to URL
   function syncToUrl() {
     const encoded = encodeConfig()
-    router.replace({
-      query: { ...route.query, c: encoded }
-    })
+    if (encoded) {
+      router.replace({
+        query: { ...route.query, c: encoded },
+      })
+    }
   }
 
-  // Watch for changes and mark as dirty
-  watch(
-    () => config,
-    () => {
-      isDirty.value = true
-    },
-    { deep: true }
-  )
+  // Auto-save to localStorage with debounce using VueUse
+  if (import.meta.client) {
+    watchDebounced(
+      () => config,
+      () => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeConfig()))
+        isDirty.value = true
+      },
+      { deep: true, debounce: 500 }
+    )
+  }
 
   // Theme config helpers
   function setTheme(newTheme: Partial<ThemeConfig>) {
@@ -116,7 +178,7 @@ export function useDesignSystem() {
   }
 
   function resetTheme() {
-    Object.assign(config.theme, DEFAULT_THEME_CONFIG)
+    Object.assign(config.theme, structuredClone(DEFAULT_THEME_CONFIG))
   }
 
   // Typography config helpers
@@ -125,7 +187,7 @@ export function useDesignSystem() {
   }
 
   function resetTypography() {
-    Object.assign(config.typography, DEFAULT_TYPOGRAPHY_CONFIG)
+    Object.assign(config.typography, structuredClone(DEFAULT_TYPOGRAPHY_CONFIG))
   }
 
   // Components config helpers
@@ -134,7 +196,7 @@ export function useDesignSystem() {
   }
 
   function resetComponents() {
-    Object.assign(config.components, DEFAULT_COMPONENTS_CONFIG)
+    Object.assign(config.components, structuredClone(DEFAULT_COMPONENTS_CONFIG))
   }
 
   // Icons config helpers
@@ -143,7 +205,7 @@ export function useDesignSystem() {
   }
 
   function resetIcons() {
-    Object.assign(config.icons, DEFAULT_ICONS_CONFIG)
+    Object.assign(config.icons, structuredClone(DEFAULT_ICONS_CONFIG))
   }
 
   // Layout config helpers
@@ -152,7 +214,7 @@ export function useDesignSystem() {
   }
 
   function resetLayout() {
-    Object.assign(config.layout, DEFAULT_LAYOUT_CONFIG)
+    Object.assign(config.layout, structuredClone(DEFAULT_LAYOUT_CONFIG))
   }
 
   // Export config helpers
@@ -161,12 +223,12 @@ export function useDesignSystem() {
   }
 
   function resetExport() {
-    Object.assign(config.export, DEFAULT_EXPORT_CONFIG)
+    Object.assign(config.export, structuredClone(DEFAULT_EXPORT_CONFIG))
   }
 
   // Reset all config to defaults
   function resetAll() {
-    Object.assign(config, DEFAULT_CONFIG)
+    Object.assign(config, structuredClone(DEFAULT_CONFIG))
     isDirty.value = false
   }
 
@@ -182,15 +244,15 @@ export function useDesignSystem() {
       radius: randomItem(RADIUS_OPTIONS).name as ThemeConfig['radius'],
       shadowIntensity: randomItem(['none', 'subtle', 'default', 'strong'] as const),
       menuAccent: randomItem(['subtle', 'bold'] as const),
-      menuColor: randomItem(['default', 'inverted'] as const)
+      menuColor: randomItem(['default', 'inverted'] as const),
     })
 
     setTypography({
-      fontFamily: randomItem(FONT_FAMILIES).name as TypographyConfig['fontFamily']
+      fontFamily: randomItem(FONT_FAMILIES).name as TypographyConfig['fontFamily'],
     })
 
     setComponents({
-      style: randomItem(STYLES).name as ComponentsConfig['style']
+      style: randomItem(STYLES).name as ComponentsConfig['style'],
     })
   }
 
@@ -218,18 +280,75 @@ export function useDesignSystem() {
   // Get shareable URL
   function getShareableUrl(): string {
     const encoded = encodeConfig()
-    const baseUrl = window.location.origin + window.location.pathname
-    return `${baseUrl}?c=${encoded}`
+    if (import.meta.client) {
+      const baseUrl = window.location.origin + window.location.pathname
+      return `${baseUrl}?c=${encoded}`
+    }
+    return ''
   }
 
-  // Copy shareable URL to clipboard
+  // Copy shareable URL to clipboard using VueUse
   async function copyShareableUrl(): Promise<boolean> {
-    try {
-      await navigator.clipboard.writeText(getShareableUrl())
-      return true
-    } catch {
-      return false
+    if (!isClipboardSupported.value) return false
+    await copy(getShareableUrl())
+    return copied.value
+  }
+
+  // Copy text to clipboard using VueUse
+  async function copyToClipboard(text: string): Promise<boolean> {
+    if (!isClipboardSupported.value) return false
+    await copy(text)
+    return copied.value
+  }
+
+  // Save current configuration with a name
+  function saveConfiguration(name: string): SavedConfig {
+    const newConfig: SavedConfig = {
+      id: crypto.randomUUID(),
+      name,
+      createdAt: Date.now(),
+      config: serializeConfig(),
     }
+    savedConfigs.value = [...savedConfigs.value, newConfig]
+    return newConfig
+  }
+
+  // Load a saved configuration
+  function loadConfiguration(id: string): boolean {
+    const saved = savedConfigs.value.find((c) => c.id === id)
+    if (saved) {
+      const decoded = deserializeConfig(saved.config)
+      Object.assign(config, defu(decoded, DEFAULT_CONFIG))
+      isDirty.value = true
+      return true
+    }
+    return false
+  }
+
+  // Delete a saved configuration
+  function deleteConfiguration(id: string): boolean {
+    const index = savedConfigs.value.findIndex((c) => c.id === id)
+    if (index !== -1) {
+      savedConfigs.value = savedConfigs.value.filter((c) => c.id !== id)
+      return true
+    }
+    return false
+  }
+
+  // Rename a saved configuration
+  function renameConfiguration(id: string, newName: string): boolean {
+    const savedConfig = savedConfigs.value.find((c) => c.id === id)
+    if (savedConfig) {
+      savedConfig.name = newName
+      savedConfigs.value = [...savedConfigs.value]
+      return true
+    }
+    return false
+  }
+
+  // Get all saved configurations
+  function getSavedConfigurations(): SavedConfig[] {
+    return savedConfigs.value
   }
 
   return {
@@ -237,6 +356,9 @@ export function useDesignSystem() {
     config: readonly(config),
     isInitialized: readonly(isInitialized),
     isDirty: readonly(isDirty),
+    savedConfigs: readonly(savedConfigs),
+    isClipboardSupported,
+    copied,
 
     // Initialization
     initFromUrl,
@@ -265,10 +387,18 @@ export function useDesignSystem() {
     exportConfigJson,
     getShareableUrl,
     copyShareableUrl,
+    copyToClipboard,
+
+    // Save/Load functions
+    saveConfiguration,
+    loadConfiguration,
+    deleteConfiguration,
+    renameConfiguration,
+    getSavedConfigurations,
 
     // Serialization
     encodeConfig,
-    decodeConfig
+    decodeConfig,
   }
 }
 
@@ -289,25 +419,6 @@ export function useConfigOptions() {
     BORDER_WIDTHS: BORDER_WIDTHS_OPTIONS,
     CONTAINER_WIDTHS: CONTAINER_WIDTHS_OPTIONS,
     AVAILABLE_COMPONENTS: AVAILABLE_COMPONENTS_LIST,
-    PREVIEW_TEMPLATES: PREVIEW_TEMPLATES_OPTIONS
+    PREVIEW_TEMPLATES: PREVIEW_TEMPLATES_OPTIONS,
   }
 }
-
-// Import from defaults
-import {
-  BASE_COLORS as BASE_COLORS_OPTIONS,
-  ACCENT_THEMES as ACCENT_THEMES_OPTIONS,
-  STYLES as STYLES_OPTIONS,
-  RADIUS_OPTIONS as RADIUS_OPTIONS_LIST,
-  ICON_LIBRARIES as ICON_LIBRARIES_OPTIONS,
-  FONT_FAMILIES as FONT_FAMILIES_OPTIONS,
-  MONO_FONT_FAMILIES as MONO_FONT_FAMILIES_OPTIONS,
-  FONT_SCALES as FONT_SCALES_OPTIONS,
-  SPACING_SCALES as SPACING_SCALES_OPTIONS,
-  ANIMATION_SPEEDS as ANIMATION_SPEEDS_OPTIONS,
-  SHADOW_INTENSITIES as SHADOW_INTENSITIES_OPTIONS,
-  BORDER_WIDTHS as BORDER_WIDTHS_OPTIONS,
-  CONTAINER_WIDTHS as CONTAINER_WIDTHS_OPTIONS,
-  AVAILABLE_COMPONENTS as AVAILABLE_COMPONENTS_LIST,
-  PREVIEW_TEMPLATES as PREVIEW_TEMPLATES_OPTIONS
-} from '~/config/defaults'

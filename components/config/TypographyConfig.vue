@@ -8,27 +8,27 @@ import { Label } from '~/components/ui/label'
 const { config, setTypography } = useDesignSystem()
 const { FONT_FAMILIES, MONO_FONT_FAMILIES, FONT_SCALES } = useConfigOptions()
 
-const fontFamilyOptions = FONT_FAMILIES.map(f => ({
+const fontFamilyOptions = FONT_FAMILIES.map((f) => ({
   value: f.name,
-  label: f.label
+  label: f.label,
 }))
 
-const monoFontOptions = MONO_FONT_FAMILIES.map(f => ({
+const monoFontOptions = MONO_FONT_FAMILIES.map((f) => ({
   value: f.name,
-  label: f.label
+  label: f.label,
 }))
 
 const headingWeightOptions = [
   { value: 'normal', label: 'Normal' },
   { value: 'medium', label: 'Medium' },
   { value: 'semibold', label: 'Semibold' },
-  { value: 'bold', label: 'Bold' }
+  { value: 'bold', label: 'Bold' },
 ]
 
 const lineHeightOptions = [
   { value: 'tight', label: 'Tight' },
   { value: 'normal', label: 'Normal' },
-  { value: 'relaxed', label: 'Relaxed' }
+  { value: 'relaxed', label: 'Relaxed' },
 ]
 </script>
 
@@ -46,7 +46,9 @@ const lineHeightOptions = [
         />
         <p
           class="text-sm text-muted-foreground mt-2"
-          :style="{ fontFamily: FONT_FAMILIES.find(f => f.name === config.typography.fontFamily)?.label }"
+          :style="{
+            fontFamily: FONT_FAMILIES.find((f) => f.name === config.typography.fontFamily)?.label,
+          }"
         >
           The quick brown fox jumps over the lazy dog.
         </p>
@@ -61,19 +63,19 @@ const lineHeightOptions = [
           placeholder="Select mono font"
           @update:model-value="(v) => setTypography({ monoFontFamily: v as any })"
         />
-        <p class="text-sm text-muted-foreground font-mono mt-2">
-          const code = "example";
-        </p>
+        <p class="text-sm text-muted-foreground font-mono mt-2">const code = "example";</p>
       </div>
 
       <!-- Font Scale -->
       <OptionPicker
         :model-value="config.typography.fontScale"
-        :options="FONT_SCALES.map(s => ({
-          name: s.name,
-          label: s.label,
-          description: s.description
-        }))"
+        :options="
+          FONT_SCALES.map((s) => ({
+            name: s.name,
+            label: s.label,
+            description: s.description,
+          }))
+        "
         label="Font Scale"
         :columns="2"
         @update:model-value="(v) => setTypography({ fontScale: v as any })"
@@ -92,7 +94,7 @@ const lineHeightOptions = [
       <!-- Line Height -->
       <OptionPicker
         :model-value="config.typography.bodyLineHeight"
-        :options="lineHeightOptions.map(o => ({ name: o.value, label: o.label }))"
+        :options="lineHeightOptions.map((o) => ({ name: o.value, label: o.label }))"
         label="Body Line Height"
         :columns="3"
         @update:model-value="(v) => setTypography({ bodyLineHeight: v as any })"

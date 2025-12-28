@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '~/components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -83,9 +90,7 @@ const theme = ref('system')
               { value: 'system', label: 'System' },
             ]"
           />
-          <p class="text-xs text-muted-foreground">
-            Select the theme for the dashboard.
-          </p>
+          <p class="text-xs text-muted-foreground">Select the theme for the dashboard.</p>
         </div>
 
         <Separator />

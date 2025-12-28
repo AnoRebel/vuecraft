@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
   min: 0,
   max: 100,
   step: 1,
-  disabled: false
+  disabled: false,
 })
 
 const emit = defineEmits<{
@@ -25,7 +25,7 @@ const emit = defineEmits<{
 
 const value = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: (val) => emit('update:modelValue', val),
 })
 
 const percentage = computed(() => {
@@ -36,10 +36,7 @@ const percentage = computed(() => {
 <template>
   <div :class="cn('relative flex w-full touch-none select-none items-center', props.class)">
     <div class="relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20">
-      <div
-        class="absolute h-full bg-primary"
-        :style="{ width: `${percentage}%` }"
-      />
+      <div class="absolute h-full bg-primary" :style="{ width: `${percentage}%` }" />
     </div>
     <input
       v-model.number="value"

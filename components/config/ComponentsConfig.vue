@@ -9,13 +9,13 @@ const { STYLES, BORDER_WIDTHS, ANIMATION_SPEEDS } = useConfigOptions()
 const focusRingWidthOptions = [
   { name: 'thin', label: 'Thin' },
   { name: 'default', label: 'Default' },
-  { name: 'thick', label: 'Thick' }
+  { name: 'thick', label: 'Thick' },
 ]
 
 const focusRingOffsetOptions = [
   { name: 'none', label: 'None' },
   { name: 'sm', label: 'Small' },
-  { name: 'default', label: 'Default' }
+  { name: 'default', label: 'Default' },
 ]
 </script>
 
@@ -25,11 +25,13 @@ const focusRingOffsetOptions = [
       <!-- Component Style -->
       <OptionPicker
         :model-value="config.components.style"
-        :options="STYLES.map(s => ({
-          name: s.name,
-          label: s.label,
-          description: s.description
-        }))"
+        :options="
+          STYLES.map((s) => ({
+            name: s.name,
+            label: s.label,
+            description: s.description,
+          }))
+        "
         label="Component Style"
         :columns="2"
         @update:model-value="(v) => setComponents({ style: v as any })"
@@ -38,7 +40,7 @@ const focusRingOffsetOptions = [
       <!-- Border Width -->
       <OptionPicker
         :model-value="config.components.borderWidth"
-        :options="BORDER_WIDTHS.map(b => ({ name: b.name, label: b.label }))"
+        :options="BORDER_WIDTHS.map((b) => ({ name: b.name, label: b.label }))"
         label="Border Width"
         :columns="4"
         @update:model-value="(v) => setComponents({ borderWidth: v as any })"
@@ -47,7 +49,7 @@ const focusRingOffsetOptions = [
       <!-- Animation Speed -->
       <OptionPicker
         :model-value="config.components.animationSpeed"
-        :options="ANIMATION_SPEEDS.map(a => ({ name: a.name, label: a.label }))"
+        :options="ANIMATION_SPEEDS.map((a) => ({ name: a.name, label: a.label }))"
         label="Animation Speed"
         :columns="4"
         @update:model-value="(v) => setComponents({ animationSpeed: v as any })"

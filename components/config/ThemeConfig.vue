@@ -9,11 +9,11 @@ const { config, setTheme } = useDesignSystem()
 const { BASE_COLORS, ACCENT_THEMES, RADIUS_OPTIONS, SHADOW_INTENSITIES } = useConfigOptions()
 
 // Group accent themes
-const neutralThemes = ACCENT_THEMES.filter(t =>
+const neutralThemes = ACCENT_THEMES.filter((t) =>
   ['neutral', 'stone', 'zinc', 'gray', 'slate'].includes(t.name)
 )
-const vibrantThemes = ACCENT_THEMES.filter(t =>
-  !['neutral', 'stone', 'zinc', 'gray', 'slate'].includes(t.name)
+const vibrantThemes = ACCENT_THEMES.filter(
+  (t) => !['neutral', 'stone', 'zinc', 'gray', 'slate'].includes(t.name)
 )
 </script>
 
@@ -44,7 +44,7 @@ const vibrantThemes = ACCENT_THEMES.filter(t =>
                 'h-8 w-full rounded-md border-2 transition-all hover:scale-105',
                 config.theme.accentTheme === theme.name
                   ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
-                  : 'border-transparent'
+                  : 'border-transparent',
               ]"
               :style="{ backgroundColor: theme.color }"
               @click="setTheme({ accentTheme: theme.name as any })"
@@ -66,7 +66,7 @@ const vibrantThemes = ACCENT_THEMES.filter(t =>
                 'h-8 w-full rounded-md border-2 transition-all hover:scale-105',
                 config.theme.accentTheme === theme.name
                   ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
-                  : 'border-transparent'
+                  : 'border-transparent',
               ]"
               :style="{ backgroundColor: theme.color }"
               @click="setTheme({ accentTheme: theme.name as any })"
@@ -77,14 +77,14 @@ const vibrantThemes = ACCENT_THEMES.filter(t =>
         </div>
 
         <p class="text-xs text-muted-foreground">
-          Selected: {{ ACCENT_THEMES.find(t => t.name === config.theme.accentTheme)?.label }}
+          Selected: {{ ACCENT_THEMES.find((t) => t.name === config.theme.accentTheme)?.label }}
         </p>
       </div>
 
       <!-- Border Radius -->
       <OptionPicker
         :model-value="config.theme.radius"
-        :options="RADIUS_OPTIONS.map(r => ({ name: r.name, label: r.label }))"
+        :options="RADIUS_OPTIONS.map((r) => ({ name: r.name, label: r.label }))"
         label="Border Radius"
         :columns="3"
         @update:model-value="(v) => setTheme({ radius: v as any })"
@@ -93,7 +93,7 @@ const vibrantThemes = ACCENT_THEMES.filter(t =>
       <!-- Shadow Intensity -->
       <OptionPicker
         :model-value="config.theme.shadowIntensity"
-        :options="SHADOW_INTENSITIES.map(s => ({ name: s.name, label: s.label }))"
+        :options="SHADOW_INTENSITIES.map((s) => ({ name: s.name, label: s.label }))"
         label="Shadow Intensity"
         :columns="4"
         @update:model-value="(v) => setTheme({ shadowIntensity: v as any })"
@@ -105,7 +105,7 @@ const vibrantThemes = ACCENT_THEMES.filter(t =>
           :model-value="config.theme.menuAccent"
           :options="[
             { name: 'subtle', label: 'Subtle' },
-            { name: 'bold', label: 'Bold' }
+            { name: 'bold', label: 'Bold' },
           ]"
           label="Menu Accent"
           :columns="2"
@@ -116,7 +116,7 @@ const vibrantThemes = ACCENT_THEMES.filter(t =>
           :model-value="config.theme.menuColor"
           :options="[
             { name: 'default', label: 'Default' },
-            { name: 'inverted', label: 'Inverted' }
+            { name: 'inverted', label: 'Inverted' },
           ]"
           label="Menu Color"
           :columns="2"
