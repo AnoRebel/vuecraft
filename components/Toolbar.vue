@@ -1,0 +1,134 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Button } from '~/components/ui/button'
+import { Separator } from '~/components/ui/separator'
+import { Tooltip } from '~/components/ui/tooltip'
+import ExportDialog from './ExportDialog.vue'
+import ImportDialog from './ImportDialog.vue'
+import ShareDialog from './ShareDialog.vue'
+
+const exportDialogOpen = ref(false)
+const importDialogOpen = ref(false)
+const shareDialogOpen = ref(false)
+</script>
+
+<template>
+  <div class="flex items-center justify-between border-b px-4 py-2 bg-background">
+    <!-- Left side - Logo & Title -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-4 w-4 text-primary-foreground"
+          >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold leading-none">shadcn-vue</h1>
+          <p class="text-xs text-muted-foreground">Create</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side - Actions -->
+    <div class="flex items-center gap-2">
+      <Tooltip content="Import configuration" side="bottom">
+        <Button variant="ghost" size="sm" @click="importDialogOpen = true">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" x2="12" y1="3" y2="15" />
+          </svg>
+          <span class="ml-2 hidden sm:inline">Import</span>
+        </Button>
+      </Tooltip>
+
+      <Tooltip content="Share configuration" side="bottom">
+        <Button variant="ghost" size="sm" @click="shareDialogOpen = true">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+            <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+          </svg>
+          <span class="ml-2 hidden sm:inline">Share</span>
+        </Button>
+      </Tooltip>
+
+      <Separator orientation="vertical" class="h-6" />
+
+      <Button @click="exportDialogOpen = true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="mr-2"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" x2="12" y1="15" y2="3" />
+        </svg>
+        Export
+      </Button>
+
+      <a
+        href="https://github.com/shadcn-vue/create"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="ml-2"
+      >
+        <Button variant="ghost" size="icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+          </svg>
+        </Button>
+      </a>
+    </div>
+  </div>
+
+  <!-- Dialogs -->
+  <ExportDialog v-model:open="exportDialogOpen" />
+  <ImportDialog v-model:open="importDialogOpen" />
+  <ShareDialog v-model:open="shareDialogOpen" />
+</template>
