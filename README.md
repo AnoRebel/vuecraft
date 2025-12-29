@@ -1,22 +1,22 @@
 # shadcn-vue Create
 
-A design system customizer for shadcn-vue. Create and customize your design system with real-time preview, then export to Vue or Nuxt projects.
+A universal Vue/Nuxt theme builder and design system customizer. Create beautiful themes with real-time preview, then export for **shadcn-vue**, **Nuxt UI**, or **plain Tailwind CSS** projects.
 
 Inspired by [ui.shadcn.com/create](https://ui.shadcn.com/create) and built for the Vue ecosystem.
 
 ## Features
 
+- **Multi-Framework Export**: Export themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS
 - **Real-time Preview**: See changes instantly as you customize
 - **Preset Themes**: Quick-start with 10 curated preset themes (Default, Ocean, Forest, Sunset, etc.)
 - **Interactive Tour Guide**: Built-in guided tour to learn all features (click the ? icon)
 - **Component Selection**: Choose which components to include in your export
 - **Live CSS Editor**: Edit and preview CSS variables in real-time
-- **CLI Integration**: Generate shadcn-vue CLI commands and setup scripts
+- **CLI Integration**: Generate framework-specific CLI commands and setup scripts
 - **PWA Support**: Install as a Progressive Web App for offline access
 - **Multiple Themes**: Choose from 20+ accent colors with OKLCH color format
 - **Component Styles**: Default, New York, Miami, Brutal, and Soft styles
 - **Font Selection**: Configure both primary and monospace fonts
-- **Export Options**: Export CSS variables, JSON configuration, CLI commands, and README
 - **Import/Export**: Save configurations to localStorage, share via URL, or export as JSON
 - **Dark Mode**: Full dark mode support with system preference detection
 - **Tailwind CSS v4**: Uses the latest config-less Tailwind CSS v4
@@ -66,6 +66,34 @@ bun run build
 bun run preview
 ```
 
+## Export Options
+
+The app supports exporting to three different UI frameworks:
+
+### shadcn-vue
+Beautiful components built with Reka UI and Tailwind CSS.
+
+**Exports:**
+- `main.css` - Theme CSS with Tailwind CSS v4 configuration
+- `components.json` - shadcn-vue CLI configuration
+- CLI commands for `npx shadcn-vue@latest init/add`
+
+### Nuxt UI
+Fully styled and customizable components for Nuxt.
+
+**Exports:**
+- `main.css` - CSS with `--ui-*` variable customizations
+- `app.config.ts` - Nuxt UI color configuration
+- CLI commands for `npx nuxi module add ui`
+
+### Plain Tailwind
+Just CSS variables for your own custom components.
+
+**Exports:**
+- `main.css` - Minimal CSS variables for Tailwind CSS v4
+- Setup script for Vue or Nuxt projects
+- Framework installation instructions
+
 ## Configuration Groups
 
 ### Theme
@@ -100,11 +128,10 @@ bun run preview
 - Header height
 
 ### Export
+- UI Library (shadcn-vue, Nuxt UI, Plain Tailwind)
 - Framework (Vue or Nuxt)
-- Format (CSS, JSON, or both)
 - Component selection
 - TypeScript support
-- CSS variables prefix
 
 ## Preset Themes
 
@@ -188,19 +215,6 @@ Elegant rose pink metallic theme.
 - **Auth**: Login and signup forms
 - **Components**: Component gallery view
 
-## Export Options
-
-### CSS Tab
-Export generated CSS variables compatible with Tailwind CSS v4.
-
-### Config Tab
-Export `components.json` for shadcn-vue CLI configuration.
-
-### CLI Tab
-- **Init Command**: `npx shadcn-vue@latest init` with your settings
-- **Add Command**: Component installation command
-- **Setup Script**: Full bash script to create a new project
-
 ## Import/Export
 
 ### URL Sharing
@@ -222,7 +236,7 @@ This app can be installed as a Progressive Web App:
 
 ## Interactive Tour Guide
 
-New to shadcn-vue Create? The built-in tour guide walks you through all features:
+New to this app? The built-in tour guide walks you through all features:
 
 1. Click the **?** (help) icon in the top toolbar
 2. Follow the 12-step guided tour covering:
@@ -284,7 +298,7 @@ shadcn-vue-create/
 │   │   ├── PreviewDashboard.vue
 │   │   └── ...
 │   ├── ui/                   # Reusable UI components
-│   ├── ExportDialog.vue      # Export modal with tabs
+│   ├── ExportDialog.vue      # Export modal with framework tabs
 │   ├── Toolbar.vue           # Top toolbar with actions
 │   └── PWAInstallPrompt.vue  # PWA install UI
 ├── composables/
@@ -292,7 +306,7 @@ shadcn-vue-create/
 │   ├── useAppTour.ts         # Interactive tour guide steps
 │   └── useColorMode.ts       # Dark/light mode management
 ├── config/
-│   ├── defaults.ts           # Default values, presets, components
+│   ├── defaults.ts           # Default values, presets, UI libraries
 │   └── themes.ts             # Theme color definitions (OKLCH)
 ├── plugins/
 │   └── v-tour-guide.client.ts # Tour guide plugin
@@ -304,7 +318,9 @@ shadcn-vue-create/
 │   └── config.ts             # TypeScript type definitions
 ├── utils/
 │   ├── cliGenerator.ts       # CLI command generation
-│   └── cssGenerator.ts       # CSS variable generation
+│   ├── cssGenerator.ts       # CSS variable generation
+│   ├── nuxtUIGenerator.ts    # Nuxt UI config generation
+│   └── tailwindGenerator.ts  # Plain Tailwind CSS generation
 ├── app.vue                   # Root component
 └── nuxt.config.ts            # Nuxt configuration
 ```
@@ -321,6 +337,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 - [shadcn/ui](https://ui.shadcn.com/) for the original inspiration
 - [shadcn-vue](https://www.shadcn-vue.com/) for the Vue port
+- [Nuxt UI](https://ui.nuxt.com/) for the Nuxt UI theming system
 - [Reka UI](https://reka-ui.com/) for the headless UI components
 - [v-tour-guide](https://www.npmjs.com/package/v-tour-guide) for the interactive tour system
 - [Vite PWA](https://vite-pwa-org.netlify.app/) for PWA support
