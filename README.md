@@ -8,6 +8,7 @@ Inspired by [ui.shadcn.com/create](https://ui.shadcn.com/create) and built for t
 
 - **Real-time Preview**: See changes instantly as you customize
 - **Preset Themes**: Quick-start with 10 curated preset themes (Default, Ocean, Forest, Sunset, etc.)
+- **Interactive Tour Guide**: Built-in guided tour to learn all features (click the ? icon)
 - **Component Selection**: Choose which components to include in your export
 - **Live CSS Editor**: Edit and preview CSS variables in real-time
 - **CLI Integration**: Generate shadcn-vue CLI commands and setup scripts
@@ -25,12 +26,13 @@ Inspired by [ui.shadcn.com/create](https://ui.shadcn.com/create) and built for t
 - **Framework**: [Nuxt 4.2](https://nuxt.com/) with Vue 3.5
 - **Styling**: [Tailwind CSS v4.1](https://tailwindcss.com/) (config-less)
 - **Components**: [Reka UI 2.7](https://reka-ui.com/) (Vue port of Radix UI)
+- **Tour Guide**: [v-tour-guide](https://www.npmjs.com/package/v-tour-guide) for interactive onboarding
 - **Icons**: [@nuxt/icon](https://nuxt.com/modules/icon)
 - **Fonts**: [@nuxt/fonts](https://nuxt.com/modules/fonts)
 - **State**: [VueUse 14](https://vueuse.org/) utilities
 - **Validation**: [Valibot](https://valibot.dev/)
 - **PWA**: [@vite-pwa/nuxt](https://vite-pwa-org.netlify.app/frameworks/nuxt)
-- **Package Manager**: [Bun 1.3](https://bun.sh/)
+- **Package Manager**: [Bun 1.3.5](https://bun.sh/)
 
 ## Getting Started
 
@@ -218,6 +220,23 @@ This app can be installed as a Progressive Web App:
 2. Click "Install" to add to your device
 3. Access offline with cached resources
 
+## Interactive Tour Guide
+
+New to shadcn-vue Create? The built-in tour guide walks you through all features:
+
+1. Click the **?** (help) icon in the top toolbar
+2. Follow the 12-step guided tour covering:
+   - Preset themes and quick-start options
+   - Theme configuration (colors, radius, shadows)
+   - Typography settings (fonts, scales)
+   - Component styling options
+   - Live preview and templates
+   - Dark mode toggle
+   - Shuffle and reset controls
+   - Import, share, and export features
+
+The tour can be restarted anytime by clicking the help icon.
+
 ## Scripts
 
 ```bash
@@ -255,6 +274,7 @@ shadcn-vue-create/
 │   │   ├── ColorPicker.vue
 │   │   ├── ComponentSelection.vue
 │   │   ├── ConfigPanel.vue
+│   │   ├── ConfigSection.vue
 │   │   ├── LiveCSSEditor.vue
 │   │   ├── OptionPicker.vue
 │   │   ├── PresetThemes.vue
@@ -265,12 +285,17 @@ shadcn-vue-create/
 │   │   └── ...
 │   ├── ui/                   # Reusable UI components
 │   ├── ExportDialog.vue      # Export modal with tabs
+│   ├── Toolbar.vue           # Top toolbar with actions
 │   └── PWAInstallPrompt.vue  # PWA install UI
 ├── composables/
-│   └── useDesignSystem.ts    # Design system state management
+│   ├── useDesignSystem.ts    # Design system state management
+│   ├── useAppTour.ts         # Interactive tour guide steps
+│   └── useColorMode.ts       # Dark/light mode management
 ├── config/
 │   ├── defaults.ts           # Default values, presets, components
 │   └── themes.ts             # Theme color definitions (OKLCH)
+├── plugins/
+│   └── v-tour-guide.client.ts # Tour guide plugin
 ├── lib/
 │   └── utils.ts              # Utility functions (cn, etc.)
 ├── pages/
@@ -297,4 +322,5 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 - [shadcn/ui](https://ui.shadcn.com/) for the original inspiration
 - [shadcn-vue](https://www.shadcn-vue.com/) for the Vue port
 - [Reka UI](https://reka-ui.com/) for the headless UI components
+- [v-tour-guide](https://www.npmjs.com/package/v-tour-guide) for the interactive tour system
 - [Vite PWA](https://vite-pwa-org.netlify.app/) for PWA support
