@@ -1,8 +1,8 @@
-# shadcn-vue Create
+# Vuecraft
 
 A universal Vue/Nuxt theme builder and design system customizer. Create beautiful themes with real-time preview, then export for **shadcn-vue**, **Nuxt UI**, or **plain Tailwind CSS** projects.
 
-Inspired by [ui.shadcn.com/create](https://ui.shadcn.com/create) and built for the Vue ecosystem.
+Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for the Vue ecosystem.
 
 ## Features
 
@@ -44,8 +44,8 @@ Inspired by [ui.shadcn.com/create](https://ui.shadcn.com/create) and built for t
 
 ```bash
 # Clone the repository
-git clone https://github.com/AnoRebel/shadcn-vue-create.git
-cd shadcn-vue-create
+git clone https://github.com/AnoRebel/vuecraft.git
+cd vuecraft
 
 # Install dependencies
 bun install
@@ -279,7 +279,7 @@ bun run typecheck
 ## Project Structure
 
 ```
-shadcn-vue-create/
+vuecraft/
 ├── assets/
 │   └── css/
 │       └── main.css          # Global styles with Tailwind

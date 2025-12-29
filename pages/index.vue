@@ -18,12 +18,12 @@ onMounted(() => {
 
 // SEO
 useHead({
-  title: 'shadcn-vue Create - Design System Customizer',
+  title: 'Vuecraft - Universal Vue/Nuxt Theme Builder',
   meta: [
     {
       name: 'description',
       content:
-        'Create and customize your shadcn-vue design system. Export to Vue or Nuxt projects with Tailwind CSS v4.',
+        'Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Export to Vue or Nuxt projects.',
     },
   ],
 })

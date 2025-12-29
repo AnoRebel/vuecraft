@@ -37,7 +37,7 @@ function dismissPrompt() {
         <div class="flex-1 min-w-0">
           <h4 class="text-sm font-semibold">Install App</h4>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Install shadcn-vue Create for offline access and a better experience.
+            Install Vuecraft for offline access and a better experience.
           </p>
         </div>
         <button

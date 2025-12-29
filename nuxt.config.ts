@@ -18,9 +18,9 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-      name: 'shadcn-vue Create',
-      short_name: 'shadcn Create',
-      description: 'Design system customizer for shadcn-vue',
+      name: 'Vuecraft',
+      short_name: 'Vuecraft',
+      description: 'Universal Vue/Nuxt theme builder for shadcn-vue, Nuxt UI, and Tailwind',
       theme_color: '#0a0a0a',
       background_color: '#0a0a0a',
       display: 'standalone',
@@ -100,14 +100,14 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'shadcn-vue Create - Design System Customizer',
+      title: 'Vuecraft - Universal Vue/Nuxt Theme Builder',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
           content:
-            'Create and customize your shadcn-vue design system. Export to Vue or Nuxt projects.',
+            'Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Export to Vue or Nuxt projects.',
         },
       ],
       link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
