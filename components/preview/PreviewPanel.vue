@@ -25,6 +25,9 @@ const generatedCSS = computed(() => {
 const styleId = 'design-system-preview-styles'
 
 function updatePreviewStyles() {
+  // Only run on client side - document is undefined during SSR
+  if (import.meta.server) return
+
   let styleEl = document.getElementById(styleId) as HTMLStyleElement | null
   if (!styleEl) {
     styleEl = document.createElement('style')
