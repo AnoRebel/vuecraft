@@ -19,7 +19,7 @@ const { resetAll, randomize } = useDesignSystem()
     <!-- Header -->
     <div class="flex items-center justify-between border-b px-4 py-3">
       <h2 class="font-semibold">Configuration</h2>
-      <div class="flex gap-2">
+      <div class="flex gap-2" data-tour-guide="shuffle-reset-buttons">
         <Button variant="ghost" size="sm" @click="randomize">
           <svg
             xmlns="http://www.w3.org/2000/svg"

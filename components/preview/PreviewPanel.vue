@@ -55,11 +55,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col">
+  <div class="flex h-full flex-col" data-tour-guide="preview-panel">
     <!-- Preview Header -->
     <div class="flex items-center justify-between border-b px-4 py-3">
       <Tabs v-model="activeTemplate" class="w-full">
-        <TabsList>
+        <TabsList data-tour-guide="preview-templates">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="cards">Cards</TabsTrigger>
           <TabsTrigger value="forms">Forms</TabsTrigger>
@@ -68,7 +68,7 @@ onMounted(() => {
         </TabsList>
       </Tabs>
       <div class="flex items-center gap-2 ml-4">
-        <Button variant="ghost" size="icon" @click="toggleColorMode">
+        <Button variant="ghost" size="icon" data-tour-guide="dark-mode-toggle" @click="toggleColorMode">
           <svg
             v-if="isDark"
             xmlns="http://www.w3.org/2000/svg"

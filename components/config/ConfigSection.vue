@@ -6,10 +6,12 @@ interface Props {
   title: string
   description?: string
   defaultOpen?: boolean
+  tourId?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   defaultOpen: true,
+  tourId: undefined,
 })
 
 const isOpen = ref(props.defaultOpen)
@@ -20,7 +22,7 @@ function toggle() {
 </script>
 
 <template>
-  <div class="border-b border-border">
+  <div class="border-b border-border" :data-tour-guide="tourId">
     <button
       type="button"
       class="flex w-full items-center justify-between py-4 text-left hover:bg-accent/50 transition-colors px-1 -mx-1 rounded-sm"
