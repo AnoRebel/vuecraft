@@ -348,7 +348,7 @@ export function generateExportPackage(config: DesignSystemConfigInput): {
 
   const readme = `# shadcn-vue Design System
 
-This design system was generated using Vueforge.
+This design system was generated using Vuecraft.
 
 ## Configuration
 

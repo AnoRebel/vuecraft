@@ -4,8 +4,8 @@ export function useAppTour() {
   const tourSteps: TourGuideStep[] = [
     {
       id: 'welcome',
-      title: 'Welcome to shadcn-vue Create!',
-      content: 'This tool helps you customize and generate themes for shadcn-vue components. Let\'s take a quick tour!',
+      title: 'Welcome to Vuecraft!',
+      content: 'Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Let\'s take a quick tour!',
       target: 'app-logo',
       direction: 'bottom',
       showAction: true,
@@ -95,7 +95,7 @@ export function useAppTour() {
     {
       id: 'export-button',
       title: 'Export Theme',
-      content: 'Export your theme as CSS, JSON, or CLI commands ready to use with shadcn-vue.',
+      content: 'Export your theme for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Get CSS, config files, and CLI commands.',
       target: 'export-button',
       direction: 'bottom',
       showAction: true,

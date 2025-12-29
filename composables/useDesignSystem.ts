@@ -42,8 +42,8 @@ import {
 const CONFIG_VERSION = 1
 
 // Storage key for saved configurations
-const STORAGE_KEY = 'shadcn-vue-create-config'
-const SAVED_CONFIGS_KEY = 'shadcn-vue-create-saved-configs'
+const STORAGE_KEY = 'vuecraft-config'
+const SAVED_CONFIGS_KEY = 'vuecraft-saved-configs'
 
 // Saved configuration type
 export interface SavedConfig {
