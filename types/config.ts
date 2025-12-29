@@ -64,6 +64,8 @@ export type MenuColor = 'default' | 'inverted'
 
 export type FrameworkTarget = 'vue' | 'nuxt'
 
+export type UILibrary = 'shadcn-vue' | 'nuxt-ui' | 'tailwind'
+
 export type ExportFormat = 'css' | 'json' | 'both'
 
 // Configuration Groups
@@ -106,6 +108,7 @@ export interface LayoutConfig {
 }
 
 export interface ExportConfig {
+  uiLibrary: UILibrary
   framework: FrameworkTarget
   format: ExportFormat
   includeComponents: string[]

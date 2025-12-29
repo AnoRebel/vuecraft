@@ -47,6 +47,7 @@ export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
 }
 
 export const DEFAULT_EXPORT_CONFIG: ExportConfig = {
+  uiLibrary: 'shadcn-vue',
   framework: 'vue',
   format: 'both',
   includeComponents: [],
@@ -62,6 +63,28 @@ export const DEFAULT_CONFIG: DesignSystemConfig = {
   layout: DEFAULT_LAYOUT_CONFIG,
   export: DEFAULT_EXPORT_CONFIG,
 }
+
+// UI Library options
+export const UI_LIBRARIES = [
+  {
+    name: 'shadcn-vue',
+    label: 'shadcn-vue',
+    description: 'Beautiful components built with Reka UI and Tailwind CSS',
+    icon: 'shadcn',
+  },
+  {
+    name: 'nuxt-ui',
+    label: 'Nuxt UI',
+    description: 'Fully styled and customizable components for Nuxt',
+    icon: 'nuxt',
+  },
+  {
+    name: 'tailwind',
+    label: 'Plain Tailwind',
+    description: 'Just CSS variables for your own components',
+    icon: 'tailwind',
+  },
+] as const
 
 // Configuration options for UI
 export const BASE_COLORS = [
