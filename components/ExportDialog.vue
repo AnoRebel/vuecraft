@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useDesignSystem } from '~/composables/useDesignSystem'
+import { useDesignSystem, useConfigOptions } from '~/composables/useDesignSystem'
+import type { UILibrary } from '~/types/config'
 import {
-  generateCSSVariables,
-  generateComponentsJson,
-  generateExportPackage,
+  generateUniversalCSS,
+  generateUniversalConfig,
+  generateUniversalExportPackage,
+  getUILibraryInfo,
 } from '~/utils/cssGenerator'
 import {
   generateInitCommand,
   generateAddCommand,
-  generateSetupScript,
+  generateUniversalSetupScript,
+  getLibraryCommands,
 } from '~/utils/cliGenerator'
 import {
   Dialog,
@@ -32,18 +35,30 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
 }>()
 
-const { config } = useDesignSystem()
+const { config, setExport } = useDesignSystem()
+const { UI_LIBRARIES } = useConfigOptions()
 const activeTab = ref('css')
 const copied = ref<string | null>(null)
 
-const cssOutput = computed(() => generateCSSVariables(config))
-const jsonOutput = computed(() => generateComponentsJson(config))
-const exportPackage = computed(() => generateExportPackage(config))
+// Computed values based on UI library
+const selectedLibrary = computed(() => config.export.uiLibrary)
+const libraryInfo = computed(() => getUILibraryInfo(selectedLibrary.value))
+
+const cssOutput = computed(() => generateUniversalCSS(config))
+const configOutput = computed(() => generateUniversalConfig(config))
+const exportPackage = computed(() => generateUniversalExportPackage(config))
 
 // CLI commands
+const setupScript = computed(() => generateUniversalSetupScript(config))
+const libraryCommands = computed(() => getLibraryCommands(config))
+
+// shadcn-vue specific commands
 const initCommand = computed(() => generateInitCommand(config))
 const addCommand = computed(() => generateAddCommand(config.export.includeComponents))
-const setupScript = computed(() => generateSetupScript(config))
+
+function selectLibrary(library: UILibrary) {
+  setExport({ uiLibrary: library })
+}
 
 async function copyToClipboard(content: string, type: string) {
   try {
@@ -72,8 +87,17 @@ function downloadFile(content: string, filename: string, type: string) {
 function downloadAll() {
   const pkg = exportPackage.value
   downloadFile(pkg.css, 'main.css', 'text/css')
-  downloadFile(pkg.componentsJson, 'components.json', 'application/json')
+  if (pkg.config) {
+    const configType = pkg.configFilename.endsWith('.json') ? 'application/json' : 'text/plain'
+    downloadFile(pkg.config, pkg.configFilename, configType)
+  }
   downloadFile(pkg.readme, 'README.md', 'text/markdown')
+  // Download additional files if any
+  if (pkg.additionalFiles) {
+    for (const file of pkg.additionalFiles) {
+      downloadFile(file.content, file.filename, 'text/plain')
+    }
+  }
 }
 </script>
 
@@ -87,19 +111,38 @@ function downloadAll() {
         </DialogDescription>
       </DialogHeader>
 
+      <!-- UI Library Selector -->
+      <div class="flex gap-2 pb-4 border-b">
+        <button
+          v-for="lib in UI_LIBRARIES"
+          :key="lib.name"
+          class="flex-1 flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-colors"
+          :class="[
+            selectedLibrary === lib.name
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50',
+          ]"
+          @click="selectLibrary(lib.name as UILibrary)"
+        >
+          <span class="font-medium text-sm">{{ lib.label }}</span>
+          <span class="text-xs text-muted-foreground text-center">{{ lib.description }}</span>
+        </button>
+      </div>
+
       <Tabs v-model="activeTab" class="flex-1 overflow-hidden flex flex-col">
         <TabsList class="grid w-full grid-cols-4">
           <TabsTrigger value="css">CSS</TabsTrigger>
-          <TabsTrigger value="json">Config</TabsTrigger>
+          <TabsTrigger value="config">Config</TabsTrigger>
           <TabsTrigger value="cli">CLI</TabsTrigger>
           <TabsTrigger value="readme">README</TabsTrigger>
         </TabsList>
 
+        <!-- CSS Tab -->
         <TabsContent value="css" class="flex-1 overflow-hidden flex flex-col mt-4">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
-              <span class="text-sm font-medium">main.css</span>
-              <Badge variant="secondary">Tailwind CSS v4</Badge>
+              <span class="text-sm font-medium">{{ libraryInfo.cssFilename }}</span>
+              <Badge variant="secondary">{{ libraryInfo.badge }}</Badge>
             </div>
             <div class="flex gap-2">
               <Button variant="ghost" size="sm" @click="copyToClipboard(cssOutput, 'css')">
@@ -108,7 +151,7 @@ function downloadAll() {
               <Button
                 variant="ghost"
                 size="sm"
-                @click="downloadFile(cssOutput, 'main.css', 'text/css')"
+                @click="downloadFile(cssOutput, libraryInfo.cssFilename, 'text/css')"
               >
                 Download
               </Button>
@@ -119,72 +162,177 @@ function downloadAll() {
           </div>
         </TabsContent>
 
-        <TabsContent value="json" class="flex-1 overflow-hidden flex flex-col mt-4">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-medium">components.json</span>
-              <Badge variant="secondary">shadcn-vue CLI</Badge>
-            </div>
-            <div class="flex gap-2">
-              <Button variant="ghost" size="sm" @click="copyToClipboard(jsonOutput, 'json')">
-                {{ copied === 'json' ? 'Copied!' : 'Copy' }}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="downloadFile(jsonOutput, 'components.json', 'application/json')"
-              >
-                Download
-              </Button>
-            </div>
-          </div>
-          <div class="flex-1 overflow-auto rounded-md border bg-muted/50">
-            <pre class="p-4 text-xs font-mono overflow-x-auto"><code>{{ jsonOutput }}</code></pre>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="cli" class="flex-1 overflow-hidden flex flex-col mt-4">
-          <div class="flex-1 overflow-auto space-y-4">
-            <!-- Init Command -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-medium">Initialize shadcn-vue</span>
-                  <Badge variant="secondary">Step 1</Badge>
-                </div>
+        <!-- Config Tab -->
+        <TabsContent value="config" class="flex-1 overflow-hidden flex flex-col mt-4">
+          <template v-if="configOutput">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium">{{ libraryInfo.configFilename }}</span>
+                <Badge variant="secondary">{{ libraryInfo.name }}</Badge>
+              </div>
+              <div class="flex gap-2">
+                <Button variant="ghost" size="sm" @click="copyToClipboard(configOutput, 'config')">
+                  {{ copied === 'config' ? 'Copied!' : 'Copy' }}
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  @click="copyToClipboard(initCommand, 'init')"
+                  @click="
+                    downloadFile(
+                      configOutput,
+                      libraryInfo.configFilename,
+                      libraryInfo.configFilename.endsWith('.json')
+                        ? 'application/json'
+                        : 'text/plain'
+                    )
+                  "
                 >
-                  {{ copied === 'init' ? 'Copied!' : 'Copy' }}
+                  Download
                 </Button>
               </div>
-              <div class="rounded-md border bg-muted/50 p-3">
-                <code class="text-xs font-mono">{{ initCommand }}</code>
+            </div>
+            <div class="flex-1 overflow-auto rounded-md border bg-muted/50">
+              <pre class="p-4 text-xs font-mono overflow-x-auto"><code>{{ configOutput }}</code></pre>
+            </div>
+          </template>
+          <template v-else>
+            <div class="flex-1 flex items-center justify-center text-muted-foreground">
+              <div class="text-center">
+                <p class="text-sm">No configuration file needed for {{ libraryInfo.name }}.</p>
+                <p class="text-xs mt-1">Just copy the CSS and you're ready to go!</p>
               </div>
             </div>
+          </template>
+        </TabsContent>
 
-            <!-- Add Components Command -->
-            <div v-if="config.export.includeComponents.length > 0" class="space-y-2">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-medium">Add Components</span>
-                  <Badge variant="secondary">Step 2</Badge>
-                  <Badge variant="outline">
-                    {{ config.export.includeComponents.length }} components
-                  </Badge>
+        <!-- CLI Tab -->
+        <TabsContent value="cli" class="flex-1 overflow-hidden flex flex-col mt-4">
+          <div class="flex-1 overflow-auto space-y-4">
+            <!-- shadcn-vue specific commands -->
+            <template v-if="selectedLibrary === 'shadcn-vue'">
+              <!-- Init Command -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">Initialize shadcn-vue</span>
+                    <Badge variant="secondary">Step 1</Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="copyToClipboard(initCommand, 'init')"
+                  >
+                    {{ copied === 'init' ? 'Copied!' : 'Copy' }}
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm" @click="copyToClipboard(addCommand, 'add')">
-                  {{ copied === 'add' ? 'Copied!' : 'Copy' }}
-                </Button>
+                <div class="rounded-md border bg-muted/50 p-3">
+                  <code class="text-xs font-mono">{{ initCommand }}</code>
+                </div>
               </div>
-              <div class="rounded-md border bg-muted/50 p-3 overflow-x-auto">
-                <code class="text-xs font-mono whitespace-nowrap">{{ addCommand }}</code>
-              </div>
-            </div>
 
-            <!-- Full Setup Script -->
+              <!-- Add Components Command -->
+              <div v-if="config.export.includeComponents.length > 0" class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">Add Components</span>
+                    <Badge variant="secondary">Step 2</Badge>
+                    <Badge variant="outline">
+                      {{ config.export.includeComponents.length }} components
+                    </Badge>
+                  </div>
+                  <Button variant="ghost" size="sm" @click="copyToClipboard(addCommand, 'add')">
+                    {{ copied === 'add' ? 'Copied!' : 'Copy' }}
+                  </Button>
+                </div>
+                <div class="rounded-md border bg-muted/50 p-3 overflow-x-auto">
+                  <code class="text-xs font-mono whitespace-nowrap">{{ addCommand }}</code>
+                </div>
+              </div>
+            </template>
+
+            <!-- Nuxt UI specific commands -->
+            <template v-else-if="selectedLibrary === 'nuxt-ui'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">Create Nuxt Project</span>
+                    <Badge variant="secondary">Step 1</Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="copyToClipboard(libraryCommands.init, 'init')"
+                  >
+                    {{ copied === 'init' ? 'Copied!' : 'Copy' }}
+                  </Button>
+                </div>
+                <div class="rounded-md border bg-muted/50 p-3">
+                  <code class="text-xs font-mono">{{ libraryCommands.init }}</code>
+                </div>
+              </div>
+
+              <div v-if="libraryCommands.install" class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">Add Nuxt UI Module</span>
+                    <Badge variant="secondary">Step 2</Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="copyToClipboard(libraryCommands.install, 'install')"
+                  >
+                    {{ copied === 'install' ? 'Copied!' : 'Copy' }}
+                  </Button>
+                </div>
+                <div class="rounded-md border bg-muted/50 p-3">
+                  <code class="text-xs font-mono">{{ libraryCommands.install }}</code>
+                </div>
+              </div>
+            </template>
+
+            <!-- Plain Tailwind specific commands -->
+            <template v-else-if="selectedLibrary === 'tailwind'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">Create {{ config.export.framework === 'nuxt' ? 'Nuxt' : 'Vue' }} Project</span>
+                    <Badge variant="secondary">Step 1</Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="copyToClipboard(libraryCommands.init, 'init')"
+                  >
+                    {{ copied === 'init' ? 'Copied!' : 'Copy' }}
+                  </Button>
+                </div>
+                <div class="rounded-md border bg-muted/50 p-3">
+                  <code class="text-xs font-mono">{{ libraryCommands.init }}</code>
+                </div>
+              </div>
+
+              <div v-if="libraryCommands.install" class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">Install Tailwind CSS v4</span>
+                    <Badge variant="secondary">Step 2</Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="copyToClipboard(libraryCommands.install, 'install')"
+                  >
+                    {{ copied === 'install' ? 'Copied!' : 'Copy' }}
+                  </Button>
+                </div>
+                <div class="rounded-md border bg-muted/50 p-3">
+                  <code class="text-xs font-mono">{{ libraryCommands.install }}</code>
+                </div>
+              </div>
+            </template>
+
+            <!-- Full Setup Script (all libraries) -->
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -215,6 +363,7 @@ function downloadAll() {
           </div>
         </TabsContent>
 
+        <!-- README Tab -->
         <TabsContent value="readme" class="flex-1 overflow-hidden flex flex-col mt-4">
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium">README.md</span>

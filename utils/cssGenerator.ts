@@ -9,6 +9,8 @@ import type {
 } from '~/types/config'
 import { getThemeColors } from '~/config/themes'
 import { RADIUS_OPTIONS, ANIMATION_SPEEDS, BORDER_WIDTHS } from '~/config/defaults'
+import { generateNuxtUIExportPackage, generateNuxtUIAppConfig, generateNuxtUICSS } from './nuxtUIGenerator'
+import { generateTailwindExportPackage, generateTailwindCSS } from './tailwindGenerator'
 
 // Font family mappings
 const FONT_FAMILY_MAP: Record<string, string> = {
@@ -335,7 +337,7 @@ export function generateComponentsJson(config: DesignSystemConfigInput): string 
   return JSON.stringify(json, null, 2)
 }
 
-// Generate full export package
+// Generate full export package for shadcn-vue
 export function generateExportPackage(config: DesignSystemConfigInput): {
   css: string
   componentsJson: string
@@ -346,7 +348,7 @@ export function generateExportPackage(config: DesignSystemConfigInput): {
 
   const readme = `# shadcn-vue Design System
 
-This design system was generated using [shadcn-vue Create](https://github.com/shadcn-vue/create).
+This design system was generated using Vueforge.
 
 ## Configuration
 
@@ -374,4 +376,116 @@ This design system was generated using [shadcn-vue Create](https://github.com/sh
 `
 
   return { css, componentsJson, readme }
+}
+
+// ============================================
+// Universal Export Package Generator
+// ============================================
+
+// Generate CSS based on the selected UI library
+export function generateUniversalCSS(config: DesignSystemConfigInput): string {
+  const uiLibrary = config.export.uiLibrary
+
+  switch (uiLibrary) {
+    case 'nuxt-ui':
+      return generateNuxtUICSS(config)
+    case 'tailwind':
+      return generateTailwindCSS(config)
+    case 'shadcn-vue':
+    default:
+      return generateCSSVariables(config)
+  }
+}
+
+// Generate the appropriate config file based on UI library
+export function generateUniversalConfig(config: DesignSystemConfigInput): string {
+  const uiLibrary = config.export.uiLibrary
+
+  switch (uiLibrary) {
+    case 'nuxt-ui':
+      return generateNuxtUIAppConfig(config)
+    case 'tailwind':
+      return '' // Plain Tailwind doesn't need a config file
+    case 'shadcn-vue':
+    default:
+      return generateComponentsJson(config)
+  }
+}
+
+// Generate universal export package
+export function generateUniversalExportPackage(config: DesignSystemConfigInput): {
+  css: string
+  config: string
+  configFilename: string
+  readme: string
+  additionalFiles?: { filename: string; content: string }[]
+} {
+  const uiLibrary = config.export.uiLibrary
+
+  switch (uiLibrary) {
+    case 'nuxt-ui': {
+      const pkg = generateNuxtUIExportPackage(config)
+      return {
+        css: pkg.css,
+        config: pkg.appConfig,
+        configFilename: 'app.config.ts',
+        readme: pkg.readme,
+        additionalFiles: [
+          { filename: 'nuxt.config.ts.example', content: pkg.nuxtConfig },
+        ],
+      }
+    }
+    case 'tailwind': {
+      const pkg = generateTailwindExportPackage(config)
+      return {
+        css: pkg.css,
+        config: pkg.setupScript,
+        configFilename: 'setup.sh',
+        readme: pkg.readme,
+      }
+    }
+    case 'shadcn-vue':
+    default: {
+      const pkg = generateExportPackage(config)
+      return {
+        css: pkg.css,
+        config: pkg.componentsJson,
+        configFilename: 'components.json',
+        readme: pkg.readme,
+      }
+    }
+  }
+}
+
+// Get UI library display info
+export function getUILibraryInfo(uiLibrary: string): {
+  name: string
+  badge: string
+  cssFilename: string
+  configFilename: string
+} {
+  switch (uiLibrary) {
+    case 'nuxt-ui':
+      return {
+        name: 'Nuxt UI',
+        badge: 'Nuxt UI v3',
+        cssFilename: 'main.css',
+        configFilename: 'app.config.ts',
+      }
+    case 'tailwind':
+      return {
+        name: 'Plain Tailwind',
+        badge: 'Tailwind CSS v4',
+        cssFilename: 'main.css',
+        configFilename: 'setup.sh',
+      }
+    case 'shadcn-vue':
+    default:
+      return {
+        name: 'shadcn-vue',
+        badge: 'shadcn-vue',
+        cssFilename: 'main.css',
+        configFilename: 'components.json',
+      }
+  }
 }
