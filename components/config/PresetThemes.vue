@@ -20,7 +20,7 @@ function isActivePreset(presetName: string): boolean {
 </script>
 
 <template>
-  <ConfigSection title="Preset Themes" description="Quick start with curated themes">
+  <ConfigSection title="Preset Themes" description="Quick start with curated themes" tour-id="preset-themes-section">
     <div class="grid grid-cols-2 gap-3">
       <button
         v-for="preset in PRESET_THEMES"

@@ -18,7 +18,7 @@ const vibrantThemes = ACCENT_THEMES.filter(
 </script>
 
 <template>
-  <ConfigSection title="Theme" description="Colors, radius, and shadows">
+  <ConfigSection title="Theme" description="Colors, radius, and shadows" tour-id="theme-config-section">
     <div class="space-y-6">
       <!-- Base Color -->
       <ColorPicker

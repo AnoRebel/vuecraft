@@ -6,17 +6,26 @@ import { Tooltip } from '~/components/ui/tooltip'
 import ExportDialog from './ExportDialog.vue'
 import ImportDialog from './ImportDialog.vue'
 import ShareDialog from './ShareDialog.vue'
+import { useAppTour } from '~/composables/useAppTour'
 
 const exportDialogOpen = ref(false)
 const importDialogOpen = ref(false)
 const shareDialogOpen = ref(false)
+
+// Tour Guide
+const { tourSteps, tourLabels } = useAppTour()
+const tourManagerRef = ref<{ startTourGuide: () => void } | null>(null)
+
+function startTour() {
+  tourManagerRef.value?.startTourGuide()
+}
 </script>
 
 <template>
   <div class="flex items-center justify-between border-b px-4 py-2 bg-background">
     <!-- Left side - Logo & Title -->
     <div class="flex items-center gap-3">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2" data-tour-guide="app-logo">
         <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -40,8 +49,31 @@ const shareDialogOpen = ref(false)
 
     <!-- Right side - Actions -->
     <div class="flex items-center gap-2">
+      <!-- Tour Button -->
+      <Tooltip content="Take a tour" side="bottom">
+        <Button variant="ghost" size="icon" data-tour-guide="tour-button" @click="startTour">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <path d="M12 17h.01" />
+          </svg>
+        </Button>
+      </Tooltip>
+
+      <Separator orientation="vertical" class="h-6" />
+
       <Tooltip content="Import configuration" side="bottom">
-        <Button variant="ghost" size="sm" @click="importDialogOpen = true">
+        <Button variant="ghost" size="sm" data-tour-guide="import-button" @click="importDialogOpen = true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -62,7 +94,7 @@ const shareDialogOpen = ref(false)
       </Tooltip>
 
       <Tooltip content="Share configuration" side="bottom">
-        <Button variant="ghost" size="sm" @click="shareDialogOpen = true">
+        <Button variant="ghost" size="sm" data-tour-guide="share-button" @click="shareDialogOpen = true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -86,7 +118,7 @@ const shareDialogOpen = ref(false)
 
       <Separator orientation="vertical" class="h-6" />
 
-      <Button @click="exportDialogOpen = true">
+      <Button data-tour-guide="export-button" @click="exportDialogOpen = true">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -128,6 +160,19 @@ const shareDialogOpen = ref(false)
       </a>
     </div>
   </div>
+
+  <!-- Tour Guide Manager -->
+  <ClientOnly>
+    <TourGuideManager
+      ref="tourManagerRef"
+      :steps="tourSteps"
+      :labels="tourLabels"
+      :show-overlay="true"
+      :allow-skip="true"
+      :highlight-padding="8"
+      :scroll-to-view="true"
+    />
+  </ClientOnly>
 
   <!-- Dialogs -->
   <ExportDialog v-model:open="exportDialogOpen" />
