@@ -458,6 +458,101 @@ export const ACCENT_COLORS: Record<ThemeName, { primary: string; primaryForegrou
   pink: { primary: 'oklch(0.656 0.241 354.308)', primaryForeground: 'oklch(0.971 0.014 343.198)' },
 }
 
+// Helper to generate accent-derived colors from a primary OKLCH color
+function deriveAccentColors(primaryOklch: string): {
+  accent: string
+  accentForeground: string
+  secondary: string
+  secondaryForeground: string
+  chart1: string
+  chart2: string
+  chart3: string
+  chart4: string
+  chart5: string
+} {
+  // Parse OKLCH: oklch(L C H) - extract lightness, chroma, hue
+  const match = primaryOklch.match(/oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/)
+  if (!match) {
+    return {
+      accent: 'oklch(0.967 0.001 286.375)',
+      accentForeground: 'oklch(0.21 0.006 285.885)',
+      secondary: 'oklch(0.967 0.001 286.375)',
+      secondaryForeground: 'oklch(0.21 0.006 285.885)',
+      chart1: 'oklch(0.646 0.222 41.116)',
+      chart2: 'oklch(0.6 0.118 184.714)',
+      chart3: 'oklch(0.398 0.07 227.392)',
+      chart4: 'oklch(0.828 0.189 84.429)',
+      chart5: 'oklch(0.769 0.188 70.08)',
+    }
+  }
+
+  const lightness = Number(match[1])
+  const chroma = Number(match[2])
+  const hue = Number(match[3])
+
+  return {
+    // Accent: very light tint of the primary color
+    accent: `oklch(0.95 ${(chroma * 0.15).toFixed(3)} ${hue})`,
+    accentForeground: `oklch(0.25 ${(chroma * 0.5).toFixed(3)} ${hue})`,
+    // Secondary: slightly tinted gray
+    secondary: `oklch(0.96 ${(chroma * 0.08).toFixed(3)} ${hue})`,
+    secondaryForeground: `oklch(0.25 ${(chroma * 0.4).toFixed(3)} ${hue})`,
+    // Chart colors: variations of the primary hue
+    chart1: `oklch(${lightness} ${chroma} ${hue})`,
+    chart2: `oklch(${(lightness * 0.85).toFixed(3)} ${(chroma * 0.8).toFixed(3)} ${((hue + 30) % 360).toFixed(1)})`,
+    chart3: `oklch(${(lightness * 0.7).toFixed(3)} ${(chroma * 0.6).toFixed(3)} ${((hue + 60) % 360).toFixed(1)})`,
+    chart4: `oklch(${(lightness * 1.1).toFixed(3)} ${(chroma * 0.7).toFixed(3)} ${((hue + 120) % 360).toFixed(1)})`,
+    chart5: `oklch(${(lightness * 0.9).toFixed(3)} ${(chroma * 0.9).toFixed(3)} ${((hue + 180) % 360).toFixed(1)})`,
+  }
+}
+
+// Helper to derive dark mode accent colors
+function deriveAccentColorsDark(primaryOklch: string): {
+  accent: string
+  accentForeground: string
+  secondary: string
+  secondaryForeground: string
+  chart1: string
+  chart2: string
+  chart3: string
+  chart4: string
+  chart5: string
+} {
+  const match = primaryOklch.match(/oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/)
+  if (!match) {
+    return {
+      accent: 'oklch(0.274 0.006 286.033)',
+      accentForeground: 'oklch(0.985 0 0)',
+      secondary: 'oklch(0.274 0.006 286.033)',
+      secondaryForeground: 'oklch(0.985 0 0)',
+      chart1: 'oklch(0.488 0.243 264.376)',
+      chart2: 'oklch(0.696 0.17 162.48)',
+      chart3: 'oklch(0.769 0.188 70.08)',
+      chart4: 'oklch(0.627 0.265 303.9)',
+      chart5: 'oklch(0.645 0.246 16.439)',
+    }
+  }
+
+  const lightness = Number(match[1])
+  const chroma = Number(match[2])
+  const hue = Number(match[3])
+
+  return {
+    // Accent: dark tinted background
+    accent: `oklch(0.25 ${(chroma * 0.2).toFixed(3)} ${hue})`,
+    accentForeground: `oklch(0.95 ${(chroma * 0.15).toFixed(3)} ${hue})`,
+    // Secondary: dark tinted
+    secondary: `oklch(0.22 ${(chroma * 0.15).toFixed(3)} ${hue})`,
+    secondaryForeground: `oklch(0.95 ${(chroma * 0.1).toFixed(3)} ${hue})`,
+    // Chart colors with higher lightness for dark mode
+    chart1: `oklch(${Math.min(lightness * 1.1, 0.8).toFixed(3)} ${chroma} ${hue})`,
+    chart2: `oklch(${Math.min(lightness * 1.0, 0.75).toFixed(3)} ${(chroma * 0.85).toFixed(3)} ${((hue + 30) % 360).toFixed(1)})`,
+    chart3: `oklch(${Math.min(lightness * 0.95, 0.7).toFixed(3)} ${(chroma * 0.7).toFixed(3)} ${((hue + 60) % 360).toFixed(1)})`,
+    chart4: `oklch(${Math.min(lightness * 1.15, 0.85).toFixed(3)} ${(chroma * 0.75).toFixed(3)} ${((hue + 120) % 360).toFixed(1)})`,
+    chart5: `oklch(${Math.min(lightness * 1.05, 0.8).toFixed(3)} ${(chroma * 0.9).toFixed(3)} ${((hue + 180) % 360).toFixed(1)})`,
+  }
+}
+
 // Get theme colors for a specific base color and accent theme
 export function getThemeColors(baseColor: BaseColorName, accentTheme: ThemeName): ThemeColors {
   const base = BASE_COLOR_THEMES[baseColor]
@@ -468,24 +563,50 @@ export function getThemeColors(baseColor: BaseColorName, accentTheme: ThemeName)
     return base
   }
 
+  // Derive accent-related colors from primary
+  const lightDerived = deriveAccentColors(accent.primary)
+  const darkDerived = deriveAccentColorsDark(accent.primary)
+
   // Apply accent colors to the base theme
   return {
     light: {
       ...base.light,
       primary: accent.primary,
       primaryForeground: accent.primaryForeground,
+      secondary: lightDerived.secondary,
+      secondaryForeground: lightDerived.secondaryForeground,
+      accent: lightDerived.accent,
+      accentForeground: lightDerived.accentForeground,
       ring: accent.primary,
+      chart1: lightDerived.chart1,
+      chart2: lightDerived.chart2,
+      chart3: lightDerived.chart3,
+      chart4: lightDerived.chart4,
+      chart5: lightDerived.chart5,
       sidebarPrimary: accent.primary,
       sidebarPrimaryForeground: accent.primaryForeground,
+      sidebarAccent: lightDerived.accent,
+      sidebarAccentForeground: lightDerived.accentForeground,
       sidebarRing: accent.primary,
     },
     dark: {
       ...base.dark,
       primary: accent.primary,
       primaryForeground: accent.primaryForeground,
+      secondary: darkDerived.secondary,
+      secondaryForeground: darkDerived.secondaryForeground,
+      accent: darkDerived.accent,
+      accentForeground: darkDerived.accentForeground,
       ring: accent.primary,
+      chart1: darkDerived.chart1,
+      chart2: darkDerived.chart2,
+      chart3: darkDerived.chart3,
+      chart4: darkDerived.chart4,
+      chart5: darkDerived.chart5,
       sidebarPrimary: accent.primary,
       sidebarPrimaryForeground: accent.primaryForeground,
+      sidebarAccent: darkDerived.accent,
+      sidebarAccentForeground: darkDerived.accentForeground,
       sidebarRing: accent.primary,
     },
   }
