@@ -106,47 +106,77 @@ bun run preview
 
 ## Preset Themes
 
-Quick-start with 10 curated preset themes:
+Quick-start with 10 curated preset themes, each with full light and dark mode support:
 
 ### Default
 Clean neutral theme with balanced styling.
-![Default Theme](/public/screenshots/default.png)
+
+| Light | Dark |
+|-------|------|
+| ![Default Light](/public/screenshots/default-light.png) | ![Default Dark](/public/screenshots/default-dark.png) |
 
 ### New York
 Modern and elegant monochrome style.
-![New York Theme](/public/screenshots/new-york.png)
+
+| Light | Dark |
+|-------|------|
+| ![New York Light](/public/screenshots/new-york-light.png) | ![New York Dark](/public/screenshots/new-york-dark.png) |
 
 ### Miami
-Vibrant and colorful with warm tones.
-![Miami Theme](/public/screenshots/miami.png)
+Vibrant and colorful with warm pink tones.
+
+| Light | Dark |
+|-------|------|
+| ![Miami Light](/public/screenshots/miami-light.png) | ![Miami Dark](/public/screenshots/miami-dark.png) |
 
 ### Midnight
-Dark purple accent for night-time coding.
-![Midnight Theme](/public/screenshots/midnight.png)
+Deep blue accent for night-time coding.
+
+| Light | Dark |
+|-------|------|
+| ![Midnight Light](/public/screenshots/midnight-light.png) | ![Midnight Dark](/public/screenshots/midnight-dark.png) |
 
 ### Forest
-Natural green palette inspired by nature.
-![Forest Theme](/public/screenshots/forest.png)
+Natural emerald green palette inspired by nature.
+
+| Light | Dark |
+|-------|------|
+| ![Forest Light](/public/screenshots/forest-light.png) | ![Forest Dark](/public/screenshots/forest-dark.png) |
 
 ### Sunset
 Warm orange hues for a cozy feel.
-![Sunset Theme](/public/screenshots/sunset.png)
+
+| Light | Dark |
+|-------|------|
+| ![Sunset Light](/public/screenshots/sunset-light.png) | ![Sunset Dark](/public/screenshots/sunset-dark.png) |
 
 ### Lavender
-Soft purple tones for a calm aesthetic.
-![Lavender Theme](/public/screenshots/lavender.png)
+Soft violet tones for a calm aesthetic.
+
+| Light | Dark |
+|-------|------|
+| ![Lavender Light](/public/screenshots/lavender-light.png) | ![Lavender Dark](/public/screenshots/lavender-dark.png) |
 
 ### Brutalist
-Bold, high-contrast design with strong lines.
-![Brutalist Theme](/public/screenshots/brutalist.png)
+Bold, high-contrast design with sharp edges.
+
+| Light | Dark |
+|-------|------|
+| ![Brutalist Light](/public/screenshots/brutalist-light.png) | ![Brutalist Dark](/public/screenshots/brutalist-dark.png) |
 
 ### Ocean
-Cool blue tones inspired by the sea.
-![Ocean Theme](/public/screenshots/ocean.png)
+Cool cyan tones inspired by the sea.
+
+| Light | Dark |
+|-------|------|
+| ![Ocean Light](/public/screenshots/ocean-light.png) | ![Ocean Dark](/public/screenshots/ocean-dark.png) |
 
 ### Rose Gold
-Elegant pink metallic theme.
-![Rose Gold Theme](/public/screenshots/rose-gold.png)
+Elegant rose pink metallic theme.
+
+| Light | Dark |
+|-------|------|
+| ![Rose Gold Light](/public/screenshots/rose-gold-light.png) | ![Rose Gold Dark](/public/screenshots/rose-gold-dark.png) |
 
 ## Preview Templates
 
