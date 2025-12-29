@@ -127,83 +127,85 @@ export function generateCSSVariables(config: DesignSystemConfigInput): string {
   const animationDuration = getAnimationDuration(config.components.animationSpeed)
   const borderWidth = getBorderWidth(config.components.borderWidth)
 
+  // Generate CSS that directly sets --color-* variables for runtime application
+  // This bypasses Tailwind's @theme which is compile-time only
   const lightVars = `
-  /* Light mode colors */
-  --background: ${colors.light.background};
-  --foreground: ${colors.light.foreground};
-  --card: ${colors.light.card};
-  --card-foreground: ${colors.light.cardForeground};
-  --popover: ${colors.light.popover};
-  --popover-foreground: ${colors.light.popoverForeground};
-  --primary: ${colors.light.primary};
-  --primary-foreground: ${colors.light.primaryForeground};
-  --secondary: ${colors.light.secondary};
-  --secondary-foreground: ${colors.light.secondaryForeground};
-  --muted: ${colors.light.muted};
-  --muted-foreground: ${colors.light.mutedForeground};
-  --accent: ${colors.light.accent};
-  --accent-foreground: ${colors.light.accentForeground};
-  --destructive: ${colors.light.destructive};
-  --destructive-foreground: ${colors.light.destructiveForeground};
-  --border: ${colors.light.border};
-  --input: ${colors.light.input};
-  --ring: ${colors.light.ring};
+  /* Light mode colors - using --color-* directly for Tailwind CSS v4 */
+  --color-background: ${colors.light.background};
+  --color-foreground: ${colors.light.foreground};
+  --color-card: ${colors.light.card};
+  --color-card-foreground: ${colors.light.cardForeground};
+  --color-popover: ${colors.light.popover};
+  --color-popover-foreground: ${colors.light.popoverForeground};
+  --color-primary: ${colors.light.primary};
+  --color-primary-foreground: ${colors.light.primaryForeground};
+  --color-secondary: ${colors.light.secondary};
+  --color-secondary-foreground: ${colors.light.secondaryForeground};
+  --color-muted: ${colors.light.muted};
+  --color-muted-foreground: ${colors.light.mutedForeground};
+  --color-accent: ${colors.light.accent};
+  --color-accent-foreground: ${colors.light.accentForeground};
+  --color-destructive: ${colors.light.destructive};
+  --color-destructive-foreground: ${colors.light.destructiveForeground};
+  --color-border: ${colors.light.border};
+  --color-input: ${colors.light.input};
+  --color-ring: ${colors.light.ring};
 
   /* Chart colors */
-  --chart-1: ${colors.light.chart1};
-  --chart-2: ${colors.light.chart2};
-  --chart-3: ${colors.light.chart3};
-  --chart-4: ${colors.light.chart4};
-  --chart-5: ${colors.light.chart5};
+  --color-chart-1: ${colors.light.chart1};
+  --color-chart-2: ${colors.light.chart2};
+  --color-chart-3: ${colors.light.chart3};
+  --color-chart-4: ${colors.light.chart4};
+  --color-chart-5: ${colors.light.chart5};
 
   /* Sidebar colors */
-  --sidebar: ${colors.light.sidebar};
-  --sidebar-foreground: ${colors.light.sidebarForeground};
-  --sidebar-primary: ${colors.light.sidebarPrimary};
-  --sidebar-primary-foreground: ${colors.light.sidebarPrimaryForeground};
-  --sidebar-accent: ${colors.light.sidebarAccent};
-  --sidebar-accent-foreground: ${colors.light.sidebarAccentForeground};
-  --sidebar-border: ${colors.light.sidebarBorder};
-  --sidebar-ring: ${colors.light.sidebarRing};`
+  --color-sidebar: ${colors.light.sidebar};
+  --color-sidebar-foreground: ${colors.light.sidebarForeground};
+  --color-sidebar-primary: ${colors.light.sidebarPrimary};
+  --color-sidebar-primary-foreground: ${colors.light.sidebarPrimaryForeground};
+  --color-sidebar-accent: ${colors.light.sidebarAccent};
+  --color-sidebar-accent-foreground: ${colors.light.sidebarAccentForeground};
+  --color-sidebar-border: ${colors.light.sidebarBorder};
+  --color-sidebar-ring: ${colors.light.sidebarRing};`
 
   const darkVars = `
   /* Dark mode colors */
-  --background: ${colors.dark.background};
-  --foreground: ${colors.dark.foreground};
-  --card: ${colors.dark.card};
-  --card-foreground: ${colors.dark.cardForeground};
-  --popover: ${colors.dark.popover};
-  --popover-foreground: ${colors.dark.popoverForeground};
-  --primary: ${colors.dark.primary};
-  --primary-foreground: ${colors.dark.primaryForeground};
-  --secondary: ${colors.dark.secondary};
-  --secondary-foreground: ${colors.dark.secondaryForeground};
-  --muted: ${colors.dark.muted};
-  --muted-foreground: ${colors.dark.mutedForeground};
-  --accent: ${colors.dark.accent};
-  --accent-foreground: ${colors.dark.accentForeground};
-  --destructive: ${colors.dark.destructive};
-  --destructive-foreground: ${colors.dark.destructiveForeground};
-  --border: ${colors.dark.border};
-  --input: ${colors.dark.input};
-  --ring: ${colors.dark.ring};
+  --color-background: ${colors.dark.background};
+  --color-foreground: ${colors.dark.foreground};
+  --color-card: ${colors.dark.card};
+  --color-card-foreground: ${colors.dark.cardForeground};
+  --color-popover: ${colors.dark.popover};
+  --color-popover-foreground: ${colors.dark.popoverForeground};
+  --color-primary: ${colors.dark.primary};
+  --color-primary-foreground: ${colors.dark.primaryForeground};
+  --color-secondary: ${colors.dark.secondary};
+  --color-secondary-foreground: ${colors.dark.secondaryForeground};
+  --color-muted: ${colors.dark.muted};
+  --color-muted-foreground: ${colors.dark.mutedForeground};
+  --color-accent: ${colors.dark.accent};
+  --color-accent-foreground: ${colors.dark.accentForeground};
+  --color-destructive: ${colors.dark.destructive};
+  --color-destructive-foreground: ${colors.dark.destructiveForeground};
+  --color-border: ${colors.dark.border};
+  --color-input: ${colors.dark.input};
+  --color-ring: ${colors.dark.ring};
 
   /* Chart colors */
-  --chart-1: ${colors.dark.chart1};
-  --chart-2: ${colors.dark.chart2};
-  --chart-3: ${colors.dark.chart3};
-  --chart-4: ${colors.dark.chart4};
-  --chart-5: ${colors.dark.chart5};
+  --color-chart-1: ${colors.dark.chart1};
+  --color-chart-2: ${colors.dark.chart2};
+  --color-chart-3: ${colors.dark.chart3};
+  --color-chart-4: ${colors.dark.chart4};
+  --color-chart-5: ${colors.dark.chart5};
 
   /* Sidebar colors */
-  --sidebar: ${colors.dark.sidebar};
-  --sidebar-foreground: ${colors.dark.sidebarForeground};
-  --sidebar-primary: ${colors.dark.sidebarPrimary};
-  --sidebar-primary-foreground: ${colors.dark.sidebarPrimaryForeground};
-  --sidebar-accent: ${colors.dark.sidebarAccent};
-  --sidebar-accent-foreground: ${colors.dark.sidebarAccentForeground};
-  --sidebar-border: ${colors.dark.sidebarBorder};
-  --sidebar-ring: ${colors.dark.sidebarRing};`
+  --color-sidebar: ${colors.dark.sidebar};
+  --color-sidebar-foreground: ${colors.dark.sidebarForeground};
+  --color-sidebar-primary: ${colors.dark.sidebarPrimary};
+  --color-sidebar-primary-foreground: ${colors.dark.sidebarPrimaryForeground};
+  --color-sidebar-accent: ${colors.dark.sidebarAccent};
+  --color-sidebar-accent-foreground: ${colors.dark.sidebarAccentForeground};
+  --color-sidebar-border: ${colors.dark.sidebarBorder};
+  --color-sidebar-ring: ${colors.dark.sidebarRing};`
 
   const sharedVars = `
   /* Shared variables */
@@ -232,43 +234,43 @@ export function generateCSSVariables(config: DesignSystemConfigInput): string {
   return `@import "tailwindcss";
 
 @theme {
-  /* Color variables - Light mode defaults */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  /* Theme configuration for Tailwind CSS v4 */
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-destructive: var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+  --color-border: var(--color-border);
+  --color-input: var(--color-input);
+  --color-ring: var(--color-ring);
 
   /* Chart colors */
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  --color-chart-1: var(--color-chart-1);
+  --color-chart-2: var(--color-chart-2);
+  --color-chart-3: var(--color-chart-3);
+  --color-chart-4: var(--color-chart-4);
+  --color-chart-5: var(--color-chart-5);
 
   /* Sidebar colors */
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
+  --color-sidebar-primary: var(--color-sidebar-primary);
+  --color-sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+  --color-sidebar-accent: var(--color-sidebar-accent);
+  --color-sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+  --color-sidebar-border: var(--color-sidebar-border);
+  --color-sidebar-ring: var(--color-sidebar-ring);
 
   /* Radius */
   --radius-sm: var(--radius-sm);
@@ -292,12 +294,12 @@ ${darkVars}
 
 /* Base styles */
 * {
-  border-color: var(--border);
+  border-color: var(--color-border);
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
 }
 `
