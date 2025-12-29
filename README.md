@@ -106,18 +106,47 @@ bun run preview
 
 ## Preset Themes
 
-Quick-start with curated preset themes:
+Quick-start with 10 curated preset themes:
 
-- **Default** - Clean neutral theme
-- **Ocean** - Cool blue tones
-- **Forest** - Natural green palette
-- **Sunset** - Warm orange hues
-- **Midnight** - Dark purple accent
-- **Rose** - Soft pink theme
-- **Lavender** - Light purple tones
-- **Ember** - Bold red accent
-- **Mint** - Fresh teal colors
-- **Slate** - Professional gray theme
+### Default
+Clean neutral theme with balanced styling.
+![Default Theme](/public/screenshots/default.png)
+
+### New York
+Modern and elegant monochrome style.
+![New York Theme](/public/screenshots/new-york.png)
+
+### Miami
+Vibrant and colorful with warm tones.
+![Miami Theme](/public/screenshots/miami.png)
+
+### Midnight
+Dark purple accent for night-time coding.
+![Midnight Theme](/public/screenshots/midnight.png)
+
+### Forest
+Natural green palette inspired by nature.
+![Forest Theme](/public/screenshots/forest.png)
+
+### Sunset
+Warm orange hues for a cozy feel.
+![Sunset Theme](/public/screenshots/sunset.png)
+
+### Lavender
+Soft purple tones for a calm aesthetic.
+![Lavender Theme](/public/screenshots/lavender.png)
+
+### Brutalist
+Bold, high-contrast design with strong lines.
+![Brutalist Theme](/public/screenshots/brutalist.png)
+
+### Ocean
+Cool blue tones inspired by the sea.
+![Ocean Theme](/public/screenshots/ocean.png)
+
+### Rose Gold
+Elegant pink metallic theme.
+![Rose Gold Theme](/public/screenshots/rose-gold.png)
 
 ## Preview Templates
 
@@ -139,9 +168,6 @@ Export `components.json` for shadcn-vue CLI configuration.
 - **Init Command**: `npx shadcn-vue@latest init` with your settings
 - **Add Command**: Component installation command
 - **Setup Script**: Full bash script to create a new project
-
-### README Tab
-Auto-generated README with your configuration details.
 
 ## Import/Export
 
