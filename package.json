@@ -2,6 +2,7 @@
   "name": "vuecraft",
   "version": "0.1.0",
   "description": "A universal Vue/Nuxt theme builder - create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
