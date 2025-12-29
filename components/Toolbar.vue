@@ -41,8 +41,8 @@ function startTour() {
           </svg>
         </div>
         <div>
-          <h1 class="text-lg font-bold leading-none">shadcn-vue</h1>
-          <p class="text-xs text-muted-foreground">Create</p>
+          <h1 class="text-lg font-bold leading-none">Vuecraft</h1>
+          <p class="text-xs text-muted-foreground">Theme Builder</p>
         </div>
       </div>
     </div>
@@ -139,7 +139,7 @@ function startTour() {
       </Button>
 
       <a
-        href="https://github.com/shadcn-vue/create"
+        href="https://github.com/AnoRebel/vuecraft"
         target="_blank"
         rel="noopener noreferrer"
         class="ml-2"
