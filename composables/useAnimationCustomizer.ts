@@ -3,7 +3,7 @@
  * Customize transition timing, easing, and animation effects
  */
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 export interface EasingPreset {
   name: string

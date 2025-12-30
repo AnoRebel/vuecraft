@@ -414,6 +414,7 @@ export function useDesignSystem() {
     // Serialization
     encodeConfig,
     decodeConfig,
+    serializeConfig,
   }
 }
 

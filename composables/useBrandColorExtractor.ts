@@ -9,8 +9,6 @@ import {
   rgbToOklch,
   rgbToHex,
   formatOklch,
-  getContrastRatio,
-  isLightColor,
   type RgbColor,
   type OklchColor,
 } from '~/utils/colorUtils'
@@ -117,7 +115,7 @@ export function useBrandColorExtractor() {
       }
     }
     if (!accent && bySaturation.length > 1) {
-      accent = bySaturation[1]
+      accent = bySaturation[1] ?? null
     }
 
     // Background: Lightest color if it's actually light, or darkest if dark theme

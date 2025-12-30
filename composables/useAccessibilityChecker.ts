@@ -7,13 +7,10 @@ import { computed } from 'vue'
 import { useDesignSystem } from './useDesignSystem'
 import {
   parseColor,
-  getContrastRatio,
   checkContrast,
   suggestAccessibleColor,
-  rgbToHex,
   formatOklch,
   rgbToOklch,
-  type RgbColor,
   type ContrastResult,
 } from '~/utils/colorUtils'
 
@@ -41,7 +38,7 @@ export interface AccessibilityReport {
 }
 
 export function useAccessibilityChecker() {
-  const { config, getCurrentCSSVariables } = useDesignSystem()
+  const { config: _config } = useDesignSystem()
 
   /**
    * Get the color pairs to check from the current theme
@@ -108,7 +105,7 @@ export function useAccessibilityChecker() {
 
     // Extract variable name from var(--name)
     const match = variable.match(/var\((--[\w-]+)\)/)
-    if (!match) return variable // Already a color value
+    if (!match || !match[1]) return variable // Already a color value
 
     const varName = match[1]
     const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim()

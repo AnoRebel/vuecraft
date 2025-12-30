@@ -9,7 +9,6 @@ import {
   parseColor,
   rgbToHex,
   type ColorBlindnessType,
-  type RgbColor,
 } from '~/utils/colorUtils'
 
 export interface ColorBlindnessOption {

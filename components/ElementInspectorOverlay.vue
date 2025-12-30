@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useElementInspector } from '~/composables/useElementInspector'
 import { Button } from '~/components/ui/button'
 
@@ -11,17 +11,14 @@ const {
   isInspecting,
   isPinned,
   inspectedData,
-  styleProperties,
   highlightStyles,
   currentElement,
   startInspecting,
   stopInspecting,
-  toggleInspecting,
   handleElementHover,
   handleElementClick,
   unpinSelection,
   copyTailwindClasses,
-  generateCodeSnippet,
   setPreviewContainer,
 } = useElementInspector()
 
@@ -34,7 +31,7 @@ onMounted(() => {
   }
 })
 
-function handleMouseMove(event: MouseEvent) {
+function _handleMouseMove(event: MouseEvent) {
   if (!isInspecting.value || isPinned.value) return
   const target = event.target as HTMLElement
   if (target && props.container?.contains(target)) {
@@ -42,7 +39,7 @@ function handleMouseMove(event: MouseEvent) {
   }
 }
 
-function handleClick(event: MouseEvent) {
+function _handleClick(event: MouseEvent) {
   if (!isInspecting.value) return
   event.preventDefault()
   event.stopPropagation()

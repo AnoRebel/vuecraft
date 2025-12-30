@@ -72,8 +72,8 @@ export function useThemeComparison() {
       t: preset.config.theme as ThemeConfig,
       ty: preset.config.typography as TypographyConfig,
       c: preset.config.components as ComponentsConfig,
-      i: { library: 'lucide', strokeWidth: 1.5 },
-      l: { containerWidth: 'max-w-6xl', spacingScale: 'default' },
+      i: { library: 'lucide', defaultSize: 'md', strokeWidth: 'default' },
+      l: { containerWidth: 'xl', spacingScale: 'default', sidebarWidth: 'default', headerHeight: 'default' },
     }
 
     const theme: ComparisonTheme = {

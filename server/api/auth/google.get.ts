@@ -7,7 +7,7 @@ export default defineOAuthGoogleEventHandler({
   config: {
     scope: ['email', 'profile'],
   },
-  async onSuccess(event, { user, tokens }) {
+  async onSuccess(event, { user }) {
     // Set user session
     await setUserSession(event, {
       user: {

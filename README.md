@@ -3,7 +3,7 @@
 
   # Vuecraft
 
-  **A universal Vue/Nuxt theme builder**
+  **A universal Vue/Nuxt theme builder with professional-grade tools**
 
   [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
   [![Vue 3](https://img.shields.io/badge/Vue-3.5-42b883.svg)](https://vuejs.org/)
@@ -13,33 +13,79 @@
 
 ---
 
-A universal Vue/Nuxt theme builder and design system customizer. Create beautiful themes with real-time preview, then export for **shadcn-vue**, **Nuxt UI**, or **plain Tailwind CSS** projects.
+A universal Vue/Nuxt theme builder and design system customizer. Create beautiful themes with real-time preview, accessibility checking, and professional export options for **shadcn-vue**, **Nuxt UI**, or **plain Tailwind CSS** projects.
 
 Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for the Vue ecosystem.
 
-## Features
+## ✨ Features
 
+### Core Features
 - **Multi-Framework Export**: Export themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS
 - **Real-time Preview**: See changes instantly as you customize
-- **Preset Themes**: Quick-start with 10 curated preset themes (Default, Ocean, Forest, Sunset, etc.)
-- **Interactive Tour Guide**: Built-in guided tour to learn all features (click the ? icon)
-- **Component Selection**: Choose which components to include in your export
-- **Live CSS Editor**: Edit and preview CSS variables in real-time
-- **CLI Integration**: Generate framework-specific CLI commands and setup scripts
-- **PWA Support**: Install as a Progressive Web App for offline access
-- **Multiple Themes**: Choose from 20+ accent colors with OKLCH color format
-- **Component Styles**: Default, New York, Miami, Brutal, and Soft styles
-- **Font Selection**: Configure both primary and monospace fonts
-- **Import/Export**: Save configurations to localStorage, share via URL, or export as JSON
+- **10 Preset Themes**: Quick-start with curated themes (Default, Ocean, Forest, Sunset, etc.)
+- **Interactive Tour Guide**: Built-in guided tour to learn all features
 - **Dark Mode**: Full dark mode support with system preference detection
-- **Tailwind CSS v4**: Uses the latest config-less Tailwind CSS v4
+- **PWA Support**: Install as a Progressive Web App for offline access
 
-## Tech Stack
+### 🆕 Advanced Tools
+- **Accessibility Checker**: WCAG contrast ratio checking with AA/AAA compliance scores
+- **Color Palette Generator**: Generate harmonious palettes (complementary, analogous, triadic, etc.)
+- **Responsive Preview**: Preview themes at different device breakpoints (mobile, tablet, desktop)
+- **Theme History/Undo**: Full undo/redo support with 50-step history
+- **Brand Color Import**: Extract dominant colors from uploaded logos/images
+- **Color Blindness Simulation**: Preview for protanopia, deuteranopia, tritanopia, achromatopsia
+- **Element Inspector**: Inspect preview elements to see Tailwind classes and CSS variables
+- **Theme Comparison**: Side-by-side diff view to compare themes
+- **Animation Customizer**: Configure transition timing, easing curves, and animation effects
+- **Keyboard Shortcuts**: Power-user shortcuts (Ctrl+Z, Ctrl+E, Ctrl+D, etc.)
+- **Theme Gallery**: Browse and fork community themes
+
+### Export Options
+- **Design Token Export**: Export to Figma Tokens, Style Dictionary, CSS-in-JS, W3C Design Tokens
+- **CLI Integration**: Generate framework-specific CLI commands and setup scripts
+- **Component Selection**: Choose which components to include in your export
+
+### Authentication
+- **OAuth Support**: Sign in with Google or GitHub
+- **Email/Password**: Traditional email authentication
+- **Session Management**: Secure session handling with nuxt-auth-utils
+
+## 📸 Screenshots
+
+### Theme Builder Interface
+| Light Mode | Dark Mode |
+|------------|-----------|
+| ![Default Light](/public/screenshots/default-light.png) | ![Default Dark](/public/screenshots/default-dark.png) |
+
+### Advanced Features
+
+#### Accessibility Checker
+Check WCAG contrast ratios and get suggestions for accessible color combinations.
+
+![Accessibility Checker](/public/screenshots/feature-accessibility.png)
+
+#### Color Palette Generator
+Generate harmonious color palettes based on color theory.
+
+![Color Palette Generator](/public/screenshots/feature-palette.png)
+
+#### Theme Gallery
+Browse, fork, and share community themes.
+
+![Theme Gallery](/public/screenshots/feature-gallery.png)
+
+#### Responsive Preview
+Preview your theme at different device sizes.
+
+![Responsive Preview](/public/screenshots/feature-responsive.png)
+
+## 🛠 Tech Stack
 
 - **Framework**: [Nuxt 4.2](https://nuxt.com/) with Vue 3.5
 - **Styling**: [Tailwind CSS v4.1](https://tailwindcss.com/) (config-less)
 - **Components**: [Reka UI 2.7](https://reka-ui.com/) (Vue port of Radix UI)
-- **Tour Guide**: [v-tour-guide](https://www.npmjs.com/package/v-tour-guide) for interactive onboarding
+- **Authentication**: [nuxt-auth-utils](https://github.com/Atinux/nuxt-auth-utils)
+- **Tour Guide**: [v-tour-guide](https://www.npmjs.com/package/v-tour-guide)
 - **Icons**: [@nuxt/icon](https://nuxt.com/modules/icon)
 - **Fonts**: [@nuxt/fonts](https://nuxt.com/modules/fonts)
 - **State**: [VueUse 14](https://vueuse.org/) utilities
@@ -47,7 +93,7 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 - **PWA**: [@vite-pwa/nuxt](https://vite-pwa-org.netlify.app/frameworks/nuxt)
 - **Package Manager**: [Bun 1.3.5](https://bun.sh/)
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -69,6 +115,23 @@ bun dev
 
 The app will be available at `http://localhost:3000`.
 
+### Environment Variables (Optional)
+
+For authentication features, create a `.env` file:
+
+```env
+# Session (required for auth)
+NUXT_SESSION_PASSWORD=your-secret-password-at-least-32-chars
+
+# Google OAuth (optional)
+NUXT_OAUTH_GOOGLE_CLIENT_ID=your-google-client-id
+NUXT_OAUTH_GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# GitHub OAuth (optional)
+NUXT_OAUTH_GITHUB_CLIENT_ID=your-github-client-id
+NUXT_OAUTH_GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
 ### Build for Production
 
 ```bash
@@ -79,9 +142,22 @@ bun run build
 bun run preview
 ```
 
-## Export Options
+## ⌨️ Keyboard Shortcuts
 
-The app supports exporting to three different UI frameworks:
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Z` | Undo |
+| `Ctrl+Shift+Z` | Redo |
+| `Ctrl+S` | Save configuration |
+| `Ctrl+E` | Open export dialog |
+| `Ctrl+I` | Open import dialog |
+| `Ctrl+D` | Toggle dark mode |
+| `Ctrl+R` | Randomize theme |
+| `1-5` | Switch preview template |
+| `?` | Show keyboard shortcuts |
+| `Escape` | Close dialogs |
+
+## 📦 Export Options
 
 ### shadcn-vue
 Beautiful components built with Reka UI and Tailwind CSS.
@@ -105,48 +181,17 @@ Just CSS variables for your own custom components.
 **Exports:**
 - `main.css` - Minimal CSS variables for Tailwind CSS v4
 - Setup script for Vue or Nuxt projects
-- Framework installation instructions
 
-## Configuration Groups
+### Design Tokens
+Export your theme as design tokens for design tools:
 
-### Theme
-- Base color (Neutral, Stone, Zinc, Gray, Slate)
-- Accent theme (20+ colors including Red, Blue, Green, Purple, etc.)
-- Border radius
-- Shadow intensity
-- Menu accent and color options
+- **Figma Tokens** - Compatible with the Figma Tokens plugin
+- **Style Dictionary** - Amazon's design token format
+- **CSS-in-JS** - For styled-components, emotion, etc.
+- **W3C Design Tokens** - Community group standard format
+- **Tailwind Config** - Ready-to-use Tailwind configuration
 
-### Typography
-- Font family (Inter, Roboto, DM Sans, and more)
-- Monospace font family (JetBrains Mono, Fira Code, etc.)
-- Font scale (Compact, Default, Relaxed, Spacious)
-- Heading weight
-- Body line height
-
-### Components
-- Style (Default, New York, Miami, Brutal, Soft)
-- Border width
-- Animation speed
-- Focus ring configuration
-
-### Icons
-- Icon library (Lucide, Phosphor, Tabler, Heroicons, Radix)
-- Default size
-- Stroke width
-
-### Layout
-- Spacing scale
-- Container width
-- Sidebar width
-- Header height
-
-### Export
-- UI Library (shadcn-vue, Nuxt UI, Plain Tailwind)
-- Framework (Vue or Nuxt)
-- Component selection
-- TypeScript support
-
-## Preset Themes
+## 🎨 Preset Themes
 
 Quick-start with 10 curated preset themes, each with full light and dark mode support:
 
@@ -220,137 +265,112 @@ Elegant rose pink metallic theme.
 |-------|------|
 | ![Rose Gold Light](/public/screenshots/rose-gold-light.png) | ![Rose Gold Dark](/public/screenshots/rose-gold-dark.png) |
 
-## Preview Templates
+## ⚙️ Configuration Groups
 
-- **Dashboard**: Full dashboard layout with sidebar and charts
-- **Cards**: Card components showcase
-- **Forms**: Form inputs and validation
-- **Auth**: Login and signup forms
-- **Components**: Component gallery view
+### Theme
+- Base color (Neutral, Stone, Zinc, Gray, Slate)
+- Accent theme (20+ colors)
+- Border radius
+- Shadow intensity
 
-## Import/Export
+### Typography
+- Font family (Inter, Roboto, DM Sans, and more)
+- Monospace font (JetBrains Mono, Fira Code, etc.)
+- Font scale (Compact, Default, Relaxed, Spacious)
 
-### URL Sharing
-Click "Share" to copy a URL with your configuration encoded. Share this URL with others to load the same configuration.
+### Components
+- Style (Default, New York, Miami, Brutal, Soft)
+- Border width
+- Animation speed
+- Focus ring configuration
 
-### JSON Export
-Export your configuration as JSON for version control or backup.
+### Icons
+- Icon library (Lucide, Phosphor, Tabler, Heroicons, Radix)
+- Default size and stroke width
 
-### Save/Load
-Save multiple named configurations to localStorage for quick access.
+### Layout
+- Spacing scale
+- Container width
+- Sidebar and header dimensions
 
-## PWA Support
-
-This app can be installed as a Progressive Web App:
-
-1. Look for the install prompt at the bottom of the screen
-2. Click "Install" to add to your device
-3. Access offline with cached resources
-
-## Interactive Tour Guide
-
-New to this app? The built-in tour guide walks you through all features:
-
-1. Click the **?** (help) icon in the top toolbar
-2. Follow the 12-step guided tour covering:
-   - Preset themes and quick-start options
-   - Theme configuration (colors, radius, shadows)
-   - Typography settings (fonts, scales)
-   - Component styling options
-   - Live preview and templates
-   - Dark mode toggle
-   - Shuffle and reset controls
-   - Import, share, and export features
-
-The tour can be restarted anytime by clicking the help icon.
-
-## Scripts
-
-```bash
-# Development
-bun dev
-
-# Build
-bun run build
-
-# Preview production build
-bun run preview
-
-# Lint
-bun run lint
-
-# Lint and fix
-bun run lint:fix
-
-# Format with Prettier
-bun run format
-
-# Type check
-bun run typecheck
-```
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 vuecraft/
-├── assets/
-│   └── css/
-│       └── main.css          # Global styles with Tailwind
+├── assets/css/              # Global styles
 ├── components/
-│   ├── config/               # Configuration panel components
-│   │   ├── ColorPicker.vue
-│   │   ├── ComponentSelection.vue
-│   │   ├── ConfigPanel.vue
-│   │   ├── ConfigSection.vue
-│   │   ├── LiveCSSEditor.vue
-│   │   ├── OptionPicker.vue
-│   │   ├── PresetThemes.vue
-│   │   └── ...
-│   ├── preview/              # Preview template components
-│   │   ├── PreviewPanel.vue
-│   │   ├── PreviewDashboard.vue
-│   │   └── ...
-│   ├── ui/                   # Reusable UI components
-│   ├── ExportDialog.vue      # Export modal with framework tabs
-│   ├── Toolbar.vue           # Top toolbar with actions
-│   └── PWAInstallPrompt.vue  # PWA install UI
+│   ├── config/              # Configuration panel components
+│   ├── preview/             # Preview template components
+│   ├── ui/                  # Reusable UI components
+│   ├── AccessibilityPanel.vue
+│   ├── AuthDialog.vue
+│   ├── BrandColorImportDialog.vue
+│   ├── ColorBlindnessControls.vue
+│   ├── ColorPalettePanel.vue
+│   ├── ElementInspectorOverlay.vue
+│   ├── ExportDialog.vue
+│   ├── KeyboardShortcutsDialog.vue
+│   ├── ResponsivePreviewControls.vue
+│   ├── ThemeCompareDialog.vue
+│   ├── ThemeGalleryDialog.vue
+│   ├── Toolbar.vue
+│   └── UserMenu.vue
 ├── composables/
-│   ├── useDesignSystem.ts    # Design system state management
-│   ├── useAppTour.ts         # Interactive tour guide steps
-│   └── useColorMode.ts       # Dark/light mode management
+│   ├── useAccessibilityChecker.ts
+│   ├── useAnimationCustomizer.ts
+│   ├── useAuth.ts
+│   ├── useBrandColorExtractor.ts
+│   ├── useColorBlindnessSimulation.ts
+│   ├── useColorPaletteGenerator.ts
+│   ├── useDesignSystem.ts
+│   ├── useElementInspector.ts
+│   ├── useKeyboardShortcuts.ts
+│   ├── useResponsivePreview.ts
+│   ├── useThemeComparison.ts
+│   ├── useThemeGallery.ts
+│   └── useThemeHistory.ts
 ├── config/
-│   ├── defaults.ts           # Default values, presets, UI libraries
-│   └── themes.ts             # Theme color definitions (OKLCH)
-├── plugins/
-│   └── v-tour-guide.client.ts # Tour guide plugin
-├── lib/
-│   └── utils.ts              # Utility functions (cn, etc.)
-├── pages/
-│   └── index.vue             # Main page
-├── types/
-│   └── config.ts             # TypeScript type definitions
+│   ├── defaults.ts          # Default values and presets
+│   └── themes.ts            # Theme color definitions (OKLCH)
+├── server/
+│   └── api/auth/            # Authentication endpoints
 ├── utils/
-│   ├── cliGenerator.ts       # CLI command generation
-│   ├── cssGenerator.ts       # CSS variable generation
-│   ├── nuxtUIGenerator.ts    # Nuxt UI config generation
-│   └── tailwindGenerator.ts  # Plain Tailwind CSS generation
-├── app.vue                   # Root component
-└── nuxt.config.ts            # Nuxt configuration
+│   ├── cliGenerator.ts      # CLI command generation
+│   ├── colorUtils.ts        # Color manipulation utilities
+│   ├── cssGenerator.ts      # CSS variable generation
+│   ├── designTokenExporter.ts
+│   ├── nuxtUIGenerator.ts
+│   └── tailwindGenerator.ts
+├── pages/
+│   └── index.vue
+└── nuxt.config.ts
 ```
 
-## Contributing
+## 🧪 Scripts
+
+```bash
+bun dev          # Start development server
+bun run build    # Build for production
+bun run preview  # Preview production build
+bun run lint     # Run ESLint
+bun run lint:fix # Fix linting issues
+bun run format   # Format with Prettier
+bun run typecheck # TypeScript type checking
+```
+
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+## 📄 License
 
 MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - [shadcn/ui](https://ui.shadcn.com/) for the original inspiration
 - [shadcn-vue](https://www.shadcn-vue.com/) for the Vue port
 - [Nuxt UI](https://ui.nuxt.com/) for the Nuxt UI theming system
 - [Reka UI](https://reka-ui.com/) for the headless UI components
 - [v-tour-guide](https://www.npmjs.com/package/v-tour-guide) for the interactive tour system
-- [Vite PWA](https://vite-pwa-org.netlify.app/) for PWA support
+- [nuxt-auth-utils](https://github.com/Atinux/nuxt-auth-utils) for authentication

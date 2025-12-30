@@ -4,7 +4,7 @@ import { useBrandColorExtractor } from '~/composables/useBrandColorExtractor'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
 }>()
 
@@ -13,7 +13,7 @@ const emit = defineEmits<{
   (e: 'apply', colors: { primary: string; accent?: string }): void
 }>()
 
-const { extractFromFile, lastResult, isExtracting, error, generateThemeSuggestion, clear } =
+const { extractFromFile, lastResult, isExtracting, error, clear } =
   useBrandColorExtractor()
 
 const fileInput = ref<HTMLInputElement | null>(null)

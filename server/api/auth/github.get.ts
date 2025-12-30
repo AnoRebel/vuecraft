@@ -7,7 +7,7 @@ export default defineOAuthGitHubEventHandler({
   config: {
     scope: ['user:email'],
   },
-  async onSuccess(event, { user, tokens }) {
+  async onSuccess(event, { user }) {
     // Set user session
     await setUserSession(event, {
       user: {

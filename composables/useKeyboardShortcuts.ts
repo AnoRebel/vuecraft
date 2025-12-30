@@ -4,7 +4,7 @@
  */
 
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useMagicKeys, whenever } from '@vueuse/core'
+import { useMagicKeys } from '@vueuse/core'
 
 export interface Shortcut {
   key: string
@@ -89,7 +89,7 @@ export function useKeyboardShortcuts() {
         if (!acc[shortcut.category]) {
           acc[shortcut.category] = []
         }
-        acc[shortcut.category].push(shortcut)
+        acc[shortcut.category]!.push(shortcut)
         return acc
       },
       {} as Record<string, Shortcut[]>
@@ -149,7 +149,7 @@ export function setupDefaultShortcuts(options: {
   onRandomize?: () => void
   onPreviewTemplate?: (index: number) => void
 }) {
-  const { registerShortcut, keys, isInputFocused, openShortcutsDialog } = useKeyboardShortcuts()
+  const { registerShortcut, isInputFocused, openShortcutsDialog } = useKeyboardShortcuts()
 
   // Register all default shortcuts
   const defaultShortcuts: Shortcut[] = [

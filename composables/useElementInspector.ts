@@ -3,7 +3,7 @@
  * Inspect preview elements and view their styles/code
  */
 
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 
 export interface InspectedElement {
   tagName: string
@@ -244,7 +244,7 @@ export function useElementInspector() {
   function generateCodeSnippet(): string {
     if (!inspectedData.value) return ''
 
-    const { tagName, tailwindClasses, id, outerHTML } = inspectedData.value
+    const { tagName, tailwindClasses, id } = inspectedData.value
 
     // Generate a simplified code example
     const classStr = tailwindClasses.length > 0 ? ` class="${tailwindClasses.join(' ')}"` : ''

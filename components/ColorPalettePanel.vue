@@ -14,7 +14,7 @@ const {
   randomize,
 } = useColorPaletteGenerator()
 
-const { config } = useDesignSystem()
+const { config: _config } = useDesignSystem()
 
 // Initialize with current primary color
 const primaryHue = ref(270)

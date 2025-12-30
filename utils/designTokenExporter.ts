@@ -64,7 +64,7 @@ export function generateFigmaTokens(config: DesignSystemConfig): string {
   for (const [key, value] of Object.entries(vars)) {
     if (key.startsWith('--') && !key.includes('radius')) {
       const name = key.replace('--', '').replace(/-/g, '.')
-      tokens.colors[name] = {
+      tokens.colors![name] = {
         value: convertToHex(value),
         type: 'color',
       }
@@ -83,10 +83,8 @@ export function generateFigmaTokens(config: DesignSystemConfig): string {
 
   // Typography
   tokens.typography = {
-    fontFamily: {
-      sans: { value: config.typography.fontFamily, type: 'fontFamilies' },
-      mono: { value: config.typography.monoFontFamily, type: 'fontFamilies' },
-    },
+    'fontFamily.sans': { value: config.typography.fontFamily, type: 'fontFamilies' },
+    'fontFamily.mono': { value: config.typography.monoFontFamily, type: 'fontFamilies' },
   }
 
   return JSON.stringify(tokens, null, 2)
@@ -244,7 +242,7 @@ export function generateTailwindConfig(config: DesignSystemConfig): string {
   const vars = getThemeVariables(config)
 
   const colors: Record<string, string> = {}
-  for (const [key, value] of Object.entries(vars)) {
+  for (const key of Object.keys(vars)) {
     if (key.startsWith('--') && !key.includes('radius')) {
       const name = key.replace('--', '')
       colors[name] = `var(${key})`

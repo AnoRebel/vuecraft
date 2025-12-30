@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useThemeComparison } from '~/composables/useThemeComparison'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
 }>()
 
@@ -29,7 +29,7 @@ const {
 const { serializeConfig } = useDesignSystem()
 
 const leftSource = ref<'current' | 'preset'>('current')
-const rightSource = ref<'preset'>('preset')
+const _rightSource = ref<'preset'>('preset')
 const leftPreset = ref('default')
 const rightPreset = ref('new-york')
 
