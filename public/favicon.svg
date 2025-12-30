@@ -1,4 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <rect x="3" y="3" width="18" height="18" rx="2" fill="#18181b"/>
-  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" stroke="#fafafa" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <!-- Favicon: Compact Vuecraft gem logo -->
+
+  <!-- Background -->
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#18181b"/>
+
+  <!-- Main V shape - left facet -->
+  <path d="M14 18 L32 50 L32 36 L22 18 Z" fill="#41B883"/>
+
+  <!-- Main V shape - right facet -->
+  <path d="M50 18 L32 50 L32 36 L42 18 Z" fill="#34495E"/>
+
+  <!-- Inner highlight - left -->
+  <path d="M22 18 L32 36 L28 18 Z" fill="#3EAF7C"/>
+
+  <!-- Inner highlight - right -->
+  <path d="M42 18 L32 36 L36 18 Z" fill="#2C3E50"/>
+
+  <!-- Top sparkle -->
+  <path d="M32 10 L33.5 13 L37 14.5 L33.5 16 L32 19 L30.5 16 L27 14.5 L30.5 13 Z" fill="#41B883"/>
 </svg>
