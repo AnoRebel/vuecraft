@@ -26,18 +26,19 @@ function startTour() {
     <!-- Left side - Logo & Title -->
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-2" data-tour-guide="app-logo">
-        <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+        <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-slate-700 flex items-center justify-center shadow-sm">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
+            viewBox="0 0 64 64"
             fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="h-4 w-4 text-primary-foreground"
+            class="h-5 w-5"
           >
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            <!-- Gem V logo -->
+            <path d="M12 16 L32 52 L32 36 L20 16 Z" fill="white" opacity="0.95"/>
+            <path d="M52 16 L32 52 L32 36 L44 16 Z" fill="white" opacity="0.7"/>
+            <path d="M20 16 L32 36 L28 16 Z" fill="white" opacity="0.5"/>
+            <path d="M44 16 L32 36 L36 16 Z" fill="white" opacity="0.3"/>
+            <path d="M32 8 L34 12 L38 14 L34 16 L32 20 L30 16 L26 14 L30 12 Z" fill="white"/>
           </svg>
         </div>
         <div>

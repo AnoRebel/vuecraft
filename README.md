@@ -1,4 +1,17 @@
-# Vuecraft
+<div align="center">
+  <img src="/public/logo-animated.svg" alt="Vuecraft Logo" width="120" height="120" />
+
+  # Vuecraft
+
+  **A universal Vue/Nuxt theme builder**
+
+  [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+  [![Vue 3](https://img.shields.io/badge/Vue-3.5-42b883.svg)](https://vuejs.org/)
+  [![Nuxt](https://img.shields.io/badge/Nuxt-4.2-00dc82.svg)](https://nuxt.com/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8.svg)](https://tailwindcss.com/)
+</div>
+
+---
 
 A universal Vue/Nuxt theme builder and design system customizer. Create beautiful themes with real-time preview, then export for **shadcn-vue**, **Nuxt UI**, or **plain Tailwind CSS** projects.
 
