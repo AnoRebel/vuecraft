@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
 import { ScrollArea } from '~/components/ui/scroll-area'
@@ -10,8 +11,14 @@ import IconsConfig from './IconsConfig.vue'
 import LayoutConfig from './LayoutConfig.vue'
 import ComponentSelection from './ComponentSelection.vue'
 import ExportConfig from './ExportConfig.vue'
+import AccessibilityPanel from '~/components/AccessibilityPanel.vue'
+import ColorPalettePanel from '~/components/ColorPalettePanel.vue'
+import ThemeGalleryDialog from '~/components/ThemeGalleryDialog.vue'
 
 const { resetAll, randomize } = useDesignSystem()
+
+// Feature dialogs
+const showGallery = ref(false)
 </script>
 
 <template>
@@ -65,13 +72,41 @@ const { resetAll, randomize } = useDesignSystem()
       <div class="py-2">
         <PresetThemes />
         <ThemeConfig />
+
+        <!-- Quick Actions -->
+        <div class="mb-4 mt-2">
+          <Button variant="outline" size="sm" class="w-full" @click="showGallery = true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <circle cx="9" cy="9" r="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
+            Browse Theme Gallery
+          </Button>
+        </div>
+
         <TypographyConfig />
         <ComponentsConfig />
         <IconsConfig />
         <LayoutConfig />
         <ComponentSelection />
         <ExportConfig />
+
+        <!-- Accessibility Panel -->
+        <div class="mt-4 border-t pt-4">
+          <h3 class="text-sm font-semibold mb-3">Accessibility Check</h3>
+          <AccessibilityPanel />
+        </div>
+
+        <!-- Color Palette Generator -->
+        <div class="mt-4 border-t pt-4">
+          <h3 class="text-sm font-semibold mb-3">Color Palette Generator</h3>
+          <ColorPalettePanel />
+        </div>
       </div>
     </ScrollArea>
+
+    <!-- Theme Gallery Dialog -->
+    <ThemeGalleryDialog v-model:open="showGallery" @apply="showGallery = false" />
   </div>
 </template>

@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { useColorMode } from '~/composables/useColorMode'
+import { useResponsivePreview } from '~/composables/useResponsivePreview'
 import { generateCSSVariables } from '~/utils/cssGenerator'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Button } from '~/components/ui/button'
@@ -10,8 +11,10 @@ import PreviewCards from './PreviewCards.vue'
 import PreviewForms from './PreviewForms.vue'
 import PreviewAuth from './PreviewAuth.vue'
 import PreviewComponents from './PreviewComponents.vue'
+import ResponsivePreviewControls from '~/components/ResponsivePreviewControls.vue'
 
 const { config } = useDesignSystem()
+const { currentDimensions, zoom, activePreset } = useResponsivePreview()
 const { toggleColorMode, isDark } = useColorMode()
 
 const activeTemplate = ref('dashboard')
@@ -68,6 +71,9 @@ onMounted(() => {
         </TabsList>
       </Tabs>
       <div class="flex items-center gap-2 ml-4">
+        <!-- Responsive Preview Controls -->
+        <ResponsivePreviewControls />
+        <div class="w-px h-6 bg-border mx-1" />
         <Button variant="ghost" size="icon" data-tour-guide="dark-mode-toggle" @click="toggleColorMode">
           <svg
             v-if="isDark"

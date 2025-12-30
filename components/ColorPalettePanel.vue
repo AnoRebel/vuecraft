@@ -40,6 +40,11 @@ function handleRandomize() {
   generate()
 }
 
+function selectHarmony(value: string) {
+  selectedHarmony.value = value as typeof selectedHarmony.value
+  generate()
+}
+
 // Initialize
 setBaseColor({ l: 0.5, c: 0.15, h: 270 })
 generate()
@@ -134,10 +139,7 @@ watch(
           :variant="selectedHarmony === harmony.value ? 'default' : 'outline'"
           size="sm"
           class="text-xs justify-start"
-          @click="
-            selectedHarmony = harmony.value
-            generate()
-          "
+          @click="selectHarmony(harmony.value)"
         >
           {{ harmony.label }}
         </Button>
