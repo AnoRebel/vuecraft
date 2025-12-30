@@ -1,0 +1,32 @@
+services:
+  vuecraft:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vuecraft
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3000
+      # Session password for auth (use a secure password in production)
+      - NUXT_SESSION_PASSWORD=${NUXT_SESSION_PASSWORD:-your-secure-session-password-at-least-32-chars}
+      # OAuth credentials (optional)
+      - NUXT_OAUTH_GITHUB_CLIENT_ID=${NUXT_OAUTH_GITHUB_CLIENT_ID:-}
+      - NUXT_OAUTH_GITHUB_CLIENT_SECRET=${NUXT_OAUTH_GITHUB_CLIENT_SECRET:-}
+      - NUXT_OAUTH_GOOGLE_CLIENT_ID=${NUXT_OAUTH_GOOGLE_CLIENT_ID:-}
+      - NUXT_OAUTH_GOOGLE_CLIENT_SECRET=${NUXT_OAUTH_GOOGLE_CLIENT_SECRET:-}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - vuecraft-network
+
+networks:
+  vuecraft-network:
+    driver: bridge
