@@ -13,7 +13,6 @@ const {
   toggleRotation,
   zoomIn,
   zoomOut,
-  reset,
 } = useResponsivePreview()
 
 const emit = defineEmits<{

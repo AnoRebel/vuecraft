@@ -3,7 +3,7 @@
  * Tracks configuration changes and allows reverting to previous states
  */
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import type { SerializedConfig } from '~/types/config'
 
 export interface HistoryEntry {
@@ -94,7 +94,8 @@ export function useThemeHistory() {
     if (!canUndo.value) return null
 
     currentIndex.value--
-    return structuredClone(history.value[currentIndex.value].config)
+    const entry = history.value[currentIndex.value]
+    return entry ? structuredClone(entry.config) : null
   }
 
   /**
@@ -105,7 +106,8 @@ export function useThemeHistory() {
     if (!canRedo.value) return null
 
     currentIndex.value++
-    return structuredClone(history.value[currentIndex.value].config)
+    const entry = history.value[currentIndex.value]
+    return entry ? structuredClone(entry.config) : null
   }
 
   /**
@@ -115,14 +117,15 @@ export function useThemeHistory() {
     if (index < 0 || index >= history.value.length) return null
 
     currentIndex.value = index
-    return structuredClone(history.value[index].config)
+    const entry = history.value[index]
+    return entry ? structuredClone(entry.config) : null
   }
 
   /**
    * Get the full history list
    */
   function getHistory(): HistoryEntry[] {
-    return history.value.map((entry, index) => ({
+    return history.value.map((entry) => ({
       ...entry,
       config: structuredClone(entry.config),
     }))

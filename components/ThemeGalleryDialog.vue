@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+// ref not needed - ref is unused
 import { useThemeGallery } from '~/composables/useThemeGallery'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
 }>()
 

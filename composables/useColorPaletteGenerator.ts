@@ -3,7 +3,7 @@
  * Generates harmonious color palettes based on color theory
  */
 
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import {
   parseOklch,
   formatOklch,

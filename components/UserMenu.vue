@@ -4,7 +4,7 @@ import { useAuth } from '~/composables/useAuth'
 import { Button } from '~/components/ui/button'
 import AuthDialog from './AuthDialog.vue'
 
-const { user, isLoggedIn, logout, getUserInitials, isLoading } = useAuth()
+const { user, isLoggedIn, logout, getUserInitials } = useAuth()
 
 const authDialogOpen = ref(false)
 const menuOpen = ref(false)

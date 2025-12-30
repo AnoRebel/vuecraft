@@ -51,11 +51,11 @@ export function parseOklch(color: string): OklchColor | null {
   const match = color.match(/oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+%?))?\s*\)/i)
   if (!match) return null
 
-  let l = parseFloat(match[1])
-  if (match[1].includes('%')) l /= 100
+  let l = parseFloat(match[1]!)
+  if (match[1]!.includes('%')) l /= 100
 
-  const c = parseFloat(match[2])
-  const h = parseFloat(match[3])
+  const c = parseFloat(match[2]!)
+  const h = parseFloat(match[3]!)
 
   return { l, c, h }
 }
@@ -162,9 +162,9 @@ export function hexToRgb(hex: string): RgbColor | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   if (!result) return null
   return {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16),
+    r: parseInt(result[1]!, 16),
+    g: parseInt(result[2]!, 16),
+    b: parseInt(result[3]!, 16),
   }
 }
 
@@ -262,9 +262,9 @@ export function parseColor(color: string): RgbColor | null {
   const rgbMatch = color.match(/rgb\(\s*(\d+)\s*,?\s*(\d+)\s*,?\s*(\d+)\s*\)/i)
   if (rgbMatch) {
     return {
-      r: parseInt(rgbMatch[1]),
-      g: parseInt(rgbMatch[2]),
-      b: parseInt(rgbMatch[3]),
+      r: parseInt(rgbMatch[1]!),
+      g: parseInt(rgbMatch[2]!),
+      b: parseInt(rgbMatch[3]!),
     }
   }
 
@@ -480,10 +480,13 @@ export function simulateColorBlindness(rgb: RgbColor, type: ColorBlindnessType):
   const g = rgb.g / 255
   const b = rgb.b / 255
 
+  const m0 = matrix[0]!
+  const m1 = matrix[1]!
+  const m2 = matrix[2]!
   return {
-    r: Math.round(Math.min(255, Math.max(0, (matrix[0][0] * r + matrix[0][1] * g + matrix[0][2] * b) * 255))),
-    g: Math.round(Math.min(255, Math.max(0, (matrix[1][0] * r + matrix[1][1] * g + matrix[1][2] * b) * 255))),
-    b: Math.round(Math.min(255, Math.max(0, (matrix[2][0] * r + matrix[2][1] * g + matrix[2][2] * b) * 255))),
+    r: Math.round(Math.min(255, Math.max(0, (m0[0]! * r + m0[1]! * g + m0[2]! * b) * 255))),
+    g: Math.round(Math.min(255, Math.max(0, (m1[0]! * r + m1[1]! * g + m1[2]! * b) * 255))),
+    b: Math.round(Math.min(255, Math.max(0, (m2[0]! * r + m2[1]! * g + m2[2]! * b) * 255))),
   }
 }
 
@@ -539,11 +542,11 @@ export async function extractColorsFromImage(file: File, colorCount: number = 5)
       const colors: RgbColor[] = []
       for (let i = 0; i < pixels.length; i += 4) {
         // Skip transparent pixels
-        if (pixels[i + 3] < 128) continue
+        if ((pixels[i + 3] ?? 0) < 128) continue
         colors.push({
-          r: pixels[i],
-          g: pixels[i + 1],
-          b: pixels[i + 2],
+          r: pixels[i] ?? 0,
+          g: pixels[i + 1] ?? 0,
+          b: pixels[i + 2] ?? 0,
         })
       }
 
@@ -568,8 +571,11 @@ function kMeansClustering(colors: RgbColor[], k: number, iterations: number = 10
   let centroids: RgbColor[] = []
   const step = Math.floor(colors.length / k)
   for (let i = 0; i < k; i++) {
-    centroids.push({ ...colors[i * step] })
+    const idx = i * step
+    const color = colors[idx]
+    if (color) centroids.push({ ...color })
   }
+  if (centroids.length === 0) return []
 
   for (let iter = 0; iter < iterations; iter++) {
     // Assign colors to nearest centroid
@@ -580,14 +586,16 @@ function kMeansClustering(colors: RgbColor[], k: number, iterations: number = 10
       let closest = 0
 
       for (let i = 0; i < centroids.length; i++) {
-        const dist = colorDistance(color, centroids[i])
+        const centroid = centroids[i]
+        if (!centroid) continue
+        const dist = colorDistance(color, centroid)
         if (dist < minDist) {
           minDist = dist
           closest = i
         }
       }
 
-      clusters[closest].push(color)
+      clusters[closest]?.push(color)
     }
 
     // Update centroids

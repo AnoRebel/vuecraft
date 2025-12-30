@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useKeyboardShortcuts } from '~/composables/useKeyboardShortcuts'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
 }>()
 
@@ -11,7 +11,7 @@ const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
 }>()
 
-const { formatKey, getShortcutsByCategory } = useKeyboardShortcuts()
+const { formatKey } = useKeyboardShortcuts()
 
 const isMac = computed(() => {
   if (typeof navigator === 'undefined') return false
