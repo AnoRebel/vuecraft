@@ -13,51 +13,67 @@ async function takeFeatureScreenshots() {
   // Wait for the app to fully load
   await page.waitForTimeout(3000)
 
-  // Screenshot 1: Accessibility Panel
+  // Screenshot 1: Accessibility Panel - scroll and clip to just that section
   console.log('Capturing Accessibility Panel...')
   try {
-    // Scroll down to find the Accessibility Check section
-    await page.evaluate(() => {
-      const scrollArea = document.querySelector('.flex-1.overflow-auto')
-      if (scrollArea) {
-        scrollArea.scrollTo({ top: 2000, behavior: 'instant' })
-      }
-    })
+    // Scroll to the Accessibility Check section in the config panel
+    const accessibilityHeading = page.locator('h3:has-text("Accessibility Check")').first()
+    await accessibilityHeading.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
 
-    // Look for the Accessibility Check heading
-    const accessibilitySection = page.locator('text=Accessibility Check').first()
-    if (await accessibilitySection.isVisible()) {
-      await accessibilitySection.scrollIntoViewIfNeeded()
-      await page.waitForTimeout(500)
-    }
+    // Find the parent container of the accessibility panel
+    const accessibilitySection = page.locator('.space-y-4:has(h3:has-text("Accessibility Check"))').first()
 
-    await page.screenshot({
+    // Take a screenshot of just this element
+    await accessibilitySection.screenshot({
       path: 'public/screenshots/feature-accessibility.png',
-      fullPage: false,
     })
     console.log('  ✓ Saved feature-accessibility.png')
   } catch (error) {
     console.log(`  ✗ Failed to capture Accessibility Panel: ${error}`)
+    // Fallback: take a clipped screenshot
+    try {
+      await page.screenshot({
+        path: 'public/screenshots/feature-accessibility.png',
+        clip: { x: 0, y: 400, width: 320, height: 400 },
+      })
+      console.log('  ✓ Saved feature-accessibility.png (fallback)')
+    } catch (e) {
+      console.log(`  ✗ Fallback also failed: ${e}`)
+    }
   }
 
-  // Screenshot 2: Color Palette Generator
+  // Screenshot 2: Color Palette Generator - scroll and clip to just that section
   console.log('Capturing Color Palette Generator...')
   try {
-    // Scroll to Color Palette Generator section
-    const paletteSection = page.locator('text=Color Palette Generator').first()
-    if (await paletteSection.isVisible()) {
-      await paletteSection.scrollIntoViewIfNeeded()
-      await page.waitForTimeout(500)
-    }
+    // Scroll to the Color Palette Generator section
+    const paletteHeading = page.locator('h3:has-text("Color Palette Generator")').first()
+    await paletteHeading.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(500)
 
-    await page.screenshot({
+    // Find the parent container of the color palette panel
+    const paletteSection = page.locator('.space-y-4:has(h3:has-text("Color Palette Generator"))').first()
+
+    // Take a screenshot of just this element
+    await paletteSection.screenshot({
       path: 'public/screenshots/feature-palette.png',
-      fullPage: false,
     })
     console.log('  ✓ Saved feature-palette.png')
   } catch (error) {
     console.log(`  ✗ Failed to capture Color Palette Generator: ${error}`)
+    // Fallback: scroll down and take clipped screenshot
+    try {
+      const scrollArea = page.locator('.flex-1.overflow-auto').first()
+      await scrollArea.evaluate((el) => el.scrollTo({ top: 9999, behavior: 'instant' }))
+      await page.waitForTimeout(500)
+      await page.screenshot({
+        path: 'public/screenshots/feature-palette.png',
+        clip: { x: 0, y: 300, width: 320, height: 500 },
+      })
+      console.log('  ✓ Saved feature-palette.png (fallback)')
+    } catch (e) {
+      console.log(`  ✗ Fallback also failed: ${e}`)
+    }
   }
 
   // Screenshot 3: Theme Gallery Dialog
@@ -67,14 +83,14 @@ async function takeFeatureScreenshots() {
     await page.goto('http://localhost:3000', { waitUntil: 'networkidle' })
     await page.waitForTimeout(2000)
 
-    // Look for the Browse Theme Gallery button
+    // Look for the Browse Theme Gallery button and click it
     const galleryButton = page.locator('button:has-text("Browse Theme Gallery")').first()
-
     await galleryButton.scrollIntoViewIfNeeded({ timeout: 5000 })
     await page.waitForTimeout(300)
     await galleryButton.click({ timeout: 5000 })
     await page.waitForTimeout(1000)
 
+    // Take full page screenshot showing the dialog
     await page.screenshot({
       path: 'public/screenshots/feature-gallery.png',
       fullPage: false,
@@ -88,14 +104,31 @@ async function takeFeatureScreenshots() {
     console.log(`  ✗ Failed to capture Theme Gallery: ${error}`)
   }
 
-  // Screenshot 4: Responsive Preview Controls
+  // Screenshot 4: Responsive Preview Controls - focus on the preview header
   console.log('Capturing Responsive Preview...')
   try {
-    // The responsive controls should be in the preview panel header
-    // Just take a screenshot showing the controls
+    // Navigate to fresh page
+    await page.goto('http://localhost:3000', { waitUntil: 'networkidle' })
+    await page.waitForTimeout(2000)
+
+    // Click on tablet preset to show the responsive preview in action
+    const tabletButton = page.locator('button:has(svg[class*="lucide:tablet"])').first()
+    if (await tabletButton.isVisible()) {
+      await tabletButton.click()
+      await page.waitForTimeout(500)
+    } else {
+      // Try clicking the second device button (tablet is usually second)
+      const deviceButtons = page.locator('.flex.rounded-md.border.divide-x button')
+      if (await deviceButtons.count() >= 2) {
+        await deviceButtons.nth(1).click()
+        await page.waitForTimeout(500)
+      }
+    }
+
+    // Take a screenshot focused on the preview panel area (right side of the screen)
     await page.screenshot({
       path: 'public/screenshots/feature-responsive.png',
-      fullPage: false,
+      clip: { x: 320, y: 0, width: 1080, height: 700 },
     })
     console.log('  ✓ Saved feature-responsive.png')
   } catch (error) {

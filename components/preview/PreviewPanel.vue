@@ -2,7 +2,6 @@
 import { ref, computed, watch } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { useColorMode } from '~/composables/useColorMode'
-import { useResponsivePreview } from '~/composables/useResponsivePreview'
 import { generateCSSVariables } from '~/utils/cssGenerator'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Button } from '~/components/ui/button'
@@ -14,7 +13,6 @@ import PreviewComponents from './PreviewComponents.vue'
 import ResponsivePreviewControls from '~/components/ResponsivePreviewControls.vue'
 
 const { config } = useDesignSystem()
-const { currentDimensions, zoom, activePreset } = useResponsivePreview()
 const { toggleColorMode, isDark } = useColorMode()
 
 const activeTemplate = ref('dashboard')

@@ -119,6 +119,9 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Vuecraft - Universal Vue/Nuxt Theme Builder',
+      htmlAttrs: {
+        lang: 'en',
+      },
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -127,8 +130,33 @@ export default defineNuxtConfig({
           content:
             'Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Export to Vue or Nuxt projects.',
         },
+        // Open Graph
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'Vuecraft' },
+        { property: 'og:title', content: 'Vuecraft - Universal Vue/Nuxt Theme Builder' },
+        {
+          property: 'og:description',
+          content:
+            'Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Export to Vue or Nuxt projects.',
+        },
+        { property: 'og:url', content: 'https://vuecraft.anorebel.net' },
+        { property: 'og:image', content: 'https://vuecraft.anorebel.net/screenshots/hero.png' },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        // Twitter Card
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: 'Vuecraft - Universal Vue/Nuxt Theme Builder' },
+        {
+          name: 'twitter:description',
+          content:
+            'Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Export to Vue or Nuxt projects.',
+        },
+        { name: 'twitter:image', content: 'https://vuecraft.anorebel.net/screenshots/hero.png' },
       ],
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'canonical', href: 'https://vuecraft.anorebel.net' },
+      ],
     },
   },
 
