@@ -58,9 +58,14 @@ onMounted(() => {
 <template>
   <div class="flex h-full flex-col" data-tour-guide="preview-panel">
     <!-- Preview Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-2 sm:px-4 py-2 sm:py-3 gap-2 sm:gap-0">
+    <div
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-2 sm:px-4 py-2 sm:py-3 gap-2 sm:gap-0"
+    >
       <Tabs v-model="activeTemplate" class="w-full sm:w-auto">
-        <TabsList class="w-full sm:w-auto grid grid-cols-5 sm:flex" data-tour-guide="preview-templates">
+        <TabsList
+          class="w-full sm:w-auto grid grid-cols-5 sm:flex"
+          data-tour-guide="preview-templates"
+        >
           <TabsTrigger value="dashboard" class="text-xs sm:text-sm px-2 sm:px-3">
             <span class="hidden sm:inline">Dashboard</span>
             <span class="sm:hidden">Dash</span>
