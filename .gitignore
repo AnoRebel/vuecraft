@@ -30,3 +30,8 @@ logs
 
 # Bun
 bun.lockb
+
+# NPM/Yarn/PNPM lockfiles (using bun)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

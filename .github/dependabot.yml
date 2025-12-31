@@ -8,24 +8,24 @@ updates:
     groups:
       nuxt:
         patterns:
-          - "@nuxt/*"
-          - "nuxt"
+          - '@nuxt/*'
+          - 'nuxt'
       vue:
         patterns:
-          - "vue"
-          - "vue-*"
-          - "@vue/*"
+          - 'vue'
+          - 'vue-*'
+          - '@vue/*'
       vueuse:
         patterns:
-          - "@vueuse/*"
+          - '@vueuse/*'
       tailwind:
         patterns:
-          - "tailwindcss"
-          - "@tailwindcss/*"
+          - 'tailwindcss'
+          - '@tailwindcss/*'
       dev-dependencies:
         dependency-type: development
         patterns:
-          - "*"
+          - '*'
 
   - package-ecosystem: github-actions
     directory: /

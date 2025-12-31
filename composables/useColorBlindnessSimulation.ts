@@ -152,7 +152,11 @@ export function useColorBlindnessSimulation() {
   /**
    * Check if colors are distinguishable under the current simulation
    */
-  function areColorsDistinguishable(color1: string, color2: string, threshold: number = 30): boolean {
+  function areColorsDistinguishable(
+    color1: string,
+    color2: string,
+    threshold: number = 30
+  ): boolean {
     const rgb1 = parseColor(color1)
     const rgb2 = parseColor(color2)
 

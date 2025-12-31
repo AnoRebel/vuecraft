@@ -204,7 +204,9 @@ export function useElementInspector() {
       /^(hover|focus|active|disabled|dark):/,
     ]
 
-    return className.split(/\s+/).filter((cls) => tailwindPatterns.some((pattern) => pattern.test(cls)))
+    return className
+      .split(/\s+/)
+      .filter((cls) => tailwindPatterns.some((pattern) => pattern.test(cls)))
   }
 
   /**

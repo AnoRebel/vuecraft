@@ -52,14 +52,19 @@ async function takeScreenshots() {
 
       // Ensure we're in light mode first (check for sun icon which indicates dark mode is active)
       const isDarkMode = await page.evaluate(() => {
-        return document.documentElement.classList.contains('dark') ||
-               document.body.parentElement?.classList.contains('dark') ||
-               document.querySelector('.dark') !== null
+        return (
+          document.documentElement.classList.contains('dark') ||
+          document.body.parentElement?.classList.contains('dark') ||
+          document.querySelector('.dark') !== null
+        )
       })
 
       // If in dark mode, click toggle to switch to light
       if (isDarkMode) {
-        const themeToggle = page.locator('button:has(svg)').filter({ has: page.locator('path[d*="M12 3a6"]') }).first()
+        const themeToggle = page
+          .locator('button:has(svg)')
+          .filter({ has: page.locator('path[d*="M12 3a6"]') })
+          .first()
         if (await themeToggle.isVisible()) {
           await themeToggle.click()
           await page.waitForTimeout(500)
@@ -76,16 +81,22 @@ async function takeScreenshots() {
       // Find and click the theme toggle button (in preview panel header)
       // The toggle button has an SVG - sun for dark mode, moon for light mode
       // Alternative: find the button with moon/sun SVG in the preview header
-      const toggleButton = page.locator('button').filter({
-        has: page.locator('svg path[d*="M12 2v2"], svg path[d*="M12 3a6"]')
-      }).first()
+      const toggleButton = page
+        .locator('button')
+        .filter({
+          has: page.locator('svg path[d*="M12 2v2"], svg path[d*="M12 3a6"]'),
+        })
+        .first()
 
       if (await toggleButton.isVisible()) {
         await toggleButton.click()
         await page.waitForTimeout(800) // Wait for dark mode transition
       } else {
         // Try finding it a different way - look for the ghost variant button with icon
-        const altToggle = page.locator('button[class*="ghost"]').filter({ has: page.locator('svg') }).last()
+        const altToggle = page
+          .locator('button[class*="ghost"]')
+          .filter({ has: page.locator('svg') })
+          .last()
         if (await altToggle.isVisible()) {
           await altToggle.click()
           await page.waitForTimeout(800)

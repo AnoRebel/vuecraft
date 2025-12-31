@@ -2,13 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useAccessibilityChecker } from '~/composables/useAccessibilityChecker'
 
-const {
-  generateReport,
-  getContrastBadgeClass,
-  getScoreClass,
-  formatRatio,
-  getLevelLabel,
-} = useAccessibilityChecker()
+const { generateReport, getContrastBadgeClass, getScoreClass, formatRatio, getLevelLabel } =
+  useAccessibilityChecker()
 
 const report = ref<ReturnType<typeof generateReport> | null>(null)
 const isLoading = ref(false)
@@ -50,9 +45,7 @@ defineExpose({ runCheck })
           </span>
         </div>
         <div class="mt-2 flex gap-4 text-xs">
-          <span class="text-green-600 dark:text-green-400">
-            {{ report.passCount }} passed
-          </span>
+          <span class="text-green-600 dark:text-green-400"> {{ report.passCount }} passed </span>
           <span v-if="report.warningCount > 0" class="text-yellow-600 dark:text-yellow-400">
             {{ report.warningCount }} warnings
           </span>
