@@ -6,7 +6,12 @@
 import type { DesignSystemConfig } from '~/types/config'
 import { parseOklch, oklchToRgb, rgbToHex } from './colorUtils'
 
-export type ExportFormat = 'figma' | 'style-dictionary' | 'css-in-js' | 'json-tokens' | 'tailwind-config'
+export type ExportFormat =
+  | 'figma'
+  | 'style-dictionary'
+  | 'css-in-js'
+  | 'json-tokens'
+  | 'tailwind-config'
 
 /**
  * Get all CSS variables from the current theme
@@ -31,7 +36,16 @@ function getThemeVariables(config: DesignSystemConfig): Record<string, string> {
   vars['--border'] = 'oklch(0.92 0.004 286.32)'
   vars['--input'] = 'oklch(0.92 0.004 286.32)'
   vars['--ring'] = 'oklch(0.708 0.022 261.325)'
-  vars['--radius'] = config.theme.radius === 'none' ? '0' : config.theme.radius === 'sm' ? '0.25rem' : config.theme.radius === 'md' ? '0.375rem' : config.theme.radius === 'lg' ? '0.5rem' : '0.75rem'
+  vars['--radius'] =
+    config.theme.radius === 'none'
+      ? '0'
+      : config.theme.radius === 'sm'
+        ? '0.25rem'
+        : config.theme.radius === 'md'
+          ? '0.375rem'
+          : config.theme.radius === 'lg'
+            ? '0.5rem'
+            : '0.75rem'
 
   return vars
 }
@@ -150,9 +164,7 @@ export function generateCSSInJS(config: DesignSystemConfig): string {
   // Colors
   for (const [key, value] of Object.entries(vars)) {
     if (key.startsWith('--') && !key.includes('radius')) {
-      const name = key
-        .replace('--', '')
-        .replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
+      const name = key.replace('--', '').replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
       ;(theme.colors as Record<string, string>)[name] = convertToHex(value)
     }
   }

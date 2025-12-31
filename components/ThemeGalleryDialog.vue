@@ -171,9 +171,7 @@ function handleFork() {
           </div>
 
           <div class="space-y-2">
-            <Button class="w-full" @click="applyTheme">
-              Apply Theme
-            </Button>
+            <Button class="w-full" @click="applyTheme"> Apply Theme </Button>
             <Button variant="outline" class="w-full" @click="handleFork">
               <Icon name="lucide:git-fork" class="h-4 w-4 mr-2" />
               Fork Theme

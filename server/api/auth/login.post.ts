@@ -31,9 +31,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Find user (demo implementation)
-  const user = DEMO_USERS.find(
-    (u) => u.email === body.email && u.password === body.password
-  )
+  const user = DEMO_USERS.find((u) => u.email === body.email && u.password === body.password)
 
   if (!user) {
     throw createError({

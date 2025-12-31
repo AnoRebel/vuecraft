@@ -35,13 +35,12 @@ function handlePresetChange(presetId: string) {
         variant="ghost"
         size="sm"
         class="rounded-none first:rounded-l-md last:rounded-r-md px-3"
-        :class="{ 'bg-accent': (preset.id === 'full' && !activePreset) || activePreset === preset.id }"
+        :class="{
+          'bg-accent': (preset.id === 'full' && !activePreset) || activePreset === preset.id,
+        }"
         @click="handlePresetChange(preset.id)"
       >
-        <Icon
-          :name="`lucide:${preset.icon}`"
-          class="h-4 w-4"
-        />
+        <Icon :name="`lucide:${preset.icon}`" class="h-4 w-4" />
       </Button>
     </div>
 
