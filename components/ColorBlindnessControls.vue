@@ -2,7 +2,8 @@
 import { useColorBlindnessSimulation } from '~/composables/useColorBlindnessSimulation'
 import { Button } from '~/components/ui/button'
 
-const { activeSimulation, simulationOptions, setSimulation, isSimulating } = useColorBlindnessSimulation()
+const { activeSimulation, simulationOptions, setSimulation, isSimulating } =
+  useColorBlindnessSimulation()
 
 const emit = defineEmits<{
   (e: 'change', simulation: string): void

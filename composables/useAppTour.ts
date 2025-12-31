@@ -5,7 +5,8 @@ export function useAppTour() {
     {
       id: 'welcome',
       title: 'Welcome to Vuecraft!',
-      content: 'Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Let\'s take a quick tour!',
+      content:
+        "Create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Let's take a quick tour!",
       target: 'app-logo',
       direction: 'bottom',
       showAction: true,
@@ -15,7 +16,8 @@ export function useAppTour() {
     {
       id: 'preset-themes',
       title: 'Preset Themes',
-      content: 'Quick-start with one of our 10 curated preset themes. Each includes carefully selected colors, typography, and styling.',
+      content:
+        'Quick-start with one of our 10 curated preset themes. Each includes carefully selected colors, typography, and styling.',
       target: 'preset-themes-section',
       direction: 'right',
       showAction: true,
@@ -23,7 +25,8 @@ export function useAppTour() {
     {
       id: 'theme-config',
       title: 'Theme Configuration',
-      content: 'Customize your base color, accent color, border radius, and shadow intensity to match your brand.',
+      content:
+        'Customize your base color, accent color, border radius, and shadow intensity to match your brand.',
       target: 'theme-config-section',
       direction: 'right',
       showAction: true,
@@ -39,7 +42,8 @@ export function useAppTour() {
     {
       id: 'components-config',
       title: 'Components',
-      content: 'Select which components to include and customize their styling (Default or New York style).',
+      content:
+        'Select which components to include and customize their styling (Default or New York style).',
       target: 'components-config-section',
       direction: 'right',
       showAction: true,
@@ -47,7 +51,8 @@ export function useAppTour() {
     {
       id: 'preview-panel',
       title: 'Live Preview',
-      content: 'See your theme changes in real-time with various preview templates like Dashboard, Cards, Forms, and more.',
+      content:
+        'See your theme changes in real-time with various preview templates like Dashboard, Cards, Forms, and more.',
       target: 'preview-panel',
       direction: 'left',
       showAction: true,
@@ -55,7 +60,8 @@ export function useAppTour() {
     {
       id: 'preview-templates',
       title: 'Preview Templates',
-      content: 'Switch between different preview templates to see how your theme looks across various UI patterns.',
+      content:
+        'Switch between different preview templates to see how your theme looks across various UI patterns.',
       target: 'preview-templates',
       direction: 'bottom',
       showAction: true,
@@ -71,7 +77,8 @@ export function useAppTour() {
     {
       id: 'shuffle-reset',
       title: 'Shuffle & Reset',
-      content: 'Use Shuffle to randomize your theme settings, or Reset to start fresh with defaults.',
+      content:
+        'Use Shuffle to randomize your theme settings, or Reset to start fresh with defaults.',
       target: 'shuffle-reset-buttons',
       direction: 'bottom',
       showAction: true,
@@ -95,7 +102,8 @@ export function useAppTour() {
     {
       id: 'export-button',
       title: 'Export Theme',
-      content: 'Export your theme for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Get CSS, config files, and CLI commands.',
+      content:
+        'Export your theme for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Get CSS, config files, and CLI commands.',
       target: 'export-button',
       direction: 'bottom',
       showAction: true,

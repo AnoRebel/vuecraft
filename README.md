@@ -1,14 +1,15 @@
 <div align="center">
   <img src="/public/logo-animated.svg" alt="Vuecraft Logo" width="120" height="120" />
 
-  # Vuecraft
+# Vuecraft
 
-  **A universal Vue/Nuxt theme builder with professional-grade tools**
+**A universal Vue/Nuxt theme builder with professional-grade tools**
 
-  [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-  [![Vue 3](https://img.shields.io/badge/Vue-3.5-42b883.svg)](https://vuejs.org/)
-  [![Nuxt](https://img.shields.io/badge/Nuxt-4.2-00dc82.svg)](https://nuxt.com/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8.svg)](https://tailwindcss.com/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Vue 3](https://img.shields.io/badge/Vue-3.5-42b883.svg)](https://vuejs.org/)
+[![Nuxt](https://img.shields.io/badge/Nuxt-4.2-00dc82.svg)](https://nuxt.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8.svg)](https://tailwindcss.com/)
+
 </div>
 
 ---
@@ -20,6 +21,7 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 ## ✨ Features
 
 ### Core Features
+
 - **Multi-Framework Export**: Export themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS
 - **Real-time Preview**: See changes instantly as you customize
 - **10 Preset Themes**: Quick-start with curated themes (Default, Ocean, Forest, Sunset, etc.)
@@ -28,6 +30,7 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 - **PWA Support**: Install as a Progressive Web App for offline access
 
 ### 🆕 Advanced Tools
+
 - **Accessibility Checker**: WCAG contrast ratio checking with AA/AAA compliance scores
 - **Color Palette Generator**: Generate harmonious palettes (complementary, analogous, triadic, etc.)
 - **Responsive Preview**: Preview themes at different device breakpoints (mobile, tablet, desktop)
@@ -41,11 +44,13 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 - **Theme Gallery**: Browse and fork community themes
 
 ### Export Options
+
 - **Design Token Export**: Export to Figma Tokens, Style Dictionary, CSS-in-JS, W3C Design Tokens
 - **CLI Integration**: Generate framework-specific CLI commands and setup scripts
 - **Component Selection**: Choose which components to include in your export
 
 ### Authentication
+
 - **OAuth Support**: Sign in with Google or GitHub
 - **Email/Password**: Traditional email authentication
 - **Session Management**: Secure session handling with nuxt-auth-utils
@@ -53,28 +58,33 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 ## 📸 Screenshots
 
 ### Theme Builder Interface
-| Light Mode | Dark Mode |
-|------------|-----------|
+
+| Light Mode                                              | Dark Mode                                             |
+| ------------------------------------------------------- | ----------------------------------------------------- |
 | ![Default Light](/public/screenshots/default-light.png) | ![Default Dark](/public/screenshots/default-dark.png) |
 
 ### Advanced Features
 
 #### Accessibility Checker
+
 Check WCAG contrast ratios and get suggestions for accessible color combinations.
 
 ![Accessibility Checker](/public/screenshots/feature-accessibility.png)
 
 #### Color Palette Generator
+
 Generate harmonious color palettes based on color theory.
 
 ![Color Palette Generator](/public/screenshots/feature-palette.png)
 
 #### Theme Gallery
+
 Browse, fork, and share community themes.
 
 ![Theme Gallery](/public/screenshots/feature-gallery.png)
 
 #### Responsive Preview
+
 Preview your theme at different device sizes.
 
 ![Responsive Preview](/public/screenshots/feature-responsive.png)
@@ -144,45 +154,52 @@ bun run preview
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+Z` | Undo |
-| `Ctrl+Shift+Z` | Redo |
-| `Ctrl+S` | Save configuration |
-| `Ctrl+E` | Open export dialog |
-| `Ctrl+I` | Open import dialog |
-| `Ctrl+D` | Toggle dark mode |
-| `Ctrl+R` | Randomize theme |
-| `1-5` | Switch preview template |
-| `?` | Show keyboard shortcuts |
-| `Escape` | Close dialogs |
+| Shortcut       | Action                  |
+| -------------- | ----------------------- |
+| `Ctrl+Z`       | Undo                    |
+| `Ctrl+Shift+Z` | Redo                    |
+| `Ctrl+S`       | Save configuration      |
+| `Ctrl+E`       | Open export dialog      |
+| `Ctrl+I`       | Open import dialog      |
+| `Ctrl+D`       | Toggle dark mode        |
+| `Ctrl+R`       | Randomize theme         |
+| `1-5`          | Switch preview template |
+| `?`            | Show keyboard shortcuts |
+| `Escape`       | Close dialogs           |
 
 ## 📦 Export Options
 
 ### shadcn-vue
+
 Beautiful components built with Reka UI and Tailwind CSS.
 
 **Exports:**
+
 - `main.css` - Theme CSS with Tailwind CSS v4 configuration
 - `components.json` - shadcn-vue CLI configuration
 - CLI commands for `npx shadcn-vue@latest init/add`
 
 ### Nuxt UI
+
 Fully styled and customizable components for Nuxt.
 
 **Exports:**
+
 - `main.css` - CSS with `--ui-*` variable customizations
 - `app.config.ts` - Nuxt UI color configuration
 - CLI commands for `npx nuxi module add ui`
 
 ### Plain Tailwind
+
 Just CSS variables for your own custom components.
 
 **Exports:**
+
 - `main.css` - Minimal CSS variables for Tailwind CSS v4
 - Setup script for Vue or Nuxt projects
 
 ### Design Tokens
+
 Export your theme as design tokens for design tools:
 
 - **Figma Tokens** - Compatible with the Figma Tokens plugin
@@ -196,99 +213,114 @@ Export your theme as design tokens for design tools:
 Quick-start with 10 curated preset themes, each with full light and dark mode support:
 
 ### Default
+
 Clean neutral theme with balanced styling.
 
-| Light | Dark |
-|-------|------|
+| Light                                                   | Dark                                                  |
+| ------------------------------------------------------- | ----------------------------------------------------- |
 | ![Default Light](/public/screenshots/default-light.png) | ![Default Dark](/public/screenshots/default-dark.png) |
 
 ### New York
+
 Modern and elegant monochrome style.
 
-| Light | Dark |
-|-------|------|
+| Light                                                     | Dark                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------- |
 | ![New York Light](/public/screenshots/new-york-light.png) | ![New York Dark](/public/screenshots/new-york-dark.png) |
 
 ### Miami
+
 Vibrant and colorful with warm pink tones.
 
-| Light | Dark |
-|-------|------|
+| Light                                               | Dark                                              |
+| --------------------------------------------------- | ------------------------------------------------- |
 | ![Miami Light](/public/screenshots/miami-light.png) | ![Miami Dark](/public/screenshots/miami-dark.png) |
 
 ### Midnight
+
 Deep blue accent for night-time coding.
 
-| Light | Dark |
-|-------|------|
+| Light                                                     | Dark                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------- |
 | ![Midnight Light](/public/screenshots/midnight-light.png) | ![Midnight Dark](/public/screenshots/midnight-dark.png) |
 
 ### Forest
+
 Natural emerald green palette inspired by nature.
 
-| Light | Dark |
-|-------|------|
+| Light                                                 | Dark                                                |
+| ----------------------------------------------------- | --------------------------------------------------- |
 | ![Forest Light](/public/screenshots/forest-light.png) | ![Forest Dark](/public/screenshots/forest-dark.png) |
 
 ### Sunset
+
 Warm orange hues for a cozy feel.
 
-| Light | Dark |
-|-------|------|
+| Light                                                 | Dark                                                |
+| ----------------------------------------------------- | --------------------------------------------------- |
 | ![Sunset Light](/public/screenshots/sunset-light.png) | ![Sunset Dark](/public/screenshots/sunset-dark.png) |
 
 ### Lavender
+
 Soft violet tones for a calm aesthetic.
 
-| Light | Dark |
-|-------|------|
+| Light                                                     | Dark                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------- |
 | ![Lavender Light](/public/screenshots/lavender-light.png) | ![Lavender Dark](/public/screenshots/lavender-dark.png) |
 
 ### Brutalist
+
 Bold, high-contrast design with sharp edges.
 
-| Light | Dark |
-|-------|------|
+| Light                                                       | Dark                                                      |
+| ----------------------------------------------------------- | --------------------------------------------------------- |
 | ![Brutalist Light](/public/screenshots/brutalist-light.png) | ![Brutalist Dark](/public/screenshots/brutalist-dark.png) |
 
 ### Ocean
+
 Cool cyan tones inspired by the sea.
 
-| Light | Dark |
-|-------|------|
+| Light                                               | Dark                                              |
+| --------------------------------------------------- | ------------------------------------------------- |
 | ![Ocean Light](/public/screenshots/ocean-light.png) | ![Ocean Dark](/public/screenshots/ocean-dark.png) |
 
 ### Rose Gold
+
 Elegant rose pink metallic theme.
 
-| Light | Dark |
-|-------|------|
+| Light                                                       | Dark                                                      |
+| ----------------------------------------------------------- | --------------------------------------------------------- |
 | ![Rose Gold Light](/public/screenshots/rose-gold-light.png) | ![Rose Gold Dark](/public/screenshots/rose-gold-dark.png) |
 
 ## ⚙️ Configuration Groups
 
 ### Theme
+
 - Base color (Neutral, Stone, Zinc, Gray, Slate)
 - Accent theme (20+ colors)
 - Border radius
 - Shadow intensity
 
 ### Typography
+
 - Font family (Inter, Roboto, DM Sans, and more)
 - Monospace font (JetBrains Mono, Fira Code, etc.)
 - Font scale (Compact, Default, Relaxed, Spacious)
 
 ### Components
+
 - Style (Default, New York, Miami, Brutal, Soft)
 - Border width
 - Animation speed
 - Focus ring configuration
 
 ### Icons
+
 - Icon library (Lucide, Phosphor, Tabler, Heroicons, Radix)
 - Default size and stroke width
 
 ### Layout
+
 - Spacing scale
 - Container width
 - Sidebar and header dimensions

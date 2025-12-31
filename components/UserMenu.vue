@@ -19,16 +19,8 @@ async function handleLogout() {
   <div class="relative">
     <template v-if="isLoggedIn && user">
       <!-- User Avatar Button -->
-      <Button
-        variant="ghost"
-        size="icon"
-        class="rounded-full"
-        @click="menuOpen = !menuOpen"
-      >
-        <div
-          v-if="user.avatar"
-          class="h-8 w-8 rounded-full overflow-hidden"
-        >
+      <Button variant="ghost" size="icon" class="rounded-full" @click="menuOpen = !menuOpen">
+        <div v-if="user.avatar" class="h-8 w-8 rounded-full overflow-hidden">
           <img :src="user.avatar" :alt="user.name" class="h-full w-full object-cover" />
         </div>
         <div
@@ -61,11 +53,7 @@ async function handleLogout() {
       </div>
 
       <!-- Click outside to close -->
-      <div
-        v-if="menuOpen"
-        class="fixed inset-0 z-40"
-        @click="menuOpen = false"
-      />
+      <div v-if="menuOpen" class="fixed inset-0 z-40" @click="menuOpen = false" />
     </template>
 
     <template v-else>

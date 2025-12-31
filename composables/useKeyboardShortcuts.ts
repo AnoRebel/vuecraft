@@ -100,7 +100,8 @@ export function useKeyboardShortcuts() {
    * Format key for display (platform-aware)
    */
   function formatKey(key: string): string {
-    const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
+    const isMac =
+      typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
 
     return key
       .replace(/ctrl/gi, isMac ? '⌃' : 'Ctrl')

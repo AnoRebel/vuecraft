@@ -53,7 +53,12 @@ function createBuiltInThemes(): GalleryTheme[] {
       ty: preset.config.typography as SerializedConfig['ty'],
       c: preset.config.components as SerializedConfig['c'],
       i: { library: 'lucide', defaultSize: 'md', strokeWidth: 'default' },
-      l: { containerWidth: 'xl', spacingScale: 'default', sidebarWidth: 'default', headerHeight: 'default' },
+      l: {
+        containerWidth: 'xl',
+        spacingScale: 'default',
+        sidebarWidth: 'default',
+        headerHeight: 'default',
+      },
     },
     preview: {
       primaryColor: preset.preview.primary,

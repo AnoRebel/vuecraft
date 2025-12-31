@@ -31,7 +31,9 @@ function dismissPrompt() {
       class="fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-card border rounded-lg shadow-lg p-4 z-50"
     >
       <div class="flex items-start gap-3">
-        <div class="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+        <div
+          class="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center"
+        >
           <Icon name="lucide:download" class="w-5 h-5 text-primary" />
         </div>
         <div class="flex-1 min-w-0">
@@ -50,12 +52,8 @@ function dismissPrompt() {
         </button>
       </div>
       <div class="flex gap-2 mt-3">
-        <Button variant="outline" size="sm" class="flex-1" @click="dismissPrompt">
-          Not now
-        </Button>
-        <Button size="sm" class="flex-1" @click="installApp">
-          Install
-        </Button>
+        <Button variant="outline" size="sm" class="flex-1" @click="dismissPrompt"> Not now </Button>
+        <Button size="sm" class="flex-1" @click="installApp"> Install </Button>
       </div>
     </div>
   </Transition>

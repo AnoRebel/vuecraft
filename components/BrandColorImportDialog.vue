@@ -13,8 +13,7 @@ const emit = defineEmits<{
   (e: 'apply', colors: { primary: string; accent?: string }): void
 }>()
 
-const { extractFromFile, lastResult, isExtracting, error, clear } =
-  useBrandColorExtractor()
+const { extractFromFile, lastResult, isExtracting, error, clear } = useBrandColorExtractor()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const dragOver = ref(false)
@@ -95,9 +94,7 @@ function handleClose() {
           />
 
           <Icon name="lucide:image" class="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-          <p class="text-sm text-muted-foreground mb-2">
-            Drop your logo or brand image here
-          </p>
+          <p class="text-sm text-muted-foreground mb-2">Drop your logo or brand image here</p>
           <Button variant="outline" size="sm" :disabled="isExtracting" @click="openFilePicker">
             <Icon v-if="isExtracting" name="lucide:loader-2" class="h-4 w-4 mr-2 animate-spin" />
             Choose File

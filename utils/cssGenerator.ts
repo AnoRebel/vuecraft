@@ -9,7 +9,11 @@ import type {
 } from '~/types/config'
 import { getThemeColors } from '~/config/themes'
 import { RADIUS_OPTIONS, ANIMATION_SPEEDS, BORDER_WIDTHS } from '~/config/defaults'
-import { generateNuxtUIExportPackage, generateNuxtUIAppConfig, generateNuxtUICSS } from './nuxtUIGenerator'
+import {
+  generateNuxtUIExportPackage,
+  generateNuxtUIAppConfig,
+  generateNuxtUICSS,
+} from './nuxtUIGenerator'
 import { generateTailwindExportPackage, generateTailwindCSS } from './tailwindGenerator'
 
 // Font family mappings
@@ -430,9 +434,7 @@ export function generateUniversalExportPackage(config: DesignSystemConfigInput):
         config: pkg.appConfig,
         configFilename: 'app.config.ts',
         readme: pkg.readme,
-        additionalFiles: [
-          { filename: 'nuxt.config.ts.example', content: pkg.nuxtConfig },
-        ],
+        additionalFiles: [{ filename: 'nuxt.config.ts.example', content: pkg.nuxtConfig }],
       }
     }
     case 'tailwind': {

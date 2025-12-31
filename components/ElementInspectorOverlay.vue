@@ -71,11 +71,7 @@ function toggleInspector() {
 <template>
   <div>
     <!-- Toggle Button -->
-    <Button
-      :variant="isInspecting ? 'default' : 'outline'"
-      size="sm"
-      @click="toggleInspector"
-    >
+    <Button :variant="isInspecting ? 'default' : 'outline'" size="sm" @click="toggleInspector">
       <Icon name="lucide:mouse-pointer" class="h-4 w-4 mr-2" />
       {{ isInspecting ? 'Stop Inspecting' : 'Inspect Element' }}
     </Button>
@@ -106,7 +102,14 @@ function toggleInspector() {
             #{{ inspectedData.id }}
           </span>
         </div>
-        <Button variant="ghost" size="sm" @click="unpinSelection(); showPanel = false">
+        <Button
+          variant="ghost"
+          size="sm"
+          @click="
+            unpinSelection()
+            showPanel = false
+          "
+        >
           <Icon name="lucide:x" class="h-4 w-4" />
         </Button>
       </div>

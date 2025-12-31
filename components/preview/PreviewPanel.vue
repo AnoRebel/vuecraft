@@ -72,7 +72,12 @@ onMounted(() => {
         <!-- Responsive Preview Controls -->
         <ResponsivePreviewControls />
         <div class="w-px h-6 bg-border mx-1" />
-        <Button variant="ghost" size="icon" data-tour-guide="dark-mode-toggle" @click="toggleColorMode">
+        <Button
+          variant="ghost"
+          size="icon"
+          data-tour-guide="dark-mode-toggle"
+          @click="toggleColorMode"
+        >
           <svg
             v-if="isDark"
             xmlns="http://www.w3.org/2000/svg"

@@ -20,7 +20,11 @@ const focusRingOffsetOptions = [
 </script>
 
 <template>
-  <ConfigSection title="Components" description="Style, borders, and animations" tour-id="components-config-section">
+  <ConfigSection
+    title="Components"
+    description="Style, borders, and animations"
+    tour-id="components-config-section"
+  >
     <div class="space-y-4">
       <!-- Component Style -->
       <OptionPicker

@@ -26,9 +26,20 @@ export interface HslColor {
   l: number // 0-100
 }
 
-export type ColorBlindnessType = 'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'
+export type ColorBlindnessType =
+  | 'normal'
+  | 'protanopia'
+  | 'deuteranopia'
+  | 'tritanopia'
+  | 'achromatopsia'
 
-export type HarmonyType = 'complementary' | 'analogous' | 'triadic' | 'split-complementary' | 'tetradic' | 'monochromatic'
+export type HarmonyType =
+  | 'complementary'
+  | 'analogous'
+  | 'triadic'
+  | 'split-complementary'
+  | 'tetradic'
+  | 'monochromatic'
 
 export interface ContrastResult {
   ratio: number
@@ -48,7 +59,9 @@ export interface ContrastResult {
  */
 export function parseOklch(color: string): OklchColor | null {
   // Match oklch(0.5 0.2 180) or oklch(50% 0.2 180deg)
-  const match = color.match(/oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+%?))?\s*\)/i)
+  const match = color.match(
+    /oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+%?))?\s*\)/i
+  )
   if (!match) return null
 
   let l = parseFloat(match[1]!)
@@ -76,7 +89,11 @@ function oklchToOklab(oklch: OklchColor): { L: number; a: number; b: number } {
 /**
  * Convert Oklab to linear RGB
  */
-function oklabToLinearRgb(oklab: { L: number; a: number; b: number }): { r: number; g: number; b: number } {
+function oklabToLinearRgb(oklab: { L: number; a: number; b: number }): {
+  r: number
+  g: number
+  b: number
+} {
   const { L, a, b } = oklab
 
   const l_ = L + 0.3963377774 * a + 0.2158037573 * b
@@ -516,7 +533,10 @@ export function getColorBlindnessFilter(type: ColorBlindnessType): string {
 /**
  * Extract dominant colors from an image using k-means clustering
  */
-export async function extractColorsFromImage(file: File, colorCount: number = 5): Promise<RgbColor[]> {
+export async function extractColorsFromImage(
+  file: File,
+  colorCount: number = 5
+): Promise<RgbColor[]> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     const canvas = document.createElement('canvas')
