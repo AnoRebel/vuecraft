@@ -58,20 +58,28 @@ onMounted(() => {
 <template>
   <div class="flex h-full flex-col" data-tour-guide="preview-panel">
     <!-- Preview Header -->
-    <div class="flex items-center justify-between border-b px-4 py-3">
-      <Tabs v-model="activeTemplate" class="w-full">
-        <TabsList data-tour-guide="preview-templates">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="cards">Cards</TabsTrigger>
-          <TabsTrigger value="forms">Forms</TabsTrigger>
-          <TabsTrigger value="auth">Auth</TabsTrigger>
-          <TabsTrigger value="components">Components</TabsTrigger>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-2 sm:px-4 py-2 sm:py-3 gap-2 sm:gap-0">
+      <Tabs v-model="activeTemplate" class="w-full sm:w-auto">
+        <TabsList class="w-full sm:w-auto grid grid-cols-5 sm:flex" data-tour-guide="preview-templates">
+          <TabsTrigger value="dashboard" class="text-xs sm:text-sm px-2 sm:px-3">
+            <span class="hidden sm:inline">Dashboard</span>
+            <span class="sm:hidden">Dash</span>
+          </TabsTrigger>
+          <TabsTrigger value="cards" class="text-xs sm:text-sm px-2 sm:px-3">Cards</TabsTrigger>
+          <TabsTrigger value="forms" class="text-xs sm:text-sm px-2 sm:px-3">Forms</TabsTrigger>
+          <TabsTrigger value="auth" class="text-xs sm:text-sm px-2 sm:px-3">Auth</TabsTrigger>
+          <TabsTrigger value="components" class="text-xs sm:text-sm px-2 sm:px-3">
+            <span class="hidden sm:inline">Components</span>
+            <span class="sm:hidden">Comp</span>
+          </TabsTrigger>
         </TabsList>
       </Tabs>
-      <div class="flex items-center gap-2 ml-4">
-        <!-- Responsive Preview Controls -->
-        <ResponsivePreviewControls />
-        <div class="w-px h-6 bg-border mx-1" />
+      <div class="flex items-center gap-2 sm:ml-4 w-full sm:w-auto justify-end">
+        <!-- Responsive Preview Controls - Hidden on mobile -->
+        <div class="hidden md:flex items-center">
+          <ResponsivePreviewControls />
+          <div class="w-px h-6 bg-border mx-2" />
+        </div>
         <Button
           variant="ghost"
           size="icon"
