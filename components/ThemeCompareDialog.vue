@@ -83,14 +83,20 @@ function handleClose() {
               <Button
                 :variant="leftSource === 'current' ? 'default' : 'outline'"
                 size="sm"
-                @click="leftSource = 'current'; loadLeft()"
+                @click="
+                  leftSource = 'current'
+                  loadLeft()
+                "
               >
                 Current
               </Button>
               <select
                 v-model="leftPreset"
                 class="flex-1 h-9 rounded-md border bg-background px-3 text-sm"
-                @change="leftSource = 'preset'; loadLeft()"
+                @change="
+                  leftSource = 'preset'
+                  loadLeft()
+                "
               >
                 <option v-for="preset in availablePresets" :key="preset.name" :value="preset.name">
                   {{ preset.label }}
@@ -132,7 +138,9 @@ function handleClose() {
         <!-- Summary -->
         <div v-if="leftTheme && rightTheme" class="mb-4 p-3 bg-muted rounded-lg">
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium">{{ diffSummary.totalChanges }} differences found</span>
+            <span class="text-sm font-medium"
+              >{{ diffSummary.totalChanges }} differences found</span
+            >
             <div class="flex gap-4 text-xs">
               <span v-for="(count, category) in diffSummary.byCategory" :key="category">
                 {{ categoryLabels[category] }}: {{ count }}
@@ -161,12 +169,16 @@ function handleClose() {
                   <span class="font-mono text-xs">{{ diff.path }}</span>
                 </td>
                 <td class="p-2">
-                  <span class="font-mono text-xs bg-red-500/10 text-red-700 dark:text-red-300 px-1 rounded">
+                  <span
+                    class="font-mono text-xs bg-red-500/10 text-red-700 dark:text-red-300 px-1 rounded"
+                  >
                     {{ formatValue(diff.leftValue) }}
                   </span>
                 </td>
                 <td class="p-2">
-                  <span class="font-mono text-xs bg-green-500/10 text-green-700 dark:text-green-300 px-1 rounded">
+                  <span
+                    class="font-mono text-xs bg-green-500/10 text-green-700 dark:text-green-300 px-1 rounded"
+                  >
                     {{ formatValue(diff.rightValue) }}
                   </span>
                 </td>

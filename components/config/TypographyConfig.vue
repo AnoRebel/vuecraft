@@ -33,7 +33,11 @@ const lineHeightOptions = [
 </script>
 
 <template>
-  <ConfigSection title="Typography" description="Fonts and text styling" tour-id="typography-config-section">
+  <ConfigSection
+    title="Typography"
+    description="Fonts and text styling"
+    tour-id="typography-config-section"
+  >
     <div class="space-y-4">
       <!-- Font Family -->
       <div class="space-y-2">

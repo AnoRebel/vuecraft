@@ -4,7 +4,12 @@
  */
 
 import { ref, computed } from 'vue'
-import type { SerializedConfig, ThemeConfig, TypographyConfig, ComponentsConfig } from '~/types/config'
+import type {
+  SerializedConfig,
+  ThemeConfig,
+  TypographyConfig,
+  ComponentsConfig,
+} from '~/types/config'
 import { PRESET_THEMES } from '~/config/defaults'
 
 export interface ThemeDiff {
@@ -73,7 +78,12 @@ export function useThemeComparison() {
       ty: preset.config.typography as TypographyConfig,
       c: preset.config.components as ComponentsConfig,
       i: { library: 'lucide', defaultSize: 'md', strokeWidth: 'default' },
-      l: { containerWidth: 'xl', spacingScale: 'default', sidebarWidth: 'default', headerHeight: 'default' },
+      l: {
+        containerWidth: 'xl',
+        spacingScale: 'default',
+        sidebarWidth: 'default',
+        headerHeight: 'default',
+      },
     }
 
     const theme: ComparisonTheme = {
@@ -93,7 +103,12 @@ export function useThemeComparison() {
   /**
    * Load a saved config into a side
    */
-  function loadSavedTheme(side: 'left' | 'right', id: string, name: string, config: SerializedConfig): void {
+  function loadSavedTheme(
+    side: 'left' | 'right',
+    id: string,
+    name: string,
+    config: SerializedConfig
+  ): void {
     const theme: ComparisonTheme = {
       id: `saved-${id}`,
       name,
@@ -111,7 +126,11 @@ export function useThemeComparison() {
   /**
    * Import a theme from JSON
    */
-  function loadImportedTheme(side: 'left' | 'right', config: SerializedConfig, name: string = 'Imported'): void {
+  function loadImportedTheme(
+    side: 'left' | 'right',
+    config: SerializedConfig,
+    name: string = 'Imported'
+  ): void {
     const theme: ComparisonTheme = {
       id: `imported-${Date.now()}`,
       name,
@@ -171,7 +190,12 @@ export function useThemeComparison() {
       const rightValue = right?.[key]
       const fullPath = `${path}.${key}`
 
-      if (typeof leftValue === 'object' && typeof rightValue === 'object' && leftValue && rightValue) {
+      if (
+        typeof leftValue === 'object' &&
+        typeof rightValue === 'object' &&
+        leftValue &&
+        rightValue
+      ) {
         // Recursively compare nested objects
         compareObjects(
           leftValue as Record<string, unknown>,

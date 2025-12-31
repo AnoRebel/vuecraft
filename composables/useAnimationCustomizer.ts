@@ -35,12 +35,42 @@ const EASING_PRESETS: EasingPreset[] = [
   { name: 'Ease', value: 'ease', description: 'Default browser easing' },
   { name: 'Ease In', value: 'ease-in', cubicBezier: [0.42, 0, 1, 1], description: 'Slow start' },
   { name: 'Ease Out', value: 'ease-out', cubicBezier: [0, 0, 0.58, 1], description: 'Slow end' },
-  { name: 'Ease In Out', value: 'ease-in-out', cubicBezier: [0.42, 0, 0.58, 1], description: 'Slow start and end' },
-  { name: 'Smooth', value: 'cubic-bezier(0.4, 0, 0.2, 1)', cubicBezier: [0.4, 0, 0.2, 1], description: 'Material Design standard' },
-  { name: 'Snappy', value: 'cubic-bezier(0.2, 0, 0, 1)', cubicBezier: [0.2, 0, 0, 1], description: 'Quick and responsive' },
-  { name: 'Bounce', value: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)', cubicBezier: [0.68, -0.55, 0.265, 1.55], description: 'Playful bounce effect' },
-  { name: 'Spring', value: 'cubic-bezier(0.5, 1.5, 0.5, 1)', cubicBezier: [0.5, 1.5, 0.5, 1], description: 'Spring-like motion' },
-  { name: 'Sharp', value: 'cubic-bezier(0.4, 0, 0.6, 1)', cubicBezier: [0.4, 0, 0.6, 1], description: 'Sharp acceleration' },
+  {
+    name: 'Ease In Out',
+    value: 'ease-in-out',
+    cubicBezier: [0.42, 0, 0.58, 1],
+    description: 'Slow start and end',
+  },
+  {
+    name: 'Smooth',
+    value: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    cubicBezier: [0.4, 0, 0.2, 1],
+    description: 'Material Design standard',
+  },
+  {
+    name: 'Snappy',
+    value: 'cubic-bezier(0.2, 0, 0, 1)',
+    cubicBezier: [0.2, 0, 0, 1],
+    description: 'Quick and responsive',
+  },
+  {
+    name: 'Bounce',
+    value: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    cubicBezier: [0.68, -0.55, 0.265, 1.55],
+    description: 'Playful bounce effect',
+  },
+  {
+    name: 'Spring',
+    value: 'cubic-bezier(0.5, 1.5, 0.5, 1)',
+    cubicBezier: [0.5, 1.5, 0.5, 1],
+    description: 'Spring-like motion',
+  },
+  {
+    name: 'Sharp',
+    value: 'cubic-bezier(0.4, 0, 0.6, 1)',
+    cubicBezier: [0.4, 0, 0.6, 1],
+    description: 'Sharp acceleration',
+  },
 ]
 
 const DURATION_PRESETS = [
@@ -181,7 +211,9 @@ export function useAnimationCustomizer() {
     const uniqueProps = [...new Set(properties)]
     if (uniqueProps.length === 0) return 'none'
 
-    return uniqueProps.map((prop) => `${prop} ${config.value.duration}ms ${config.value.easing}`).join(', ')
+    return uniqueProps
+      .map((prop) => `${prop} ${config.value.duration}ms ${config.value.easing}`)
+      .join(', ')
   })
 
   /**

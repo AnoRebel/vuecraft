@@ -20,7 +20,11 @@ function isActivePreset(presetName: string): boolean {
 </script>
 
 <template>
-  <ConfigSection title="Preset Themes" description="Quick start with curated themes" tour-id="preset-themes-section">
+  <ConfigSection
+    title="Preset Themes"
+    description="Quick start with curated themes"
+    tour-id="preset-themes-section"
+  >
     <div class="grid grid-cols-2 gap-3">
       <button
         v-for="preset in PRESET_THEMES"
@@ -57,10 +61,7 @@ function isActivePreset(presetName: string): boolean {
         </div>
 
         <!-- Active Indicator -->
-        <div
-          v-if="isActivePreset(preset.name)"
-          class="absolute top-2 right-2"
-        >
+        <div v-if="isActivePreset(preset.name)" class="absolute top-2 right-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"

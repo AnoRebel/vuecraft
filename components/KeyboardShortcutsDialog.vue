@@ -19,24 +19,36 @@ const isMac = computed(() => {
 })
 
 const shortcuts = [
-  { category: 'General', items: [
-    { key: 'Ctrl+S', description: 'Save configuration' },
-    { key: 'Ctrl+D', description: 'Toggle dark mode' },
-    { key: '?', description: 'Show keyboard shortcuts' },
-  ]},
-  { category: 'Editing', items: [
-    { key: 'Ctrl+Z', description: 'Undo' },
-    { key: 'Ctrl+Shift+Z', description: 'Redo' },
-    { key: 'Ctrl+R', description: 'Randomize theme' },
-  ]},
-  { category: 'Export', items: [
-    { key: 'Ctrl+E', description: 'Open export dialog' },
-    { key: 'Ctrl+I', description: 'Open import dialog' },
-  ]},
-  { category: 'Navigation', items: [
-    { key: '1-5', description: 'Switch preview template' },
-    { key: 'Escape', description: 'Close dialogs' },
-  ]},
+  {
+    category: 'General',
+    items: [
+      { key: 'Ctrl+S', description: 'Save configuration' },
+      { key: 'Ctrl+D', description: 'Toggle dark mode' },
+      { key: '?', description: 'Show keyboard shortcuts' },
+    ],
+  },
+  {
+    category: 'Editing',
+    items: [
+      { key: 'Ctrl+Z', description: 'Undo' },
+      { key: 'Ctrl+Shift+Z', description: 'Redo' },
+      { key: 'Ctrl+R', description: 'Randomize theme' },
+    ],
+  },
+  {
+    category: 'Export',
+    items: [
+      { key: 'Ctrl+E', description: 'Open export dialog' },
+      { key: 'Ctrl+I', description: 'Open import dialog' },
+    ],
+  },
+  {
+    category: 'Navigation',
+    items: [
+      { key: '1-5', description: 'Switch preview template' },
+      { key: 'Escape', description: 'Close dialogs' },
+    ],
+  },
 ]
 </script>
 
@@ -59,9 +71,7 @@ const shortcuts = [
               class="flex items-center justify-between py-1"
             >
               <span class="text-sm">{{ shortcut.description }}</span>
-              <kbd
-                class="px-2 py-1 text-xs font-mono bg-muted rounded border border-border"
-              >
+              <kbd class="px-2 py-1 text-xs font-mono bg-muted rounded border border-border">
                 {{ formatKey(shortcut.key) }}
               </kbd>
             </div>

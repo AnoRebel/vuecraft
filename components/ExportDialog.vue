@@ -192,7 +192,9 @@ function downloadAll() {
               </div>
             </div>
             <div class="flex-1 overflow-auto rounded-md border bg-muted/50">
-              <pre class="p-4 text-xs font-mono overflow-x-auto"><code>{{ configOutput }}</code></pre>
+              <pre
+                class="p-4 text-xs font-mono overflow-x-auto"
+              ><code>{{ configOutput }}</code></pre>
             </div>
           </template>
           <template v-else>
@@ -217,11 +219,7 @@ function downloadAll() {
                     <span class="text-sm font-medium">Initialize shadcn-vue</span>
                     <Badge variant="secondary">Step 1</Badge>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    @click="copyToClipboard(initCommand, 'init')"
-                  >
+                  <Button variant="ghost" size="sm" @click="copyToClipboard(initCommand, 'init')">
                     {{ copied === 'init' ? 'Copied!' : 'Copy' }}
                   </Button>
                 </div>
@@ -296,7 +294,10 @@ function downloadAll() {
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <span class="text-sm font-medium">Create {{ config.export.framework === 'nuxt' ? 'Nuxt' : 'Vue' }} Project</span>
+                    <span class="text-sm font-medium"
+                      >Create
+                      {{ config.export.framework === 'nuxt' ? 'Nuxt' : 'Vue' }} Project</span
+                    >
                     <Badge variant="secondary">Step 1</Badge>
                   </div>
                   <Button
@@ -340,11 +341,7 @@ function downloadAll() {
                   <Badge variant="secondary">All-in-one</Badge>
                 </div>
                 <div class="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    @click="copyToClipboard(setupScript, 'script')"
-                  >
+                  <Button variant="ghost" size="sm" @click="copyToClipboard(setupScript, 'script')">
                     {{ copied === 'script' ? 'Copied!' : 'Copy' }}
                   </Button>
                   <Button

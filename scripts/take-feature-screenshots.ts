@@ -22,7 +22,9 @@ async function takeFeatureScreenshots() {
     await page.waitForTimeout(500)
 
     // Find the parent container of the accessibility panel
-    const accessibilitySection = page.locator('.space-y-4:has(h3:has-text("Accessibility Check"))').first()
+    const accessibilitySection = page
+      .locator('.space-y-4:has(h3:has-text("Accessibility Check"))')
+      .first()
 
     // Take a screenshot of just this element
     await accessibilitySection.screenshot({
@@ -52,7 +54,9 @@ async function takeFeatureScreenshots() {
     await page.waitForTimeout(500)
 
     // Find the parent container of the color palette panel
-    const paletteSection = page.locator('.space-y-4:has(h3:has-text("Color Palette Generator"))').first()
+    const paletteSection = page
+      .locator('.space-y-4:has(h3:has-text("Color Palette Generator"))')
+      .first()
 
     // Take a screenshot of just this element
     await paletteSection.screenshot({
@@ -119,7 +123,7 @@ async function takeFeatureScreenshots() {
     } else {
       // Try clicking the second device button (tablet is usually second)
       const deviceButtons = page.locator('.flex.rounded-md.border.divide-x button')
-      if (await deviceButtons.count() >= 2) {
+      if ((await deviceButtons.count()) >= 2) {
         await deviceButtons.nth(1).click()
         await page.waitForTimeout(500)
       }
