@@ -29,12 +29,7 @@ function startTour() {
         <div
           class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-slate-700 flex items-center justify-center shadow-sm"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 64 64"
-            fill="none"
-            class="h-4 w-4 sm:h-5 sm:w-5"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" class="h-4 w-4 sm:h-5 sm:w-5">
             <!-- Gem V logo -->
             <path d="M12 16 L32 52 L32 36 L20 16 Z" fill="white" opacity="0.95" />
             <path d="M52 16 L32 52 L32 36 L44 16 Z" fill="white" opacity="0.7" />
@@ -54,13 +49,7 @@ function startTour() {
     <div class="flex items-center gap-1 sm:gap-2">
       <!-- Tour Button - Hidden on very small screens -->
       <Tooltip content="Take a tour" side="bottom">
-        <Button
-          variant="ghost"
-          size="icon"
-          class="hidden sm:flex"
-          data-tour-guide="tour-button"
-          @click="startTour"
-        >
+        <Button variant="ghost" size="icon" class="hidden sm:flex" data-tour-guide="tour-button" @click="startTour">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -187,12 +176,7 @@ function startTour() {
 
       <Separator orientation="vertical" class="h-6 hidden sm:block" />
 
-      <Button
-        size="sm"
-        class="gap-1 sm:gap-2"
-        data-tour-guide="export-button"
-        @click="exportDialogOpen = true"
-      >
+      <Button size="sm" class="gap-1 sm:gap-2" data-tour-guide="export-button" @click="exportDialogOpen = true">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
