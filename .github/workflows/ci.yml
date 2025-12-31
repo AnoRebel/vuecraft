@@ -22,10 +22,10 @@ jobs:
         run: bun install
 
       - name: Run ESLint
-        run: bun lint
+        run: bun run lint
 
       - name: Check Prettier formatting
-        run: bun format:check
+        run: bun run format:check
 
   typecheck:
     name: Type Check
@@ -42,7 +42,7 @@ jobs:
         run: bun install
 
       - name: Run type check
-        run: bun typecheck
+        run: bun run typecheck
 
   build:
     name: Build
@@ -60,7 +60,7 @@ jobs:
         run: bun install
 
       - name: Build
-        run: bun build
+        run: bun run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
