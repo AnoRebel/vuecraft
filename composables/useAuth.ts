@@ -1,66 +1,87 @@
 /**
  * Authentication composable for Vuecraft
- * Wraps nuxt-auth-utils with additional utilities
+ * Wraps nuxt-auth-utils with WebAuthn support
  */
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 export interface User {
   id: string
   email: string
   name: string
   avatar?: string
-  provider: 'google' | 'github' | 'email'
+  provider: 'google' | 'github' | 'email' | 'passkey'
   createdAt: number
 }
 
-export interface AuthState {
-  user: User | null
-  isLoading: boolean
-  error: string | null
-}
-
-// For demo/development - stores auth state in memory
-const authState = ref<AuthState>({
-  user: null,
-  isLoading: false,
-  error: null,
-})
+// Global state for auth (shared across components)
+const isLoading = ref(false)
+const error = ref<string | null>(null)
 
 export function useAuth() {
-  /**
-   * Current user
-   */
-  const user = computed(() => authState.value.user)
+  // Use nuxt-auth-utils composable for session management
+  const { loggedIn, user, fetch: fetchSession, clear } = useUserSession()
+
+  // WebAuthn support
+  const webAuthn = useWebAuthn({
+    registerEndpoint: '/api/webauthn/register',
+    authenticateEndpoint: '/api/webauthn/authenticate',
+  })
 
   /**
    * Is user logged in
    */
-  const isLoggedIn = computed(() => authState.value.user !== null)
+  const isLoggedIn = computed(() => loggedIn.value)
 
   /**
-   * Is authentication loading
+   * Current user
    */
-  const isLoading = computed(() => authState.value.isLoading)
+  const currentUser = computed<User | null>(() => {
+    if (!user.value) return null
+    return {
+      id: (user.value as Record<string, unknown>).id as string,
+      email: (user.value as Record<string, unknown>).email as string,
+      name: (user.value as Record<string, unknown>).name as string,
+      avatar: (user.value as Record<string, unknown>).avatar as string | undefined,
+      provider: (user.value as Record<string, unknown>).provider as User['provider'],
+      createdAt: (user.value as Record<string, unknown>).createdAt as number,
+    }
+  })
 
   /**
-   * Current error
+   * Check if WebAuthn/Passkey is supported
    */
-  const error = computed(() => authState.value.error)
+  const passkeySupported = ref(false)
+
+  // Check passkey support on mount
+  onMounted(async () => {
+    if (
+      typeof window !== 'undefined' &&
+      window.PublicKeyCredential &&
+      typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function'
+    ) {
+      try {
+        passkeySupported.value =
+          await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+      } catch {
+        passkeySupported.value = false
+      }
+    }
+  })
 
   /**
    * Login with Google OAuth
    */
   async function loginWithGoogle(): Promise<void> {
-    authState.value.isLoading = true
-    authState.value.error = null
+    isLoading.value = true
+    error.value = null
 
     try {
       // Redirect to Google OAuth endpoint
       window.location.href = '/api/auth/google'
     } catch (err) {
-      authState.value.error = err instanceof Error ? err.message : 'Failed to login with Google'
-      authState.value.isLoading = false
+      error.value = err instanceof Error ? err.message : 'Failed to login with Google'
+      isLoading.value = false
     }
   }
 
@@ -68,15 +89,15 @@ export function useAuth() {
    * Login with GitHub OAuth
    */
   async function loginWithGitHub(): Promise<void> {
-    authState.value.isLoading = true
-    authState.value.error = null
+    isLoading.value = true
+    error.value = null
 
     try {
       // Redirect to GitHub OAuth endpoint
       window.location.href = '/api/auth/github'
     } catch (err) {
-      authState.value.error = err instanceof Error ? err.message : 'Failed to login with GitHub'
-      authState.value.isLoading = false
+      error.value = err instanceof Error ? err.message : 'Failed to login with GitHub'
+      isLoading.value = false
     }
   }
 
@@ -84,22 +105,23 @@ export function useAuth() {
    * Login with email and password
    */
   async function loginWithEmail(email: string, password: string): Promise<boolean> {
-    authState.value.isLoading = true
-    authState.value.error = null
+    isLoading.value = true
+    error.value = null
 
     try {
-      const response = await $fetch<{ user: User }>('/api/auth/login', {
+      await $fetch('/api/auth/login', {
         method: 'POST',
         body: { email, password },
       })
 
-      authState.value.user = response.user
-      authState.value.isLoading = false
+      // Refresh session
+      await fetchSession()
+      isLoading.value = false
       return true
     } catch (err: unknown) {
-      const error = err as { data?: { message?: string } }
-      authState.value.error = error.data?.message || 'Failed to login'
-      authState.value.isLoading = false
+      const fetchError = err as { data?: { message?: string } }
+      error.value = fetchError.data?.message || 'Failed to login'
+      isLoading.value = false
       return false
     }
   }
@@ -112,22 +134,75 @@ export function useAuth() {
     password: string,
     name: string
   ): Promise<boolean> {
-    authState.value.isLoading = true
-    authState.value.error = null
+    isLoading.value = true
+    error.value = null
 
     try {
-      const response = await $fetch<{ user: User }>('/api/auth/register', {
+      await $fetch('/api/auth/register', {
         method: 'POST',
         body: { email, password, name },
       })
 
-      authState.value.user = response.user
-      authState.value.isLoading = false
+      // Refresh session
+      await fetchSession()
+      isLoading.value = false
       return true
     } catch (err: unknown) {
-      const error = err as { data?: { message?: string } }
-      authState.value.error = error.data?.message || 'Failed to register'
-      authState.value.isLoading = false
+      const fetchError = err as { data?: { message?: string } }
+      error.value = fetchError.data?.message || 'Failed to register'
+      isLoading.value = false
+      return false
+    }
+  }
+
+  /**
+   * Register a new passkey
+   */
+  async function registerPasskey(email: string): Promise<boolean> {
+    if (!passkeySupported.value) {
+      error.value = 'Passkeys are not supported on this device'
+      return false
+    }
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      await webAuthn.register({ userName: email })
+      // Refresh session
+      await fetchSession()
+      isLoading.value = false
+      return true
+    } catch (err: unknown) {
+      const webAuthnError = err as { data?: { message?: string }; message?: string }
+      error.value = webAuthnError.data?.message || webAuthnError.message || 'Failed to register passkey'
+      isLoading.value = false
+      return false
+    }
+  }
+
+  /**
+   * Login with passkey
+   */
+  async function loginWithPasskey(email: string): Promise<boolean> {
+    if (!passkeySupported.value) {
+      error.value = 'Passkeys are not supported on this device'
+      return false
+    }
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      await webAuthn.authenticate(email)
+      // Refresh session
+      await fetchSession()
+      isLoading.value = false
+      return true
+    } catch (err: unknown) {
+      const webAuthnError = err as { data?: { message?: string }; message?: string }
+      error.value = webAuthnError.data?.message || webAuthnError.message || 'Failed to authenticate with passkey'
+      isLoading.value = false
       return false
     }
   }
@@ -136,31 +211,15 @@ export function useAuth() {
    * Logout
    */
   async function logout(): Promise<void> {
-    authState.value.isLoading = true
+    isLoading.value = true
 
     try {
       await $fetch('/api/auth/logout', { method: 'POST' })
-      authState.value.user = null
+      await clear()
     } catch (err) {
       console.error('Logout error:', err)
     } finally {
-      authState.value.isLoading = false
-    }
-  }
-
-  /**
-   * Fetch current session
-   */
-  async function fetchSession(): Promise<void> {
-    authState.value.isLoading = true
-
-    try {
-      const response = await $fetch<{ user: User | null }>('/api/auth/session')
-      authState.value.user = response.user
-    } catch {
-      authState.value.user = null
-    } finally {
-      authState.value.isLoading = false
+      isLoading.value = false
     }
   }
 
@@ -168,15 +227,15 @@ export function useAuth() {
    * Clear error
    */
   function clearError(): void {
-    authState.value.error = null
+    error.value = null
   }
 
   /**
    * Get user initials for avatar fallback
    */
   function getUserInitials(): string {
-    if (!authState.value.user?.name) return '?'
-    return authState.value.user.name
+    if (!currentUser.value?.name) return '?'
+    return currentUser.value.name
       .split(' ')
       .map((n) => n[0])
       .join('')
@@ -195,6 +254,8 @@ export function useAuth() {
         return 'logos:github-icon'
       case 'email':
         return 'lucide:mail'
+      case 'passkey':
+        return 'lucide:key'
       default:
         return 'lucide:user'
     }
@@ -202,16 +263,19 @@ export function useAuth() {
 
   return {
     // State
-    user,
+    user: currentUser,
     isLoggedIn,
-    isLoading,
-    error,
+    isLoading: computed(() => isLoading.value),
+    error: computed(() => error.value),
+    passkeySupported,
 
     // Actions
     loginWithGoogle,
     loginWithGitHub,
     loginWithEmail,
     registerWithEmail,
+    registerPasskey,
+    loginWithPasskey,
     logout,
     fetchSession,
     clearError,
