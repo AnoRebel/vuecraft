@@ -6,6 +6,7 @@ import ColorPicker from './ColorPicker.vue'
 import OptionPicker from './OptionPicker.vue'
 import { Label } from '~/components/ui/label'
 import { Slider } from '~/components/ui/slider'
+import { Switch } from '~/components/ui/switch'
 
 const { config, setTheme } = useDesignSystem()
 const { BASE_COLORS, ACCENT_THEMES, RADIUS_OPTIONS, SHADOW_INTENSITIES } = useConfigOptions()
@@ -18,8 +19,43 @@ const vibrantThemes = ACCENT_THEMES.filter(
   (t) => !['neutral', 'stone', 'zinc', 'gray', 'slate'].includes(t.name)
 )
 
+// Custom color picker
+const useCustomColor = ref(false)
+const customColorHex = ref('#6366f1')
+
+// Convert hex to oklch color string (simplified - available for future use)
+function _hexToOklch(hex: string): string {
+  // This is a simplified conversion - in production use a proper color library
+  return `oklch(0.6 0.2 ${Math.round((parseInt(hex.slice(1, 3), 16) / 255) * 360)})`
+}
+
+// Apply custom color to CSS variables
+function applyCustomColor() {
+  if (typeof document !== 'undefined') {
+    const color = customColorHex.value
+    // Apply as primary color override
+    document.documentElement.style.setProperty('--custom-primary', color)
+  }
+}
+
+watch(customColorHex, () => {
+  if (useCustomColor.value) {
+    applyCustomColor()
+  }
+})
+
+watch(useCustomColor, (enabled) => {
+  if (enabled) {
+    applyCustomColor()
+  } else {
+    // Remove custom override
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.removeProperty('--custom-primary')
+    }
+  }
+})
+
 // Custom radius value support
-const showCustomRadius = ref(false)
 const customRadiusValue = ref(0.5)
 
 // Map preset to slider value
@@ -36,9 +72,7 @@ const radiusPresetToValue: Record<string, number> = {
 watch(
   () => config.theme.radius,
   (preset) => {
-    if (!showCustomRadius.value) {
-      customRadiusValue.value = radiusPresetToValue[preset] ?? 0.5
-    }
+    customRadiusValue.value = radiusPresetToValue[preset] ?? 0.5
   },
   { immediate: true }
 )
@@ -97,12 +131,12 @@ const currentRadiusDisplay = computed(() => {
               :title="theme.label"
               :class="[
                 'h-8 w-full rounded-md border-2 transition-all hover:scale-105',
-                config.theme.accentTheme === theme.name
+                config.theme.accentTheme === theme.name && !useCustomColor
                   ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
                   : 'border-transparent',
               ]"
               :style="{ backgroundColor: theme.color }"
-              @click="setTheme({ accentTheme: theme.name as any })"
+              @click="useCustomColor = false; setTheme({ accentTheme: theme.name as any })"
             >
               <span class="sr-only">{{ theme.label }}</span>
             </button>
@@ -119,20 +153,41 @@ const currentRadiusDisplay = computed(() => {
               :title="theme.label"
               :class="[
                 'h-8 w-full rounded-md border-2 transition-all hover:scale-105',
-                config.theme.accentTheme === theme.name
+                config.theme.accentTheme === theme.name && !useCustomColor
                   ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
                   : 'border-transparent',
               ]"
               :style="{ backgroundColor: theme.color }"
-              @click="setTheme({ accentTheme: theme.name as any })"
+              @click="useCustomColor = false; setTheme({ accentTheme: theme.name as any })"
             >
               <span class="sr-only">{{ theme.label }}</span>
             </button>
           </div>
         </div>
 
+        <!-- Custom Color Picker -->
+        <div class="space-y-2 pt-2 border-t">
+          <div class="flex items-center justify-between">
+            <Label class="text-xs">Custom Color</Label>
+            <Switch v-model:checked="useCustomColor" />
+          </div>
+          <div v-if="useCustomColor" class="flex gap-2 items-center">
+            <input
+              v-model="customColorHex"
+              type="color"
+              class="h-8 w-12 rounded cursor-pointer border-0"
+            />
+            <input
+              v-model="customColorHex"
+              type="text"
+              class="flex-1 h-8 px-2 text-xs font-mono rounded border bg-background"
+              placeholder="#6366f1"
+            />
+          </div>
+        </div>
+
         <p class="text-xs text-muted-foreground">
-          Selected: {{ ACCENT_THEMES.find((t) => t.name === config.theme.accentTheme)?.label }}
+          Selected: {{ useCustomColor ? 'Custom' : ACCENT_THEMES.find((t) => t.name === config.theme.accentTheme)?.label }}
         </p>
       </div>
 

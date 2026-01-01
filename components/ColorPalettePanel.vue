@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useColorPaletteGenerator, type PaletteColor } from '~/composables/useColorPaletteGenerator'
-import { useDesignSystem } from '~/composables/useDesignSystem'
 
 const {
   baseColor,
@@ -13,8 +12,6 @@ const {
   generateColorScale,
   randomize,
 } = useColorPaletteGenerator()
-
-const { config: _config } = useDesignSystem()
 
 // Initialize with current primary color
 const primaryHue = ref(270)
@@ -43,6 +40,36 @@ function handleRandomize() {
 function selectHarmony(value: string) {
   selectedHarmony.value = value as typeof selectedHarmony.value
   generate()
+}
+
+// Apply a generated color as the primary color
+function applyColor(color: PaletteColor) {
+  if (typeof document !== 'undefined') {
+    document.documentElement.style.setProperty('--color-primary', color.cssValue)
+    document.documentElement.style.setProperty('--color-ring', color.cssValue)
+  }
+}
+
+// Apply full palette to theme
+function applyPalette() {
+  if (!currentPalette.value || typeof document === 'undefined') return
+
+  const colors = currentPalette.value.colors
+  if (colors.length > 0) {
+    // Apply primary from first color
+    document.documentElement.style.setProperty('--color-primary', colors[0]!.cssValue)
+    document.documentElement.style.setProperty('--color-ring', colors[0]!.cssValue)
+
+    // Apply accent from second color if available
+    if (colors.length > 1) {
+      document.documentElement.style.setProperty('--color-accent', colors[1]!.cssValue)
+    }
+
+    // Apply chart colors
+    colors.slice(0, 5).forEach((color, index) => {
+      document.documentElement.style.setProperty(`--color-chart-${index + 1}`, color.cssValue)
+    })
+  }
 }
 
 // Initialize
@@ -148,28 +175,39 @@ watch(
 
     <!-- Generated Palette -->
     <div v-if="currentPalette" class="space-y-2">
-      <label class="text-xs text-muted-foreground">Generated Colors</label>
+      <div class="flex items-center justify-between">
+        <label class="text-xs text-muted-foreground">Generated Colors</label>
+        <Button variant="ghost" size="sm" class="h-6 px-2 text-xs" @click="applyPalette">
+          <Icon name="lucide:check" class="h-3 w-3 mr-1" />
+          Apply All
+        </Button>
+      </div>
       <div class="flex gap-1">
-        <div
+        <button
           v-for="(color, index) in currentPalette.colors"
           :key="index"
-          class="flex-1 h-12 rounded cursor-pointer transition-transform hover:scale-105"
+          type="button"
+          class="flex-1 h-12 rounded cursor-pointer transition-transform hover:scale-105 hover:ring-2 hover:ring-ring hover:ring-offset-2"
           :style="{ backgroundColor: color.hex }"
-          :title="color.cssValue"
+          :title="`Click to apply: ${color.cssValue}`"
+          @click="applyColor(color)"
         />
       </div>
+      <p class="text-xs text-muted-foreground text-center">Click a color to apply as primary</p>
     </div>
 
     <!-- Color Scale -->
     <div v-if="colorScale.length > 0" class="space-y-2">
       <label class="text-xs text-muted-foreground">Color Scale</label>
       <div class="flex gap-0.5">
-        <div
+        <button
           v-for="(color, index) in colorScale"
           :key="index"
-          class="flex-1 h-8 first:rounded-l last:rounded-r"
+          type="button"
+          class="flex-1 h-8 first:rounded-l last:rounded-r cursor-pointer hover:ring-1 hover:ring-ring"
           :style="{ backgroundColor: color.hex }"
-          :title="`${(index + 1) * 100}: ${color.hex}`"
+          :title="`${(index + 1) * 100}: ${color.hex} - Click to apply`"
+          @click="applyColor(color)"
         />
       </div>
       <div class="flex justify-between text-xs text-muted-foreground">
