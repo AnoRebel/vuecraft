@@ -45,53 +45,54 @@ export function useAccessibilityChecker() {
    */
   const colorPairs = computed<ColorPair[]>(() => {
     // These are the critical color pairs that need contrast checking
+    // Using --color-* prefix for Tailwind CSS v4 compatibility
     return [
       {
         name: 'Primary Text',
-        foreground: 'var(--primary-foreground)',
-        background: 'var(--primary)',
+        foreground: 'var(--color-primary-foreground)',
+        background: 'var(--color-primary)',
         usage: 'Primary buttons, badges',
       },
       {
         name: 'Secondary Text',
-        foreground: 'var(--secondary-foreground)',
-        background: 'var(--secondary)',
+        foreground: 'var(--color-secondary-foreground)',
+        background: 'var(--color-secondary)',
         usage: 'Secondary buttons, tags',
       },
       {
         name: 'Body Text',
-        foreground: 'var(--foreground)',
-        background: 'var(--background)',
+        foreground: 'var(--color-foreground)',
+        background: 'var(--color-background)',
         usage: 'Main content text',
       },
       {
         name: 'Muted Text',
-        foreground: 'var(--muted-foreground)',
-        background: 'var(--muted)',
+        foreground: 'var(--color-muted-foreground)',
+        background: 'var(--color-muted)',
         usage: 'Placeholder text, hints',
       },
       {
         name: 'Card Text',
-        foreground: 'var(--card-foreground)',
-        background: 'var(--card)',
+        foreground: 'var(--color-card-foreground)',
+        background: 'var(--color-card)',
         usage: 'Card content',
       },
       {
         name: 'Destructive Text',
-        foreground: 'var(--destructive-foreground)',
-        background: 'var(--destructive)',
+        foreground: 'var(--color-destructive-foreground)',
+        background: 'var(--color-destructive)',
         usage: 'Error buttons, alerts',
       },
       {
         name: 'Accent Text',
-        foreground: 'var(--accent-foreground)',
-        background: 'var(--accent)',
+        foreground: 'var(--color-accent-foreground)',
+        background: 'var(--color-accent)',
         usage: 'Hover states, focus rings',
       },
       {
         name: 'Popover Text',
-        foreground: 'var(--popover-foreground)',
-        background: 'var(--popover)',
+        foreground: 'var(--color-popover-foreground)',
+        background: 'var(--color-popover)',
         usage: 'Dropdowns, tooltips',
       },
     ]

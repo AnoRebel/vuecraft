@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { useColorMode } from '~/composables/useColorMode'
+import { useResponsivePreview } from '~/composables/useResponsivePreview'
 import { generateCSSVariables } from '~/utils/cssGenerator'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Button } from '~/components/ui/button'
@@ -14,6 +15,7 @@ import ResponsivePreviewControls from '~/components/ResponsivePreviewControls.vu
 
 const { config } = useDesignSystem()
 const { toggleColorMode, isDark } = useColorMode()
+const { previewStyles, isResponsive } = useResponsivePreview()
 
 const activeTemplate = ref('dashboard')
 
@@ -132,12 +134,24 @@ onMounted(() => {
     </div>
 
     <!-- Preview Content -->
-    <div class="flex-1 overflow-auto bg-background">
-      <PreviewDashboard v-if="activeTemplate === 'dashboard'" />
-      <PreviewCards v-else-if="activeTemplate === 'cards'" />
-      <PreviewForms v-else-if="activeTemplate === 'forms'" />
-      <PreviewAuth v-else-if="activeTemplate === 'auth'" />
-      <PreviewComponents v-else-if="activeTemplate === 'components'" />
+    <div
+      class="flex-1 overflow-auto bg-muted/30 flex items-start justify-center p-4"
+      :class="{ 'p-0': isResponsive }"
+    >
+      <div
+        class="bg-background overflow-auto shadow-lg transition-all duration-200"
+        :class="{
+          'w-full h-full shadow-none': isResponsive,
+          'border rounded-lg': !isResponsive,
+        }"
+        :style="isResponsive ? {} : previewStyles"
+      >
+        <PreviewDashboard v-if="activeTemplate === 'dashboard'" />
+        <PreviewCards v-else-if="activeTemplate === 'cards'" />
+        <PreviewForms v-else-if="activeTemplate === 'forms'" />
+        <PreviewAuth v-else-if="activeTemplate === 'auth'" />
+        <PreviewComponents v-else-if="activeTemplate === 'components'" />
+      </div>
     </div>
   </div>
 </template>

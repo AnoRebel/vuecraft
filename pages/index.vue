@@ -6,11 +6,13 @@ import ConfigPanel from '~/components/config/ConfigPanel.vue'
 import PreviewPanel from '~/components/preview/PreviewPanel.vue'
 import LiveCSSEditor from '~/components/config/LiveCSSEditor.vue'
 import { Button } from '~/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 
 const { initFromUrl } = useDesignSystem()
 
 const showCSSEditor = ref(false)
 const showMobileConfig = ref(false)
+const showCSSDialog = ref(false)
 
 // Initialize from URL on mount
 onMounted(() => {
@@ -105,11 +107,11 @@ useHead({
       <main class="flex-1 overflow-hidden relative w-full">
         <PreviewPanel />
 
-        <!-- CSS Editor Toggle Button -->
+        <!-- CSS Editor Toggle Button - Desktop -->
         <Button
           variant="outline"
           size="sm"
-          class="absolute bottom-4 right-4 gap-2 hidden sm:flex"
+          class="absolute bottom-4 right-4 gap-2 hidden md:flex"
           @click="showCSSEditor = !showCSSEditor"
         >
           <svg
@@ -127,6 +129,30 @@ useHead({
             <polyline points="8 6 2 12 8 18" />
           </svg>
           {{ showCSSEditor ? 'Hide CSS' : 'Show CSS' }}
+        </Button>
+
+        <!-- CSS Editor Toggle Button - Mobile (opens dialog) -->
+        <Button
+          variant="outline"
+          size="sm"
+          class="absolute bottom-4 right-4 gap-2 flex md:hidden"
+          @click="showCSSDialog = true"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
+          </svg>
+          <span class="hidden sm:inline">Show CSS</span>
         </Button>
       </main>
 
@@ -157,5 +183,17 @@ useHead({
         <LiveCSSEditor />
       </aside>
     </div>
+
+    <!-- Mobile CSS Editor Dialog -->
+    <Dialog v-model:open="showCSSDialog">
+      <DialogContent class="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-hidden">
+        <DialogHeader>
+          <DialogTitle>CSS Editor</DialogTitle>
+        </DialogHeader>
+        <div class="overflow-auto max-h-[calc(90vh-100px)]">
+          <LiveCSSEditor />
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
