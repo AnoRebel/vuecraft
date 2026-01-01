@@ -31,17 +31,20 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 
 ### 🆕 Advanced Tools
 
-- **Accessibility Checker**: WCAG contrast ratio checking with AA/AAA compliance scores
-- **Color Palette Generator**: Generate harmonious palettes (complementary, analogous, triadic, etc.)
+- **Accessibility Checker**: WCAG contrast ratio checking with AA/AAA compliance scores and one-click fixes
+- **Color Palette Generator**: Generate harmonious palettes (complementary, analogous, triadic, etc.) with instant apply
+- **Effects Configuration**: Transparency and blur effects for glassmorphism-style UI
+- **Custom Color Picker**: Pick any custom color with native color picker
 - **Responsive Preview**: Preview themes at different device breakpoints (mobile, tablet, desktop)
 - **Theme History/Undo**: Full undo/redo support with 50-step history
 - **Brand Color Import**: Extract dominant colors from uploaded logos/images
 - **Color Blindness Simulation**: Preview for protanopia, deuteranopia, tritanopia, achromatopsia
-- **Element Inspector**: Inspect preview elements to see Tailwind classes and CSS variables
+- **Element Inspector**: Hover to inspect preview elements, see component names, Tailwind classes, and CSS variables
 - **Theme Comparison**: Side-by-side diff view to compare themes
 - **Animation Customizer**: Configure transition timing, easing curves, and animation effects
 - **Keyboard Shortcuts**: Power-user shortcuts (Ctrl+Z, Ctrl+E, Ctrl+D, etc.)
 - **Theme Gallery**: Browse and fork community themes
+- **Drag-and-Drop Sections**: Reorder configuration sections with drag-and-drop
 
 ### Export Options
 
@@ -52,6 +55,7 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 ### Authentication
 
 - **OAuth Support**: Sign in with Google or GitHub
+- **Passkey/WebAuthn**: Passwordless authentication with biometric or security key
 - **Email/Password**: Traditional email authentication
 - **Session Management**: Secure session handling with nuxt-auth-utils
 
@@ -94,7 +98,8 @@ Preview your theme at different device sizes.
 - **Framework**: [Nuxt 4.2](https://nuxt.com/) with Vue 3.5
 - **Styling**: [Tailwind CSS v4.1](https://tailwindcss.com/) (config-less)
 - **Components**: [Reka UI 2.7](https://reka-ui.com/) (Vue port of Radix UI)
-- **Authentication**: [nuxt-auth-utils](https://github.com/Atinux/nuxt-auth-utils)
+- **Authentication**: [nuxt-auth-utils](https://github.com/Atinux/nuxt-auth-utils) with WebAuthn
+- **Drag-and-Drop**: [@vue-dnd-kit/core](https://vue-dnd-kit.netlify.app/)
 - **Tour Guide**: [v-tour-guide](https://www.npmjs.com/package/v-tour-guide)
 - **Icons**: [@nuxt/icon](https://nuxt.com/modules/icon)
 - **Fonts**: [@nuxt/fonts](https://nuxt.com/modules/fonts)
@@ -298,8 +303,16 @@ Elegant rose pink metallic theme.
 
 - Base color (Neutral, Stone, Zinc, Gray, Slate)
 - Accent theme (20+ colors)
+- Custom color picker
 - Border radius
 - Shadow intensity
+
+### Effects
+
+- Effect presets (None, Subtle Glass, Glassmorphism, Frosted)
+- Blur amount control
+- Header/Sidebar/Card transparency
+- Glassmorphism toggle
 
 ### Typography
 
@@ -332,14 +345,19 @@ vuecraft/
 ├── assets/css/              # Global styles
 ├── components/
 │   ├── config/              # Configuration panel components
+│   │   ├── EffectsConfig.vue
+│   │   ├── SortableSectionItem.vue
+│   │   ├── SortableSectionList.vue
+│   │   └── ...
 │   ├── preview/             # Preview template components
+│   │   ├── ElementInspector.vue
+│   │   └── ...
 │   ├── ui/                  # Reusable UI components
 │   ├── AccessibilityPanel.vue
 │   ├── AuthDialog.vue
 │   ├── BrandColorImportDialog.vue
 │   ├── ColorBlindnessControls.vue
 │   ├── ColorPalettePanel.vue
-│   ├── ElementInspectorOverlay.vue
 │   ├── ExportDialog.vue
 │   ├── KeyboardShortcutsDialog.vue
 │   ├── ResponsivePreviewControls.vue
@@ -355,7 +373,6 @@ vuecraft/
 │   ├── useColorBlindnessSimulation.ts
 │   ├── useColorPaletteGenerator.ts
 │   ├── useDesignSystem.ts
-│   ├── useElementInspector.ts
 │   ├── useKeyboardShortcuts.ts
 │   ├── useResponsivePreview.ts
 │   ├── useThemeComparison.ts
@@ -365,7 +382,8 @@ vuecraft/
 │   ├── defaults.ts          # Default values and presets
 │   └── themes.ts            # Theme color definitions (OKLCH)
 ├── server/
-│   └── api/auth/            # Authentication endpoints
+│   ├── api/auth/            # Authentication endpoints
+│   └── api/webauthn/        # Passkey/WebAuthn endpoints
 ├── utils/
 │   ├── cliGenerator.ts      # CLI command generation
 │   ├── colorUtils.ts        # Color manipulation utilities
@@ -373,6 +391,8 @@ vuecraft/
 │   ├── designTokenExporter.ts
 │   ├── nuxtUIGenerator.ts
 │   └── tailwindGenerator.ts
+├── plugins/
+│   └── vue-dnd-kit.client.ts # Drag-and-drop plugin
 ├── pages/
 │   └── index.vue
 └── nuxt.config.ts
