@@ -6,11 +6,13 @@ import { useResponsivePreview } from '~/composables/useResponsivePreview'
 import { generateCSSVariables } from '~/utils/cssGenerator'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Button } from '~/components/ui/button'
+import { Tooltip } from '~/components/ui/tooltip'
 import PreviewDashboard from './PreviewDashboard.vue'
 import PreviewCards from './PreviewCards.vue'
 import PreviewForms from './PreviewForms.vue'
 import PreviewAuth from './PreviewAuth.vue'
 import PreviewComponents from './PreviewComponents.vue'
+import ElementInspector from './ElementInspector.vue'
 import ResponsivePreviewControls from '~/components/ResponsivePreviewControls.vue'
 
 const { config } = useDesignSystem()
@@ -18,6 +20,8 @@ const { toggleColorMode, isDark } = useColorMode()
 const { previewStyles, isResponsive } = useResponsivePreview()
 
 const activeTemplate = ref('dashboard')
+const inspectorEnabled = ref(false)
+const previewContainerRef = ref<HTMLElement | null>(null)
 
 // Generate CSS variables from config - this computed will reactively update
 const generatedCSS = computed(() => {
@@ -100,6 +104,32 @@ onMounted(() => {
           <ResponsivePreviewControls />
           <div class="w-px h-6 bg-border mx-2" />
         </div>
+        <!-- Element Inspector Toggle -->
+        <Tooltip content="Element Inspector" side="bottom">
+          <Button
+            variant="ghost"
+            size="icon"
+            :class="{ 'bg-blue-500/10 text-blue-500': inspectorEnabled }"
+            @click="inspectorEnabled = !inspectorEnabled"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8" />
+              <path d="M3 16.2V21m0 0h4.8M3 21l6-6" />
+              <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6" />
+              <path d="M3 7.8V3m0 0h4.8M3 3l6 6" />
+            </svg>
+          </Button>
+        </Tooltip>
         <Button
           variant="ghost"
           size="icon"
@@ -152,10 +182,12 @@ onMounted(() => {
       :class="{ 'p-0': isResponsive }"
     >
       <div
-        class="bg-background overflow-auto shadow-lg transition-all duration-200"
+        ref="previewContainerRef"
+        class="bg-background overflow-auto shadow-lg transition-all duration-200 relative"
         :class="{
           'w-full h-full shadow-none': isResponsive,
           'border rounded-lg': !isResponsive,
+          'cursor-crosshair': inspectorEnabled,
         }"
         :style="isResponsive ? {} : previewStyles"
       >
@@ -164,7 +196,54 @@ onMounted(() => {
         <PreviewForms v-else-if="activeTemplate === 'forms'" />
         <PreviewAuth v-else-if="activeTemplate === 'auth'" />
         <PreviewComponents v-else-if="activeTemplate === 'components'" />
+
+        <!-- Element Inspector Overlay -->
+        <ElementInspector
+          :enabled="inspectorEnabled"
+          :container-ref="previewContainerRef"
+          @close="inspectorEnabled = false"
+        />
       </div>
+    </div>
+
+    <!-- Inspector Mode Indicator -->
+    <div
+      v-if="inspectorEnabled"
+      class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-blue-500 text-white text-xs rounded-full shadow-lg flex items-center gap-2"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8" />
+        <path d="M3 16.2V21m0 0h4.8M3 21l6-6" />
+        <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6" />
+        <path d="M3 7.8V3m0 0h4.8M3 3l6 6" />
+      </svg>
+      <span>Inspector Mode</span>
+      <button class="ml-1 hover:bg-white/20 rounded p-0.5" @click="inspectorEnabled = false">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
     </div>
   </div>
 </template>
