@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
 interface Props {
   enabled: boolean
@@ -15,6 +15,21 @@ defineEmits<{
 const hoveredElement = ref<HTMLElement | null>(null)
 const tooltipPosition = ref({ x: 0, y: 0 })
 const highlightBox = ref({ x: 0, y: 0, width: 0, height: 0 })
+
+// Window dimensions for tooltip positioning
+const windowSize = ref({ width: 0, height: 0 })
+
+function updateWindowSize() {
+  if (typeof window !== 'undefined') {
+    windowSize.value = { width: window.innerWidth, height: window.innerHeight }
+  }
+}
+
+// Computed tooltip position that stays within viewport
+const safeTooltipPosition = computed(() => ({
+  left: `${Math.min(tooltipPosition.value.x, windowSize.value.width - 280)}px`,
+  top: `${Math.min(tooltipPosition.value.y, windowSize.value.height - 200)}px`,
+}))
 
 // Element info
 const elementInfo = ref({
@@ -154,6 +169,10 @@ function handleClick(event: MouseEvent) {
 
 // Setup/cleanup event listeners
 onMounted(() => {
+  updateWindowSize()
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', updateWindowSize)
+  }
   nextTick(() => {
     if (props.containerRef) {
       props.containerRef.addEventListener('mousemove', handleMouseMove)
@@ -164,6 +183,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', updateWindowSize)
+  }
   if (props.containerRef) {
     props.containerRef.removeEventListener('mousemove', handleMouseMove)
     props.containerRef.removeEventListener('mouseleave', handleMouseLeave)
@@ -191,10 +213,7 @@ onUnmounted(() => {
       <div
         v-if="hoveredElement && enabled"
         class="fixed z-[100] max-w-xs bg-popover border border-border rounded-lg shadow-lg p-3 text-xs pointer-events-none"
-        :style="{
-          left: `${Math.min(tooltipPosition.x, window.innerWidth - 280)}px`,
-          top: `${Math.min(tooltipPosition.y, window.innerHeight - 200)}px`,
-        }"
+        :style="safeTooltipPosition"
       >
         <!-- Tag/Component name -->
         <div class="flex items-center gap-2 mb-2">
