@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { useColorMode } from '~/composables/useColorMode'
 import { useResponsivePreview } from '~/composables/useResponsivePreview'
@@ -19,9 +19,18 @@ const { previewStyles, isResponsive } = useResponsivePreview()
 
 const activeTemplate = ref('dashboard')
 
-// Generate CSS variables from config
+// Generate CSS variables from config - this computed will reactively update
 const generatedCSS = computed(() => {
-  return generateCSSVariables(config)
+  // Access specific config properties to ensure reactivity
+  const { theme, typography, components, icons, layout } = config
+  return generateCSSVariables({
+    theme,
+    typography,
+    components,
+    icons,
+    layout,
+    export: config.export,
+  })
 })
 
 // Inject the generated CSS into a style tag
@@ -44,16 +53,20 @@ function updatePreviewStyles() {
   styleEl.textContent = css.replace('@import "tailwindcss";', '')
 }
 
+// Watch the generated CSS directly - this is more reliable than watching config
 watch(
-  () => config,
+  generatedCSS,
   () => {
     updatePreviewStyles()
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 
 onMounted(() => {
-  updatePreviewStyles()
+  // Ensure styles are applied after hydration
+  nextTick(() => {
+    updatePreviewStyles()
+  })
 })
 </script>
 
