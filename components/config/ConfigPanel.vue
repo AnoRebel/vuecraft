@@ -4,16 +4,16 @@ import { useStorage } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
 import { ScrollArea } from '~/components/ui/scroll-area'
-import { Switch } from '~/components/ui/switch'
-import { Label } from '~/components/ui/label'
 import PresetThemes from './PresetThemes.vue'
 import ThemeConfig from './ThemeConfig.vue'
 import TypographyConfig from './TypographyConfig.vue'
 import ComponentsConfig from './ComponentsConfig.vue'
 import IconsConfig from './IconsConfig.vue'
 import LayoutConfig from './LayoutConfig.vue'
+import EffectsConfig from './EffectsConfig.vue'
 import ComponentSelection from './ComponentSelection.vue'
 import ExportConfig from './ExportConfig.vue'
+import SortableSectionList from './SortableSectionList.vue'
 import AccessibilityPanel from '~/components/AccessibilityPanel.vue'
 import ColorPalettePanel from '~/components/ColorPalettePanel.vue'
 import ThemeGalleryDialog from '~/components/ThemeGalleryDialog.vue'
@@ -34,6 +34,7 @@ interface SectionConfig {
 const defaultSections: SectionConfig[] = [
   { id: 'presets', label: 'Preset Themes', visible: true },
   { id: 'theme', label: 'Theme', visible: true },
+  { id: 'effects', label: 'Effects', visible: true },
   { id: 'typography', label: 'Typography', visible: true },
   { id: 'components', label: 'Components', visible: true },
   { id: 'icons', label: 'Icons', visible: true },
@@ -59,22 +60,9 @@ function toggleSection(id: string) {
   }
 }
 
-// Move section up in order
-function moveSectionUp(index: number) {
-  if (index > 0) {
-    const temp = sectionConfigs.value[index]!
-    sectionConfigs.value[index] = sectionConfigs.value[index - 1]!
-    sectionConfigs.value[index - 1] = temp
-  }
-}
-
-// Move section down in order
-function moveSectionDown(index: number) {
-  if (index < sectionConfigs.value.length - 1) {
-    const temp = sectionConfigs.value[index]!
-    sectionConfigs.value[index] = sectionConfigs.value[index + 1]!
-    sectionConfigs.value[index + 1] = temp
-  }
+// Handle reorder from drag-and-drop
+function handleReorder(reorderedSections: SectionConfig[]) {
+  sectionConfigs.value = reorderedSections
 }
 
 // Reset to defaults
@@ -86,9 +74,9 @@ function resetSections() {
 <template>
   <div class="flex h-full flex-col">
     <!-- Header -->
-    <div class="flex items-center justify-between border-b px-4 py-3">
-      <h2 class="font-semibold">Configuration</h2>
-      <div class="flex gap-1" data-tour-guide="shuffle-reset-buttons">
+    <div class="flex items-center justify-between border-b px-4 py-3 min-w-0">
+      <h2 class="font-semibold flex-shrink-0">Configuration</h2>
+      <div class="flex gap-1 flex-shrink-0" data-tour-guide="shuffle-reset-buttons">
         <!-- Section Settings Toggle -->
         <Button
           variant="ghost"
@@ -115,7 +103,7 @@ function resetSections() {
             <circle cx="12" cy="12" r="3" />
           </svg>
         </Button>
-        <Button variant="ghost" size="sm" class="h-8 px-2" @click="randomize">
+        <Button variant="ghost" size="icon" class="h-8 w-8" title="Shuffle theme" @click="randomize">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"
@@ -133,9 +121,8 @@ function resetSections() {
             <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" />
             <path d="m18 14 4 4-4 4" />
           </svg>
-          <span class="ml-1 hidden sm:inline">Shuffle</span>
         </Button>
-        <Button variant="ghost" size="sm" class="h-8 px-2" @click="resetAll">
+        <Button variant="ghost" size="icon" class="h-8 w-8" title="Reset all" @click="resetAll">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"
@@ -150,7 +137,6 @@ function resetSections() {
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path d="M3 3v5h5" />
           </svg>
-          <span class="ml-1 hidden sm:inline">Reset</span>
         </Button>
       </div>
     </div>
@@ -158,69 +144,21 @@ function resetSections() {
     <!-- Section Settings Panel (when visible) -->
     <div
       v-if="showSectionSettings"
-      class="border-b bg-muted/30 px-4 py-3 space-y-3 max-h-[300px] overflow-y-auto"
+      class="border-b bg-muted/30 px-4 py-3 space-y-3 max-h-[350px] overflow-y-auto"
     >
       <div class="flex items-center justify-between">
-        <span class="text-xs font-medium uppercase text-muted-foreground">Customize Sections</span>
+        <span class="text-xs font-medium uppercase text-muted-foreground"
+          >Drag to Reorder Sections</span
+        >
         <Button variant="ghost" size="sm" class="h-6 px-2 text-xs" @click="resetSections">
           Reset
         </Button>
       </div>
-      <div class="space-y-1.5">
-        <div
-          v-for="(section, index) in sectionConfigs"
-          :key="section.id"
-          class="flex items-center justify-between gap-2 py-1 px-2 rounded bg-background/50"
-        >
-          <div class="flex items-center gap-2">
-            <!-- Move buttons -->
-            <div class="flex flex-col gap-0.5">
-              <button
-                class="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                :disabled="index === 0"
-                @click="moveSectionUp(index)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="m18 15-6-6-6 6" />
-                </svg>
-              </button>
-              <button
-                class="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                :disabled="index === sectionConfigs.length - 1"
-                @click="moveSectionDown(index)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-            </div>
-            <Label :for="`section-${section.id}`" class="text-xs cursor-pointer">
-              {{ section.label }}
-            </Label>
-          </div>
-          <Switch
-            :id="`section-${section.id}`"
-            :checked="section.visible"
-            @update:checked="toggleSection(section.id)"
-          />
-        </div>
-      </div>
+      <SortableSectionList
+        :sections="sectionConfigs"
+        @toggle="toggleSection"
+        @reorder="handleReorder"
+      />
     </div>
 
     <!-- Config Sections -->
@@ -253,6 +191,7 @@ function resetSections() {
             </Button>
           </div>
 
+          <EffectsConfig v-else-if="section.id === 'effects'" />
           <TypographyConfig v-else-if="section.id === 'typography'" />
           <ComponentsConfig v-else-if="section.id === 'components'" />
           <IconsConfig v-else-if="section.id === 'icons'" />
