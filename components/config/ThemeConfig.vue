@@ -79,6 +79,7 @@ const currentRadiusDisplay = computed(() => {
         :model-value="config.theme.baseColor"
         :options="BASE_COLORS"
         label="Base Color"
+        :show-format="true"
         @update:model-value="(v) => setTheme({ baseColor: v as any })"
       />
 
