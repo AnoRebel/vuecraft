@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import { useDesignSystem, useConfigOptions } from '~/composables/useDesignSystem'
 import ConfigSection from './ConfigSection.vue'
 import ColorPicker from './ColorPicker.vue'
 import OptionPicker from './OptionPicker.vue'
 import { Label } from '~/components/ui/label'
+import { Slider } from '~/components/ui/slider'
 
 const { config, setTheme } = useDesignSystem()
 const { BASE_COLORS, ACCENT_THEMES, RADIUS_OPTIONS, SHADOW_INTENSITIES } = useConfigOptions()
@@ -15,6 +17,54 @@ const neutralThemes = ACCENT_THEMES.filter((t) =>
 const vibrantThemes = ACCENT_THEMES.filter(
   (t) => !['neutral', 'stone', 'zinc', 'gray', 'slate'].includes(t.name)
 )
+
+// Custom radius value support
+const showCustomRadius = ref(false)
+const customRadiusValue = ref(0.5)
+
+// Map preset to slider value
+const radiusPresetToValue: Record<string, number> = {
+  none: 0,
+  sm: 0.25,
+  md: 0.5,
+  lg: 0.75,
+  xl: 1,
+  full: 1.5,
+}
+
+// Initialize custom radius from current preset
+watch(
+  () => config.theme.radius,
+  (preset) => {
+    if (!showCustomRadius.value) {
+      customRadiusValue.value = radiusPresetToValue[preset] ?? 0.5
+    }
+  },
+  { immediate: true }
+)
+
+// Get closest preset from custom value
+function getClosestPreset(value: number): string {
+  const presets = Object.entries(radiusPresetToValue)
+  let closest = presets[0]!
+  let minDiff = Math.abs(value - closest[1])
+
+  for (const [name, presetValue] of presets) {
+    const diff = Math.abs(value - presetValue)
+    if (diff < minDiff) {
+      minDiff = diff
+      closest = [name, presetValue]
+    }
+  }
+
+  return closest[0]
+}
+
+// Current radius display value
+const currentRadiusDisplay = computed(() => {
+  const option = RADIUS_OPTIONS.find((r) => r.name === config.theme.radius)
+  return option?.value ?? '0.5rem'
+})
 </script>
 
 <template>
@@ -29,6 +79,7 @@ const vibrantThemes = ACCENT_THEMES.filter(
         :model-value="config.theme.baseColor"
         :options="BASE_COLORS"
         label="Base Color"
+        :show-format="true"
         @update:model-value="(v) => setTheme({ baseColor: v as any })"
       />
 
@@ -86,13 +137,40 @@ const vibrantThemes = ACCENT_THEMES.filter(
       </div>
 
       <!-- Border Radius -->
-      <OptionPicker
-        :model-value="config.theme.radius"
-        :options="RADIUS_OPTIONS.map((r) => ({ name: r.name, label: r.label }))"
-        label="Border Radius"
-        :columns="3"
-        @update:model-value="(v) => setTheme({ radius: v as any })"
-      />
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <Label>Border Radius</Label>
+          <span class="text-xs text-muted-foreground font-mono">{{ currentRadiusDisplay }}</span>
+        </div>
+
+        <OptionPicker
+          :model-value="config.theme.radius"
+          :options="RADIUS_OPTIONS.map((r) => ({ name: r.name, label: r.label }))"
+          :columns="3"
+          @update:model-value="(v) => setTheme({ radius: v as any })"
+        />
+
+        <!-- Custom radius slider -->
+        <div class="space-y-2 pt-2 border-t">
+          <div class="flex items-center justify-between">
+            <Label class="text-xs">Fine-tune</Label>
+            <span class="text-xs text-muted-foreground">{{ customRadiusValue.toFixed(2) }}rem</span>
+          </div>
+          <Slider
+            v-model="customRadiusValue"
+            :min="0"
+            :max="2"
+            :step="0.05"
+            class="w-full"
+            @update:model-value="
+              (v: number) => {
+                customRadiusValue = v
+                setTheme({ radius: getClosestPreset(v) as any })
+              }
+            "
+          />
+        </div>
+      </div>
 
       <!-- Shadow Intensity -->
       <OptionPicker

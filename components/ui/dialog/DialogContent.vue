@@ -26,7 +26,7 @@ const dialog = inject<{
     >
       <div
         v-if="dialog?.open.value"
-        class="fixed inset-0 z-50 bg-black/80"
+        class="fixed inset-0 z-[100] bg-black/80"
         @click="dialog?.close()"
       />
     </Transition>
@@ -42,7 +42,7 @@ const dialog = inject<{
         v-if="dialog?.open.value"
         :class="
           cn(
-            'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg',
+            'fixed left-1/2 top-1/2 z-[100] grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg',
             props.class
           )
         "

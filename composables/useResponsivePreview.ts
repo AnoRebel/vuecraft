@@ -19,6 +19,12 @@ export interface CustomDimensions {
   height: number
 }
 
+// Shared state (singleton pattern)
+const activePreset = ref<string | null>(null)
+const customDimensions = ref<CustomDimensions | null>(null)
+const isRotated = ref(false)
+const zoom = ref(100) // Percentage
+
 const DEVICE_PRESETS: DevicePreset[] = [
   // Mobile
   {
@@ -133,11 +139,6 @@ const DEVICE_PRESETS: DevicePreset[] = [
 ]
 
 export function useResponsivePreview() {
-  const activePreset = ref<string | null>(null)
-  const customDimensions = ref<CustomDimensions | null>(null)
-  const isRotated = ref(false)
-  const zoom = ref(100) // Percentage
-
   /**
    * Get all available device presets
    */

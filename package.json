@@ -35,7 +35,7 @@
     "vue": "^3.5.26",
     "vue-router": "^4.6.4",
     "vue-sonner": "^2.0.9",
-    "nuxt-auth-utils": "^0.5.17"
+    "nuxt-auth-utils": "^0.5.26"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.12.1",
