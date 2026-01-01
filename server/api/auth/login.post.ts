@@ -1,24 +1,14 @@
 /**
  * Email/password login handler
- * In production, this would validate against a database
  */
 
 import { createError } from 'h3'
+import { findUserByEmail } from '~/server/utils/auth'
 
 interface LoginBody {
   email: string
   password: string
 }
-
-// Demo users for development (in production, use a database)
-const DEMO_USERS = [
-  {
-    id: 'demo-1',
-    email: 'demo@vuecraft.dev',
-    password: 'demo123',
-    name: 'Demo User',
-  },
-]
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<LoginBody>(event)
@@ -30,10 +20,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Find user (demo implementation)
-  const user = DEMO_USERS.find((u) => u.email === body.email && u.password === body.password)
+  // Find user
+  const user = findUserByEmail(body.email)
 
-  if (!user) {
+  if (!user || user.password !== body.password) {
     throw createError({
       statusCode: 401,
       message: 'Invalid email or password',
@@ -46,8 +36,8 @@ export default defineEventHandler(async (event) => {
       id: user.id,
       email: user.email,
       name: user.name,
-      provider: 'email',
-      createdAt: Date.now(),
+      provider: user.provider,
+      createdAt: user.createdAt,
     },
     loggedInAt: Date.now(),
   })
@@ -57,8 +47,8 @@ export default defineEventHandler(async (event) => {
       id: user.id,
       email: user.email,
       name: user.name,
-      provider: 'email',
-      createdAt: Date.now(),
+      provider: user.provider,
+      createdAt: user.createdAt,
     },
   }
 })

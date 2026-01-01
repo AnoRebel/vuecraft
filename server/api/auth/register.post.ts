@@ -1,9 +1,9 @@
 /**
  * Email/password registration handler
- * In production, this would store users in a database
  */
 
 import { createError } from 'h3'
+import { findUserByEmail, createUser } from '~/server/utils/auth'
 
 interface RegisterBody {
   email: string
@@ -38,20 +38,42 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Create user (demo implementation - in production, store in database)
-  const user = {
-    id: `user-${Date.now()}`,
+  // Check if user already exists
+  const existingUser = findUserByEmail(body.email)
+  if (existingUser) {
+    throw createError({
+      statusCode: 400,
+      message: 'Email already registered',
+    })
+  }
+
+  // Create user
+  const user = createUser({
     email: body.email,
     name: body.name,
-    provider: 'email' as const,
-    createdAt: Date.now(),
-  }
+    password: body.password,
+    provider: 'email',
+  })
 
   // Set session
   await setUserSession(event, {
-    user,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      provider: user.provider,
+      createdAt: user.createdAt,
+    },
     loggedInAt: Date.now(),
   })
 
-  return { user }
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      provider: user.provider,
+      createdAt: user.createdAt,
+    },
+  }
 })

@@ -17,6 +17,10 @@ export default defineNuxtConfig({
   ],
 
   // Authentication configuration
+  auth: {
+    webAuthn: true,
+  },
+
   runtimeConfig: {
     session: {
       password: process.env.NUXT_SESSION_PASSWORD || 'a-secure-password-of-at-least-32-characters',

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
@@ -18,34 +18,27 @@ const {
   loginWithGitHub,
   loginWithEmail,
   registerWithEmail,
+  registerPasskey,
+  loginWithPasskey,
   isLoading,
   error,
   clearError,
+  passkeySupported,
 } = useAuth()
 
 const mode = ref<'login' | 'register'>('login')
 const email = ref('')
 const password = ref('')
 const name = ref('')
-const passkeySupported = ref(false)
 const passkeyLoading = ref(false)
-const passkeyError = ref<string | null>(null)
 
-// Check if passkey is supported on mount
-onMounted(async () => {
-  if (
-    typeof window !== 'undefined' &&
-    window.PublicKeyCredential &&
-    typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function'
-  ) {
-    try {
-      passkeySupported.value =
-        await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-    } catch {
-      passkeySupported.value = false
-    }
+// Clear form when dialog opens/closes
+watch(
+  () => mode.value,
+  () => {
+    clearError()
   }
-})
+)
 
 async function handleEmailAuth() {
   if (mode.value === 'login') {
@@ -63,24 +56,31 @@ async function handleEmailAuth() {
   }
 }
 
-async function handlePasskeyAuth() {
-  if (!passkeySupported.value) return
+async function handlePasskeyLogin() {
+  if (!passkeySupported.value || !email.value) return
 
   passkeyLoading.value = true
-  passkeyError.value = null
-
   try {
-    // Note: Full WebAuthn implementation requires server-side challenge generation
-    // This demonstrates the client-side flow
-    // In production, you would:
-    // 1. Fetch challenge from server: GET /api/auth/passkey/challenge
-    // 2. Call navigator.credentials.get() with the challenge
-    // 3. Send the response to server: POST /api/auth/passkey/verify
+    const success = await loginWithPasskey(email.value)
+    if (success) {
+      emit('update:open', false)
+      resetForm()
+    }
+  } finally {
+    passkeyLoading.value = false
+  }
+}
 
-    passkeyError.value =
-      'Passkey authentication requires server-side WebAuthn setup. Use email/password or OAuth for now.'
-  } catch (err) {
-    passkeyError.value = err instanceof Error ? err.message : 'Passkey authentication failed'
+async function handlePasskeyRegister() {
+  if (!passkeySupported.value || !email.value) return
+
+  passkeyLoading.value = true
+  try {
+    const success = await registerPasskey(email.value)
+    if (success) {
+      emit('update:open', false)
+      resetForm()
+    }
   } finally {
     passkeyLoading.value = false
   }
@@ -90,13 +90,11 @@ function resetForm() {
   email.value = ''
   password.value = ''
   name.value = ''
-  passkeyError.value = null
   clearError()
 }
 
 function switchMode() {
   mode.value = mode.value === 'login' ? 'register' : 'login'
-  passkeyError.value = null
   clearError()
 }
 </script>
@@ -109,31 +107,8 @@ function switchMode() {
       </DialogHeader>
 
       <div class="space-y-4 mt-4">
-        <!-- OAuth & Passkey Buttons -->
+        <!-- OAuth Buttons -->
         <div class="space-y-2">
-          <!-- Passkey Button (if supported) -->
-          <Button
-            v-if="passkeySupported && mode === 'login'"
-            variant="outline"
-            class="w-full"
-            :disabled="passkeyLoading"
-            @click="handlePasskeyAuth"
-          >
-            <svg
-              class="h-4 w-4 mr-2"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
-              <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
-            </svg>
-            {{ passkeyLoading ? 'Authenticating...' : 'Continue with Passkey' }}
-          </Button>
-
           <Button variant="outline" class="w-full" :disabled="isLoading" @click="loginWithGoogle">
             <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24">
               <path
@@ -164,11 +139,6 @@ function switchMode() {
             </svg>
             Continue with GitHub
           </Button>
-
-          <!-- Passkey Error -->
-          <div v-if="passkeyError" class="text-xs text-amber-600 dark:text-amber-400">
-            {{ passkeyError }}
-          </div>
         </div>
 
         <div class="relative">
@@ -176,7 +146,7 @@ function switchMode() {
             <span class="w-full border-t" />
           </div>
           <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-background px-2 text-muted-foreground">Or continue with email</span>
+            <span class="bg-background px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
 
@@ -207,6 +177,66 @@ function switchMode() {
             {{ mode === 'login' ? 'Sign In' : 'Create Account' }}
           </Button>
         </form>
+
+        <!-- Passkey Section -->
+        <div v-if="passkeySupported" class="space-y-2">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t" />
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-background px-2 text-muted-foreground">Or use a passkey</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <Button
+              v-if="mode === 'login'"
+              variant="outline"
+              class="flex-1"
+              :disabled="passkeyLoading || !email"
+              @click="handlePasskeyLogin"
+            >
+              <svg
+                class="h-4 w-4 mr-2"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
+                <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+              </svg>
+              {{ passkeyLoading ? 'Authenticating...' : 'Sign in with Passkey' }}
+            </Button>
+            <Button
+              v-else
+              variant="outline"
+              class="flex-1"
+              :disabled="passkeyLoading || !email"
+              @click="handlePasskeyRegister"
+            >
+              <svg
+                class="h-4 w-4 mr-2"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
+                <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+              </svg>
+              {{ passkeyLoading ? 'Registering...' : 'Register Passkey' }}
+            </Button>
+          </div>
+          <p class="text-xs text-center text-muted-foreground">
+            {{ mode === 'login' ? 'Enter your email first, then use your passkey' : 'Enter your email first, then register a passkey' }}
+          </p>
+        </div>
 
         <p class="text-center text-sm text-muted-foreground">
           {{ mode === 'login' ? "Don't have an account?" : 'Already have an account?' }}
