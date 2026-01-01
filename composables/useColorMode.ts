@@ -1,3 +1,4 @@
+import { computed, readonly } from 'vue'
 import { useColorMode as useVueUseColorMode, useDark } from '@vueuse/core'
 
 export function useColorMode() {

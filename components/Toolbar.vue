@@ -6,15 +6,22 @@ import { Tooltip } from '~/components/ui/tooltip'
 import ExportDialog from './ExportDialog.vue'
 import ImportDialog from './ImportDialog.vue'
 import ShareDialog from './ShareDialog.vue'
+import AuthDialog from './AuthDialog.vue'
+import UserMenu from './UserMenu.vue'
 import { useAppTour } from '~/composables/useAppTour'
 import { useColorMode } from '~/composables/useColorMode'
+import { useAuth } from '~/composables/useAuth'
 
 const exportDialogOpen = ref(false)
 const importDialogOpen = ref(false)
 const shareDialogOpen = ref(false)
+const authDialogOpen = ref(false)
 
 // Color mode
 const { toggleColorMode, isDark } = useColorMode()
+
+// Auth
+const { isLoggedIn, user } = useAuth()
 
 // Tour Guide
 const { tourSteps, tourLabels } = useAppTour()
@@ -217,7 +224,7 @@ function startTour() {
         href="https://github.com/AnoRebel/vuecraft"
         target="_blank"
         rel="noopener noreferrer"
-        class="hidden sm:block ml-1 sm:ml-2"
+        class="hidden sm:block"
       >
         <Button variant="ghost" size="icon">
           <svg
@@ -233,6 +240,34 @@ function startTour() {
           </svg>
         </Button>
       </a>
+
+      <Separator orientation="vertical" class="h-6 hidden sm:block" />
+
+      <!-- Auth Button / User Menu -->
+      <UserMenu v-if="isLoggedIn" :user="user!" />
+      <Tooltip v-else content="Sign in" side="bottom">
+        <Button
+          variant="ghost"
+          size="icon"
+          data-tour-guide="auth-button"
+          @click="authDialogOpen = true"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </Button>
+      </Tooltip>
     </div>
   </div>
 
@@ -253,4 +288,5 @@ function startTour() {
   <ExportDialog v-model:open="exportDialogOpen" />
   <ImportDialog v-model:open="importDialogOpen" />
   <ShareDialog v-model:open="shareDialogOpen" />
+  <AuthDialog v-model:open="authDialogOpen" />
 </template>

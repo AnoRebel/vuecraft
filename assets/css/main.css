@@ -232,6 +232,74 @@ body {
   outline-offset: 2px;
 }
 
+/* Cursor styles for interactive elements */
+button,
+[role='button'],
+[type='button'],
+[type='submit'],
+[type='reset'],
+a[href],
+summary,
+[tabindex]:not([tabindex='-1']) {
+  cursor: pointer;
+}
+
+button:disabled,
+[role='button'][aria-disabled='true'],
+input:disabled,
+select:disabled,
+textarea:disabled,
+[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='url'],
+input[type='number'],
+textarea,
+[contenteditable='true'] {
+  cursor: text;
+}
+
+input[type='range'] {
+  cursor: grab;
+}
+
+input[type='range']:active {
+  cursor: grabbing;
+}
+
+.cursor-move,
+[draggable='true'] {
+  cursor: move;
+}
+
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+/* Loading cursor for loading states */
+.cursor-wait,
+[aria-busy='true'] {
+  cursor: wait;
+}
+
+/* Help cursor for informational elements */
+abbr[title],
+[data-tooltip],
+.cursor-help {
+  cursor: help;
+}
+
 /* Animation keyframes */
 @keyframes fade-in {
   from {

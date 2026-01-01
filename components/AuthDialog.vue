@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
@@ -27,6 +27,25 @@ const mode = ref<'login' | 'register'>('login')
 const email = ref('')
 const password = ref('')
 const name = ref('')
+const passkeySupported = ref(false)
+const passkeyLoading = ref(false)
+const passkeyError = ref<string | null>(null)
+
+// Check if passkey is supported on mount
+onMounted(async () => {
+  if (
+    typeof window !== 'undefined' &&
+    window.PublicKeyCredential &&
+    typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function'
+  ) {
+    try {
+      passkeySupported.value =
+        await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+    } catch {
+      passkeySupported.value = false
+    }
+  }
+})
 
 async function handleEmailAuth() {
   if (mode.value === 'login') {
@@ -44,15 +63,40 @@ async function handleEmailAuth() {
   }
 }
 
+async function handlePasskeyAuth() {
+  if (!passkeySupported.value) return
+
+  passkeyLoading.value = true
+  passkeyError.value = null
+
+  try {
+    // Note: Full WebAuthn implementation requires server-side challenge generation
+    // This demonstrates the client-side flow
+    // In production, you would:
+    // 1. Fetch challenge from server: GET /api/auth/passkey/challenge
+    // 2. Call navigator.credentials.get() with the challenge
+    // 3. Send the response to server: POST /api/auth/passkey/verify
+
+    passkeyError.value =
+      'Passkey authentication requires server-side WebAuthn setup. Use email/password or OAuth for now.'
+  } catch (err) {
+    passkeyError.value = err instanceof Error ? err.message : 'Passkey authentication failed'
+  } finally {
+    passkeyLoading.value = false
+  }
+}
+
 function resetForm() {
   email.value = ''
   password.value = ''
   name.value = ''
+  passkeyError.value = null
   clearError()
 }
 
 function switchMode() {
   mode.value = mode.value === 'login' ? 'register' : 'login'
+  passkeyError.value = null
   clearError()
 }
 </script>
@@ -65,8 +109,31 @@ function switchMode() {
       </DialogHeader>
 
       <div class="space-y-4 mt-4">
-        <!-- OAuth Buttons -->
+        <!-- OAuth & Passkey Buttons -->
         <div class="space-y-2">
+          <!-- Passkey Button (if supported) -->
+          <Button
+            v-if="passkeySupported && mode === 'login'"
+            variant="outline"
+            class="w-full"
+            :disabled="passkeyLoading"
+            @click="handlePasskeyAuth"
+          >
+            <svg
+              class="h-4 w-4 mr-2"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
+              <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+            </svg>
+            {{ passkeyLoading ? 'Authenticating...' : 'Continue with Passkey' }}
+          </Button>
+
           <Button variant="outline" class="w-full" :disabled="isLoading" @click="loginWithGoogle">
             <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24">
               <path
@@ -97,6 +164,11 @@ function switchMode() {
             </svg>
             Continue with GitHub
           </Button>
+
+          <!-- Passkey Error -->
+          <div v-if="passkeyError" class="text-xs text-amber-600 dark:text-amber-400">
+            {{ passkeyError }}
+          </div>
         </div>
 
         <div class="relative">
