@@ -103,7 +103,13 @@ function resetSections() {
             <circle cx="12" cy="12" r="3" />
           </svg>
         </Button>
-        <Button variant="ghost" size="icon" class="h-8 w-8" title="Shuffle theme" @click="randomize">
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-8 w-8"
+          title="Shuffle theme"
+          @click="randomize"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"
