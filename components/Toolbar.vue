@@ -7,10 +7,14 @@ import ExportDialog from './ExportDialog.vue'
 import ImportDialog from './ImportDialog.vue'
 import ShareDialog from './ShareDialog.vue'
 import { useAppTour } from '~/composables/useAppTour'
+import { useColorMode } from '~/composables/useColorMode'
 
 const exportDialogOpen = ref(false)
 const importDialogOpen = ref(false)
 const shareDialogOpen = ref(false)
+
+// Color mode
+const { toggleColorMode, isDark } = useColorMode()
 
 // Tour Guide
 const { tourSteps, tourLabels } = useAppTour()
@@ -52,7 +56,49 @@ function startTour() {
 
     <!-- Right side - Actions -->
     <div class="flex items-center gap-1 sm:gap-2">
-      <!-- Tour Button - Hidden on very small screens -->
+      <!-- Theme Toggle - Visible on all screens -->
+      <Tooltip content="Toggle theme" side="bottom">
+        <Button variant="ghost" size="icon" data-tour-guide="theme-toggle" @click="toggleColorMode">
+          <svg
+            v-if="isDark"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+        </Button>
+      </Tooltip>
+
+      <!-- Tour Button - Hidden on small screens -->
       <Tooltip content="Take a tour" side="bottom">
         <Button
           variant="ghost"
@@ -81,34 +127,12 @@ function startTour() {
 
       <Separator orientation="vertical" class="h-6 hidden sm:block" />
 
+      <!-- Import Button - Single button with responsive content -->
       <Tooltip content="Import configuration" side="bottom">
         <Button
           variant="ghost"
           size="icon"
-          class="sm:hidden"
-          data-tour-guide="import-button"
-          @click="importDialogOpen = true"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" x2="12" y1="3" y2="15" />
-          </svg>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="hidden sm:flex"
+          class="sm:size-auto sm:h-9 sm:px-3"
           data-tour-guide="import-button"
           @click="importDialogOpen = true"
         >
@@ -131,36 +155,12 @@ function startTour() {
         </Button>
       </Tooltip>
 
+      <!-- Share Button - Single button with responsive content -->
       <Tooltip content="Share configuration" side="bottom">
         <Button
           variant="ghost"
           size="icon"
-          class="sm:hidden"
-          data-tour-guide="share-button"
-          @click="shareDialogOpen = true"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-            <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-          </svg>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="hidden sm:flex"
+          class="sm:size-auto sm:h-9 sm:px-3"
           data-tour-guide="share-button"
           @click="shareDialogOpen = true"
         >
@@ -187,6 +187,7 @@ function startTour() {
 
       <Separator orientation="vertical" class="h-6 hidden sm:block" />
 
+      <!-- Export Button -->
       <Button
         size="sm"
         class="gap-1 sm:gap-2"
@@ -211,6 +212,7 @@ function startTour() {
         <span class="hidden min-[400px]:inline">Export</span>
       </Button>
 
+      <!-- GitHub Link - Hidden on small screens -->
       <a
         href="https://github.com/AnoRebel/vuecraft"
         target="_blank"
