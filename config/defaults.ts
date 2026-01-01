@@ -170,6 +170,16 @@ export const FONT_FAMILIES = [
   { name: 'public-sans', label: 'Public Sans', category: 'sans-serif' },
   { name: 'outfit', label: 'Outfit', category: 'sans-serif' },
   { name: 'geist', label: 'Geist', category: 'sans-serif' },
+  { name: 'poppins', label: 'Poppins', category: 'sans-serif' },
+  { name: 'open-sans', label: 'Open Sans', category: 'sans-serif' },
+  { name: 'lato', label: 'Lato', category: 'sans-serif' },
+  { name: 'montserrat', label: 'Montserrat', category: 'sans-serif' },
+  { name: 'work-sans', label: 'Work Sans', category: 'sans-serif' },
+  { name: 'plus-jakarta-sans', label: 'Plus Jakarta Sans', category: 'sans-serif' },
+  { name: 'space-grotesk', label: 'Space Grotesk', category: 'sans-serif' },
+  { name: 'manrope', label: 'Manrope', category: 'sans-serif' },
+  { name: 'lexend', label: 'Lexend', category: 'sans-serif' },
+  { name: 'sora', label: 'Sora', category: 'sans-serif' },
 ] as const
 
 export const MONO_FONT_FAMILIES = [
@@ -177,6 +187,12 @@ export const MONO_FONT_FAMILIES = [
   { name: 'geist-mono', label: 'Geist Mono' },
   { name: 'fira-code', label: 'Fira Code' },
   { name: 'source-code-pro', label: 'Source Code Pro' },
+  { name: 'ibm-plex-mono', label: 'IBM Plex Mono' },
+  { name: 'roboto-mono', label: 'Roboto Mono' },
+  { name: 'inconsolata', label: 'Inconsolata' },
+  { name: 'ubuntu-mono', label: 'Ubuntu Mono' },
+  { name: 'cascadia-code', label: 'Cascadia Code' },
+  { name: 'space-mono', label: 'Space Mono' },
 ] as const
 
 export const FONT_SCALES = [

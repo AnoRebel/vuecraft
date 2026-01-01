@@ -33,7 +33,9 @@ function startTour() {
 </script>
 
 <template>
-  <div class="flex items-center justify-between border-b px-2 sm:px-4 py-2 bg-background">
+  <div
+    class="flex items-center justify-between border-b px-2 sm:px-4 py-2 bg-background/[--effects-header-opacity,1] backdrop-blur-[--effects-blur,0px] supports-[backdrop-filter]:bg-background/[--effects-header-opacity,1]"
+  >
     <!-- Left side - Logo & Title -->
     <div class="flex items-center gap-2 sm:gap-3">
       <div class="flex items-center gap-2" data-tour-guide="app-logo">
