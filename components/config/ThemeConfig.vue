@@ -136,7 +136,10 @@ const currentRadiusDisplay = computed(() => {
                   : 'border-transparent',
               ]"
               :style="{ backgroundColor: theme.color }"
-              @click="useCustomColor = false; setTheme({ accentTheme: theme.name as any })"
+              @click="
+                useCustomColor = false
+                setTheme({ accentTheme: theme.name as any })
+              "
             >
               <span class="sr-only">{{ theme.label }}</span>
             </button>
@@ -158,7 +161,10 @@ const currentRadiusDisplay = computed(() => {
                   : 'border-transparent',
               ]"
               :style="{ backgroundColor: theme.color }"
-              @click="useCustomColor = false; setTheme({ accentTheme: theme.name as any })"
+              @click="
+                useCustomColor = false
+                setTheme({ accentTheme: theme.name as any })
+              "
             >
               <span class="sr-only">{{ theme.label }}</span>
             </button>
@@ -187,7 +193,12 @@ const currentRadiusDisplay = computed(() => {
         </div>
 
         <p class="text-xs text-muted-foreground">
-          Selected: {{ useCustomColor ? 'Custom' : ACCENT_THEMES.find((t) => t.name === config.theme.accentTheme)?.label }}
+          Selected:
+          {{
+            useCustomColor
+              ? 'Custom'
+              : ACCENT_THEMES.find((t) => t.name === config.theme.accentTheme)?.label
+          }}
         </p>
       </div>
 

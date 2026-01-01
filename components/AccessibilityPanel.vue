@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useAccessibilityChecker, type AccessibilityIssue } from '~/composables/useAccessibilityChecker'
+import {
+  useAccessibilityChecker,
+  type AccessibilityIssue,
+} from '~/composables/useAccessibilityChecker'
 
 const { generateReport, getContrastBadgeClass, getScoreClass, formatRatio, getLevelLabel } =
   useAccessibilityChecker()
@@ -136,12 +139,7 @@ defineExpose({ runCheck })
               <Icon name="lucide:undo-2" class="h-3 w-3 mr-1" />
               Reset All
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              class="h-6 px-2 text-xs"
-              @click="applyAllFixes"
-            >
+            <Button variant="outline" size="sm" class="h-6 px-2 text-xs" @click="applyAllFixes">
               <Icon name="lucide:wand-2" class="h-3 w-3 mr-1" />
               Fix All
             </Button>
@@ -170,12 +168,7 @@ defineExpose({ runCheck })
               <span class="text-xs text-muted-foreground">Suggested:</span>
               <code class="text-xs bg-muted px-1.5 py-0.5 rounded">{{ issue.suggestedColor }}</code>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              class="h-6 px-2 text-xs"
-              @click="applyFix(issue)"
-            >
+            <Button variant="outline" size="sm" class="h-6 px-2 text-xs" @click="applyFix(issue)">
               <Icon name="lucide:check" class="h-3 w-3 mr-1" />
               Apply
             </Button>

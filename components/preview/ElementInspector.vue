@@ -142,9 +142,8 @@ function handleMouseMove(event: MouseEvent) {
   tooltipPosition.value = { x: event.clientX + 15, y: event.clientY + 15 }
 
   // Gather element info
-  const classes = typeof target.className === 'string'
-    ? target.className.split(' ').filter(c => c.trim())
-    : []
+  const classes =
+    typeof target.className === 'string' ? target.className.split(' ').filter((c) => c.trim()) : []
 
   elementInfo.value = {
     tagName: target.tagName.toLowerCase(),
@@ -218,7 +217,10 @@ onUnmounted(() => {
         <!-- Tag/Component name -->
         <div class="flex items-center gap-2 mb-2">
           <span class="font-mono text-blue-500">&lt;{{ elementInfo.tagName }}&gt;</span>
-          <span v-if="elementInfo.componentName" class="px-1.5 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-medium">
+          <span
+            v-if="elementInfo.componentName"
+            class="px-1.5 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-medium"
+          >
             {{ elementInfo.componentName }}
           </span>
         </div>
