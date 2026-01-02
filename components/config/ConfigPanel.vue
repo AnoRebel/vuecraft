@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import PresetThemes from './PresetThemes.vue'
 import ThemeConfig from './ThemeConfig.vue'
@@ -19,6 +20,33 @@ import ColorPalettePanel from '~/components/ColorPalettePanel.vue'
 import ThemeGalleryDialog from '~/components/ThemeGalleryDialog.vue'
 
 const { resetAll, randomize } = useDesignSystem()
+
+// Search and filter state
+const searchQuery = ref('')
+const selectedCategoryFilter = ref<string>('all')
+
+const categoryFilters = [
+  { id: 'all', label: 'All' },
+  { id: 'appearance', label: 'Appearance' },
+  { id: 'typography', label: 'Typography' },
+  { id: 'components', label: 'Components' },
+  { id: 'tools', label: 'Tools' },
+]
+
+// Map sections to categories for filtering
+const sectionCategories: Record<string, string> = {
+  presets: 'appearance',
+  theme: 'appearance',
+  effects: 'appearance',
+  typography: 'typography',
+  components: 'components',
+  icons: 'components',
+  layout: 'components',
+  selection: 'components',
+  export: 'tools',
+  accessibility: 'tools',
+  palette: 'tools',
+}
 
 // Feature dialogs
 const showGallery = ref(false)
@@ -47,9 +75,22 @@ const defaultSections: SectionConfig[] = [
 
 const sectionConfigs = useStorage<SectionConfig[]>('vuecraft-section-config', defaultSections)
 
-// Get visible sections in order
+// Get visible sections in order with search and category filtering
 const visibleSections = computed(() => {
-  return sectionConfigs.value.filter((s) => s.visible)
+  let sections = sectionConfigs.value.filter((s) => s.visible)
+
+  // Apply category filter
+  if (selectedCategoryFilter.value !== 'all') {
+    sections = sections.filter((s) => sectionCategories[s.id] === selectedCategoryFilter.value)
+  }
+
+  // Apply search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    sections = sections.filter((s) => s.label.toLowerCase().includes(query))
+  }
+
+  return sections
 })
 
 // Toggle section visibility
@@ -72,11 +113,11 @@ function resetSections() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col">
+  <div class="flex h-full flex-col overflow-hidden">
     <!-- Header -->
-    <div class="flex items-center justify-between border-b px-4 py-3 min-w-0">
-      <h2 class="font-semibold flex-shrink-0">Configuration</h2>
-      <div class="flex gap-1 flex-shrink-0" data-tour-guide="shuffle-reset-buttons">
+    <div class="flex items-center justify-between border-b px-3 py-2 min-w-0 flex-shrink-0">
+      <h2 class="font-semibold flex-shrink-0 text-sm">Configuration</h2>
+      <div class="flex gap-0.5 flex-shrink-0" data-tour-guide="shuffle-reset-buttons">
         <!-- Section Settings Toggle -->
         <Button
           variant="ghost"
@@ -147,16 +188,45 @@ function resetSections() {
       </div>
     </div>
 
+    <!-- Search and Filter Bar -->
+    <div class="border-b px-3 py-2 space-y-2 flex-shrink-0 bg-muted/20">
+      <div class="relative">
+        <Icon
+          name="lucide:search"
+          class="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
+        />
+        <Input
+          v-model="searchQuery"
+          placeholder="Search configurations..."
+          class="pl-7 h-7 text-xs"
+        />
+      </div>
+      <div class="flex flex-wrap gap-1">
+        <button
+          v-for="cat in categoryFilters"
+          :key="cat.id"
+          type="button"
+          :class="[
+            'px-2 py-0.5 text-[10px] rounded-full border transition-colors',
+            selectedCategoryFilter === cat.id
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'bg-transparent text-muted-foreground hover:bg-muted border-border',
+          ]"
+          @click="selectedCategoryFilter = cat.id"
+        >
+          {{ cat.label }}
+        </button>
+      </div>
+    </div>
+
     <!-- Section Settings Panel (when visible) -->
     <div
       v-if="showSectionSettings"
-      class="border-b bg-muted/30 px-4 py-3 space-y-3 max-h-[350px] overflow-y-auto"
+      class="border-b bg-muted/30 px-3 py-2 space-y-2 max-h-[300px] overflow-y-auto flex-shrink-0"
     >
       <div class="flex items-center justify-between">
-        <span class="text-xs font-medium uppercase text-muted-foreground"
-          >Drag to Reorder Sections</span
-        >
-        <Button variant="ghost" size="sm" class="h-6 px-2 text-xs" @click="resetSections">
+        <span class="text-[10px] font-medium uppercase text-muted-foreground">Drag to Reorder</span>
+        <Button variant="ghost" size="sm" class="h-5 px-2 text-[10px]" @click="resetSections">
           Reset
         </Button>
       </div>
@@ -168,7 +238,7 @@ function resetSections() {
     </div>
 
     <!-- Config Sections -->
-    <ScrollArea class="flex-1 px-4">
+    <ScrollArea class="flex-1 px-3 min-h-0">
       <div class="py-2">
         <template v-for="section in visibleSections" :key="section.id">
           <PresetThemes v-if="section.id === 'presets'" />
