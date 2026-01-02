@@ -7,6 +7,7 @@ import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import type { SerializedConfig } from '~/types/config'
 import { PRESET_THEMES } from '~/config/defaults'
+import { TWEAKCN_PRESETS, type TweakcnPreset } from '~/config/tweakcnPresets'
 
 export interface GalleryTheme {
   id: string
@@ -41,23 +42,27 @@ const STORAGE_KEY = 'vuecraft-gallery'
 
 // Convert preset themes to gallery format
 function createBuiltInThemes(): GalleryTheme[] {
-  return PRESET_THEMES.map((preset) => ({
+  const vuecraftThemes: GalleryTheme[] = PRESET_THEMES.map((preset) => ({
     id: `built-in-${preset.name}`,
     name: preset.label,
     author: 'Vuecraft',
     description: preset.description,
-    tags: [preset.name, 'preset', 'official'],
+    tags: [preset.name, 'preset', 'official', 'vuecraft'],
     config: {
       v: 1,
       t: preset.config.theme as SerializedConfig['t'],
       ty: preset.config.typography as SerializedConfig['ty'],
       c: preset.config.components as SerializedConfig['c'],
-      i: { library: 'lucide', defaultSize: 'md', strokeWidth: 'default' },
+      i: {
+        library: 'lucide' as const,
+        defaultSize: 'md' as const,
+        strokeWidth: 'default' as const,
+      },
       l: {
-        containerWidth: 'xl',
-        spacingScale: 'default',
-        sidebarWidth: 'default',
-        headerHeight: 'default',
+        containerWidth: 'xl' as const,
+        spacingScale: 'default' as const,
+        sidebarWidth: 'default' as const,
+        headerHeight: 'default' as const,
       },
     },
     preview: {
@@ -73,6 +78,66 @@ function createBuiltInThemes(): GalleryTheme[] {
     updatedAt: Date.now(),
     isBuiltIn: true,
   }))
+
+  // Convert TweakCN presets to gallery format
+  const tweakcnThemes: GalleryTheme[] = TWEAKCN_PRESETS.map((preset: TweakcnPreset) => ({
+    id: `tweakcn-${preset.id}`,
+    name: preset.label,
+    author: 'TweakCN',
+    description: preset.description,
+    tags: [...preset.tags, preset.category, 'tweakcn'],
+    config: {
+      v: 1,
+      t: {
+        baseColor: 'neutral' as const,
+        accentTheme: 'neutral' as const,
+        radius: 'md' as const,
+        shadowIntensity: 'default' as const,
+        menuAccent: 'subtle' as const,
+        menuColor: 'default' as const,
+      },
+      ty: {
+        fontFamily: 'inter' as const,
+        monoFontFamily: 'jetbrains-mono' as const,
+        fontScale: 'default' as const,
+        headingWeight: 'semibold' as const,
+        bodyLineHeight: 'normal' as const,
+      },
+      c: {
+        style: 'default' as const,
+        borderWidth: 'default' as const,
+        animationSpeed: 'default' as const,
+        focusRingWidth: 'default' as const,
+        focusRingOffset: 'default' as const,
+      },
+      i: {
+        library: 'lucide' as const,
+        defaultSize: 'md' as const,
+        strokeWidth: 'default' as const,
+      },
+      l: {
+        containerWidth: 'xl' as const,
+        spacingScale: 'default' as const,
+        sidebarWidth: 'default' as const,
+        headerHeight: 'default' as const,
+      },
+    },
+    preview: {
+      primaryColor: preset.styles.light.primary,
+      backgroundColor: preset.styles.light.background,
+      accentColor: preset.styles.light.accent,
+    },
+    stats: {
+      forks: 0,
+      views: 0,
+      likes: Math.floor(Math.random() * 50) + 10, // Simulated likes
+    },
+    createdAt: Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000), // Random date within last 30 days
+    updatedAt: Date.now(),
+    isBuiltIn: true,
+  }))
+
+  return [...vuecraftThemes, ...tweakcnThemes]
 }
 
 export function useThemeGallery() {
