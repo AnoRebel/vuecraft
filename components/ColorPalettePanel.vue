@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useColorPaletteGenerator, type PaletteColor } from '~/composables/useColorPaletteGenerator'
+import { Button } from '~/components/ui/button'
 
 const {
   baseColor,
@@ -43,10 +44,21 @@ function selectHarmony(value: string) {
 }
 
 // Apply a generated color as the primary color
-function applyColor(color: PaletteColor) {
+function applyColor(color: PaletteColor, target: 'primary' | 'accent' | 'secondary' = 'primary') {
   if (typeof document !== 'undefined') {
-    document.documentElement.style.setProperty('--color-primary', color.cssValue)
-    document.documentElement.style.setProperty('--color-ring', color.cssValue)
+    const root = document.documentElement
+    switch (target) {
+      case 'primary':
+        root.style.setProperty('--color-primary', color.cssValue)
+        root.style.setProperty('--color-ring', color.cssValue)
+        break
+      case 'accent':
+        root.style.setProperty('--color-accent', color.cssValue)
+        break
+      case 'secondary':
+        root.style.setProperty('--color-secondary', color.cssValue)
+        break
+    }
   }
 }
 
@@ -55,20 +67,40 @@ function applyPalette() {
   if (!currentPalette.value || typeof document === 'undefined') return
 
   const colors = currentPalette.value.colors
+  const root = document.documentElement
+
   if (colors.length > 0) {
     // Apply primary from first color
-    document.documentElement.style.setProperty('--color-primary', colors[0]!.cssValue)
-    document.documentElement.style.setProperty('--color-ring', colors[0]!.cssValue)
+    root.style.setProperty('--color-primary', colors[0]!.cssValue)
+    root.style.setProperty('--color-ring', colors[0]!.cssValue)
 
     // Apply accent from second color if available
     if (colors.length > 1) {
-      document.documentElement.style.setProperty('--color-accent', colors[1]!.cssValue)
+      root.style.setProperty('--color-accent', colors[1]!.cssValue)
+    }
+
+    // Apply secondary from third color if available
+    if (colors.length > 2) {
+      root.style.setProperty('--color-secondary', colors[2]!.cssValue)
     }
 
     // Apply chart colors
     colors.slice(0, 5).forEach((color, index) => {
-      document.documentElement.style.setProperty(`--color-chart-${index + 1}`, color.cssValue)
+      root.style.setProperty(`--color-chart-${index + 1}`, color.cssValue)
     })
+  }
+}
+
+// Clear applied colors
+function clearAppliedColors() {
+  if (typeof document === 'undefined') return
+  const root = document.documentElement
+  root.style.removeProperty('--color-primary')
+  root.style.removeProperty('--color-ring')
+  root.style.removeProperty('--color-accent')
+  root.style.removeProperty('--color-secondary')
+  for (let i = 1; i <= 5; i++) {
+    root.style.removeProperty(`--color-chart-${i}`)
   }
 }
 
@@ -92,11 +124,16 @@ watch(
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h3 class="text-sm font-medium">Color Palette Generator</h3>
-      <Button variant="outline" size="sm" @click="handleRandomize">
-        <Icon name="lucide:shuffle" class="h-4 w-4 mr-2" />
-        Random
-      </Button>
+      <div class="flex items-center gap-2">
+        <Button variant="outline" size="sm" @click="handleRandomize">
+          <Icon name="lucide:shuffle" class="h-4 w-4 mr-2" />
+          Random
+        </Button>
+        <Button variant="ghost" size="sm" @click="clearAppliedColors">
+          <Icon name="lucide:undo-2" class="h-4 w-4 mr-1" />
+          Reset
+        </Button>
+      </div>
     </div>
 
     <!-- Base Color Controls -->
@@ -177,23 +214,43 @@ watch(
     <div v-if="currentPalette" class="space-y-2">
       <div class="flex items-center justify-between">
         <label class="text-xs text-muted-foreground">Generated Colors</label>
-        <Button variant="ghost" size="sm" class="h-6 px-2 text-xs" @click="applyPalette">
+        <Button variant="default" size="sm" class="h-6 px-2 text-xs" @click="applyPalette">
           <Icon name="lucide:check" class="h-3 w-3 mr-1" />
           Apply All
         </Button>
       </div>
       <div class="flex gap-1">
-        <button
-          v-for="(color, index) in currentPalette.colors"
-          :key="index"
-          type="button"
-          class="flex-1 h-12 rounded cursor-pointer transition-transform hover:scale-105 hover:ring-2 hover:ring-ring hover:ring-offset-2"
-          :style="{ backgroundColor: color.hex }"
-          :title="`Click to apply: ${color.cssValue}`"
-          @click="applyColor(color)"
-        />
+        <div v-for="(color, index) in currentPalette.colors" :key="index" class="flex-1 space-y-1">
+          <button
+            type="button"
+            class="w-full h-12 rounded cursor-pointer transition-transform hover:scale-105 hover:ring-2 hover:ring-ring hover:ring-offset-2"
+            :style="{ backgroundColor: color.hex }"
+            :title="`Click to apply as primary: ${color.cssValue}`"
+            @click="applyColor(color, 'primary')"
+          />
+          <div class="flex gap-0.5">
+            <button
+              type="button"
+              class="flex-1 h-4 rounded-sm text-[8px] bg-muted/50 hover:bg-muted flex items-center justify-center"
+              title="Apply as accent"
+              @click="applyColor(color, 'accent')"
+            >
+              A
+            </button>
+            <button
+              type="button"
+              class="flex-1 h-4 rounded-sm text-[8px] bg-muted/50 hover:bg-muted flex items-center justify-center"
+              title="Apply as secondary"
+              @click="applyColor(color, 'secondary')"
+            >
+              S
+            </button>
+          </div>
+        </div>
       </div>
-      <p class="text-xs text-muted-foreground text-center">Click a color to apply as primary</p>
+      <p class="text-xs text-muted-foreground text-center">
+        Click color to apply as primary, A for accent, S for secondary
+      </p>
     </div>
 
     <!-- Color Scale -->
@@ -207,7 +264,7 @@ watch(
           class="flex-1 h-8 first:rounded-l last:rounded-r cursor-pointer hover:ring-1 hover:ring-ring"
           :style="{ backgroundColor: color.hex }"
           :title="`${(index + 1) * 100}: ${color.hex} - Click to apply`"
-          @click="applyColor(color)"
+          @click="applyColor(color, 'primary')"
         />
       </div>
       <div class="flex justify-between text-xs text-muted-foreground">

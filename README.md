@@ -16,7 +16,7 @@
 
 A universal Vue/Nuxt theme builder and design system customizer. Create beautiful themes with real-time preview, accessibility checking, and professional export options for **shadcn-vue**, **Nuxt UI**, or **plain Tailwind CSS** projects.
 
-Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for the Vue ecosystem.
+Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes), [tweakcn](https://tweakcn.com/), and built for the Vue ecosystem.
 
 ## ✨ Features
 
@@ -24,7 +24,7 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 
 - **Multi-Framework Export**: Export themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS
 - **Real-time Preview**: See changes instantly as you customize
-- **10 Preset Themes**: Quick-start with curated themes (Default, Ocean, Forest, Sunset, etc.)
+- **30+ Preset Themes**: Quick-start with Vuecraft presets and TweakCN themes (Default, Ocean, Catppuccin, Neo Brutalism, etc.)
 - **Interactive Tour Guide**: Built-in guided tour to learn all features
 - **Dark Mode**: Full dark mode support with system preference detection
 - **PWA Support**: Install as a Progressive Web App for offline access
@@ -45,6 +45,8 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes) and built for t
 - **Keyboard Shortcuts**: Power-user shortcuts (Ctrl+Z, Ctrl+E, Ctrl+D, etc.)
 - **Theme Gallery**: Browse and fork community themes
 - **Drag-and-Drop Sections**: Reorder configuration sections with drag-and-drop
+- **Resizable Sidebar**: Adjust the configuration panel width to your preference
+- **Searchable Presets**: Filter themes by name, category, or color
 
 ### Export Options
 
@@ -421,6 +423,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 ## 🙏 Acknowledgments
 
 - [shadcn/ui](https://ui.shadcn.com/) for the original inspiration
+- [tweakcn](https://tweakcn.com/) for theme presets and inspiration
 - [shadcn-vue](https://www.shadcn-vue.com/) for the Vue port
 - [Nuxt UI](https://ui.nuxt.com/) for the Nuxt UI theming system
 - [Reka UI](https://reka-ui.com/) for the headless UI components
