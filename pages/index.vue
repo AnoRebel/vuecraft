@@ -130,18 +130,28 @@ useHead({
         <Button
           variant="outline"
           size="sm"
-          class="absolute bottom-4 right-4 gap-2 hidden md:flex"
+          class="absolute bottom-4 right-4 gap-2 hidden lg:flex"
           @click="showCSSEditor = !showCSSEditor"
         >
           <Icon name="lucide:code-2" class="h-4 w-4" />
           {{ showCSSEditor ? 'Hide CSS' : 'Show CSS' }}
+        </Button>
+
+        <!-- CSS Editor Toggle Button - Mobile (icon only, opens dialog) -->
+        <Button
+          variant="outline"
+          size="icon"
+          class="absolute bottom-4 right-4 lg:hidden shadow-lg bg-background"
+          @click="showCSSDialog = true"
+        >
+          <Icon name="lucide:code-2" class="h-4 w-4" />
         </Button>
       </main>
 
       <!-- CSS Editor Panel (Right Sidebar) - Hidden on mobile -->
       <aside
         v-if="showCSSEditor"
-        class="w-[400px] border-l flex-shrink-0 overflow-hidden p-4 hidden md:block bg-background"
+        class="w-[400px] border-l flex-shrink-0 overflow-hidden p-4 hidden lg:block bg-background"
       >
         <div class="flex items-center justify-between mb-4">
           <h2 class="font-semibold">CSS Editor</h2>
