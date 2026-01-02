@@ -175,7 +175,8 @@ export function useAuth() {
       return true
     } catch (err: unknown) {
       const webAuthnError = err as { data?: { message?: string }; message?: string }
-      error.value = webAuthnError.data?.message || webAuthnError.message || 'Failed to register passkey'
+      error.value =
+        webAuthnError.data?.message || webAuthnError.message || 'Failed to register passkey'
       isLoading.value = false
       return false
     }
@@ -201,7 +202,10 @@ export function useAuth() {
       return true
     } catch (err: unknown) {
       const webAuthnError = err as { data?: { message?: string }; message?: string }
-      error.value = webAuthnError.data?.message || webAuthnError.message || 'Failed to authenticate with passkey'
+      error.value =
+        webAuthnError.data?.message ||
+        webAuthnError.message ||
+        'Failed to authenticate with passkey'
       isLoading.value = false
       return false
     }

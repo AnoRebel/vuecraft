@@ -234,7 +234,11 @@ function switchMode() {
             </Button>
           </div>
           <p class="text-xs text-center text-muted-foreground">
-            {{ mode === 'login' ? 'Enter your email first, then use your passkey' : 'Enter your email first, then register a passkey' }}
+            {{
+              mode === 'login'
+                ? 'Enter your email first, then use your passkey'
+                : 'Enter your email first, then register a passkey'
+            }}
           </p>
         </div>
 
