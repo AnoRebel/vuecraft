@@ -28,11 +28,12 @@ function selectOption(name: string) {
   emit('update:modelValue', name)
 }
 
+// Responsive grid columns - start with fewer columns on mobile
 const gridCols = {
   2: 'grid-cols-2',
-  3: 'grid-cols-3',
-  4: 'grid-cols-4',
-  5: 'grid-cols-5',
+  3: 'grid-cols-2 sm:grid-cols-3',
+  4: 'grid-cols-2 sm:grid-cols-4',
+  5: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
 }
 </script>
 

@@ -4,7 +4,6 @@ import { useStorage } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { ScrollArea } from '~/components/ui/scroll-area'
 import PresetThemes from './PresetThemes.vue'
 import ThemeConfig from './ThemeConfig.vue'
 import TypographyConfig from './TypographyConfig.vue'
@@ -113,7 +112,7 @@ function resetSections() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col overflow-hidden">
+  <div class="flex flex-col h-full overflow-hidden">
     <!-- Header -->
     <div class="flex items-center justify-between border-b px-3 py-2 min-w-0 flex-shrink-0">
       <h2 class="font-semibold flex-shrink-0 text-sm">Configuration</h2>
@@ -238,8 +237,8 @@ function resetSections() {
     </div>
 
     <!-- Config Sections -->
-    <ScrollArea class="flex-1 px-3 min-h-0">
-      <div class="py-2">
+    <div class="flex-1 overflow-y-auto px-3">
+      <div class="py-2 space-y-2">
         <template v-for="section in visibleSections" :key="section.id">
           <PresetThemes v-if="section.id === 'presets'" />
           <ThemeConfig v-else-if="section.id === 'theme'" />
@@ -275,20 +274,19 @@ function resetSections() {
           <ComponentSelection v-else-if="section.id === 'selection'" />
           <ExportConfig v-else-if="section.id === 'export'" />
 
-          <!-- Accessibility Panel -->
+          <!-- Accessibility Panel (no duplicate heading - component has its own) -->
           <div v-else-if="section.id === 'accessibility'" class="mt-4 border-t pt-4">
-            <h3 class="text-sm font-semibold mb-3">Accessibility Check</h3>
             <AccessibilityPanel />
           </div>
 
           <!-- Color Palette Generator -->
           <div v-else-if="section.id === 'palette'" class="mt-4 border-t pt-4">
-            <h3 class="text-sm font-semibold mb-3">Color Palette Generator</h3>
+            <h3 class="text-sm font-medium mb-3">Color Palette Generator</h3>
             <ColorPalettePanel />
           </div>
         </template>
       </div>
-    </ScrollArea>
+    </div>
 
     <!-- Theme Gallery Dialog -->
     <ThemeGalleryDialog v-model:open="showGallery" @apply="showGallery = false" />
