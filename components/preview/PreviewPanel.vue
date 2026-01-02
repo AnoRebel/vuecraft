@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import { useDesignSystem } from '~/composables/useDesignSystem'
-import { useColorMode } from '~/composables/useColorMode'
 import { useResponsivePreview } from '~/composables/useResponsivePreview'
 import { generateCSSVariables } from '~/utils/cssGenerator'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
@@ -16,8 +15,7 @@ import ElementInspector from './ElementInspector.vue'
 import ResponsivePreviewControls from '~/components/ResponsivePreviewControls.vue'
 
 const { config } = useDesignSystem()
-const { toggleColorMode, isDark } = useColorMode()
-const { previewStyles, isResponsive } = useResponsivePreview()
+const { isResponsive, zoom, currentDimensions } = useResponsivePreview()
 
 const activeTemplate = ref('dashboard')
 const inspectorEnabled = ref(false)
@@ -35,6 +33,27 @@ const generatedCSS = computed(() => {
     layout,
     export: config.export,
   })
+})
+
+// Compute preview container styles with zoom applied correctly
+const containerStyles = computed(() => {
+  if (isResponsive.value) {
+    return {}
+  }
+
+  const dims = currentDimensions.value
+  const scale = zoom.value / 100
+
+  // Get width and height
+  const width = typeof dims.width === 'number' ? dims.width : undefined
+  const height = typeof dims.height === 'number' ? dims.height : undefined
+
+  return {
+    width: width ? `${width}px` : undefined,
+    height: height ? `${height}px` : undefined,
+    transform: scale !== 1 ? `scale(${scale})` : undefined,
+    transformOrigin: 'top center',
+  }
 })
 
 // Inject the generated CSS into a style tag
@@ -102,7 +121,6 @@ onMounted(() => {
         <!-- Responsive Preview Controls - Hidden on mobile -->
         <div class="hidden md:flex items-center">
           <ResponsivePreviewControls />
-          <div class="w-px h-6 bg-border mx-2" />
         </div>
         <!-- Element Inspector Toggle -->
         <Tooltip content="Element Inspector" side="bottom">
@@ -130,49 +148,6 @@ onMounted(() => {
             </svg>
           </Button>
         </Tooltip>
-        <Button
-          variant="ghost"
-          size="icon"
-          data-tour-guide="dark-mode-toggle"
-          @click="toggleColorMode"
-        >
-          <svg
-            v-if="isDark"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2" />
-            <path d="M12 20v2" />
-            <path d="m4.93 4.93 1.41 1.41" />
-            <path d="m17.66 17.66 1.41 1.41" />
-            <path d="M2 12h2" />
-            <path d="M20 12h2" />
-            <path d="m6.34 17.66-1.41 1.41" />
-            <path d="m19.07 4.93-1.41 1.41" />
-          </svg>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          </svg>
-        </Button>
       </div>
     </div>
 
@@ -189,7 +164,7 @@ onMounted(() => {
           'border rounded-lg': !isResponsive,
           'cursor-crosshair': inspectorEnabled,
         }"
-        :style="isResponsive ? {} : previewStyles"
+        :style="containerStyles"
       >
         <PreviewDashboard v-if="activeTemplate === 'dashboard'" />
         <PreviewCards v-else-if="activeTemplate === 'cards'" />

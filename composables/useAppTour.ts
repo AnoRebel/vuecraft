@@ -17,7 +17,7 @@ export function useAppTour() {
       id: 'preset-themes',
       title: 'Preset Themes',
       content:
-        'Quick-start with one of our 10 curated preset themes. Each includes carefully selected colors, typography, and styling.',
+        'Quick-start with curated Vuecraft presets or TweakCN themes. Search by name or filter by category (professional, colorful, nature, etc.).',
       target: 'preset-themes-section',
       direction: 'right',
       showAction: true,
@@ -26,15 +26,25 @@ export function useAppTour() {
       id: 'theme-config',
       title: 'Theme Configuration',
       content:
-        'Customize your base color, accent color, border radius, and shadow intensity to match your brand.',
+        'Customize your base color, accent theme, border radius, shadow intensity, and menu styling. Use the custom color picker for any color you want.',
       target: 'theme-config-section',
+      direction: 'right',
+      showAction: true,
+    },
+    {
+      id: 'effects-config',
+      title: 'Effects Configuration',
+      content:
+        'Apply glassmorphism, blur, and transparency effects. Choose from presets like Subtle Glass or Frosted, or fine-tune each setting.',
+      target: 'effects-config-section',
       direction: 'right',
       showAction: true,
     },
     {
       id: 'typography-config',
       title: 'Typography',
-      content: 'Choose from various font families for your headings and code blocks.',
+      content:
+        'Choose from various font families for headings and code. Adjust font scale, weight, and line height.',
       target: 'typography-config-section',
       direction: 'right',
       showAction: true,
@@ -43,7 +53,7 @@ export function useAppTour() {
       id: 'components-config',
       title: 'Components',
       content:
-        'Select which components to include and customize their styling (Default or New York style).',
+        'Select component style (Default, New York, Miami, Brutal, Soft), border width, animation speed, and focus ring settings.',
       target: 'components-config-section',
       direction: 'right',
       showAction: true,
@@ -52,7 +62,7 @@ export function useAppTour() {
       id: 'preview-panel',
       title: 'Live Preview',
       content:
-        'See your theme changes in real-time with various preview templates like Dashboard, Cards, Forms, and more.',
+        'See your theme changes in real-time. Switch between Dashboard, Cards, Forms, Auth, and Components previews.',
       target: 'preview-panel',
       direction: 'left',
       showAction: true,
@@ -61,16 +71,16 @@ export function useAppTour() {
       id: 'preview-templates',
       title: 'Preview Templates',
       content:
-        'Switch between different preview templates to see how your theme looks across various UI patterns.',
+        'Test your theme across different UI patterns. Each template showcases various component combinations.',
       target: 'preview-templates',
       direction: 'bottom',
       showAction: true,
     },
     {
-      id: 'dark-mode-toggle',
-      title: 'Dark Mode Preview',
+      id: 'theme-toggle',
+      title: 'Theme Mode',
       content: 'Toggle between light and dark mode to preview both variants of your theme.',
-      target: 'dark-mode-toggle',
+      target: 'theme-toggle',
       direction: 'bottom',
       showAction: true,
     },
@@ -78,7 +88,7 @@ export function useAppTour() {
       id: 'shuffle-reset',
       title: 'Shuffle & Reset',
       content:
-        'Use Shuffle to randomize your theme settings, or Reset to start fresh with defaults.',
+        'Use Shuffle to randomize your theme settings, or Reset to start fresh. Configure which sections to show with the gear icon.',
       target: 'shuffle-reset-buttons',
       direction: 'bottom',
       showAction: true,
@@ -86,7 +96,7 @@ export function useAppTour() {
     {
       id: 'import-button',
       title: 'Import Configuration',
-      content: 'Import a previously saved configuration from a JSON file.',
+      content: 'Import a previously saved configuration from a JSON file or URL.',
       target: 'import-button',
       direction: 'bottom',
       showAction: true,
@@ -103,8 +113,17 @@ export function useAppTour() {
       id: 'export-button',
       title: 'Export Theme',
       content:
-        'Export your theme for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Get CSS, config files, and CLI commands.',
+        'Export your theme for shadcn-vue, Nuxt UI, or plain Tailwind CSS. Also export as design tokens for Figma, Style Dictionary, and more.',
       target: 'export-button',
+      direction: 'bottom',
+      showAction: true,
+    },
+    {
+      id: 'auth-button',
+      title: 'Sign In',
+      content:
+        'Sign in with Google, GitHub, email, or use passwordless Passkeys. Save and sync your custom themes across devices.',
+      target: 'auth-button',
       direction: 'bottom',
       showAction: true,
       finishLabel: 'Finish Tour',
