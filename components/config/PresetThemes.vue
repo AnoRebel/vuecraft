@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useDesignSystem, useConfigOptions } from '~/composables/useDesignSystem'
 import { useColorMode } from '~/composables/useColorMode'
 import { useAuth } from '~/composables/useAuth'
 import { TWEAKCN_PRESETS, PRESET_CATEGORIES, type TweakcnPreset } from '~/config/tweakcnPresets'
 import ConfigSection from './ConfigSection.vue'
+import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Badge } from '~/components/ui/badge'
 import { cn } from '~/lib/utils'
@@ -19,6 +20,7 @@ const searchQuery = ref('')
 const selectedCategory = ref<string>('all')
 const activePresetId = ref<string | null>(null)
 const isEdited = ref(false)
+const currentTweakcnPreset = ref<TweakcnPreset | null>(null)
 
 // Track when config changes from preset
 watch(
@@ -81,35 +83,100 @@ function isActiveTweakcnPreset(presetId: string): boolean {
 
 // Apply built-in preset
 function handleApplyBuiltinPreset(presetName: string) {
+  // Clear any inline styles from tweakcn presets first
+  clearInlineStyles()
+  currentTweakcnPreset.value = null
   applyPreset(presetName)
   activePresetId.value = `builtin-${presetName}`
   isEdited.value = false
+}
+
+// Clear all inline CSS variables
+function clearInlineStyles() {
+  if (typeof document === 'undefined') return
+  const root = document.documentElement
+
+  // List of all color properties to clear
+  const colorProps = [
+    'background',
+    'foreground',
+    'card',
+    'card-foreground',
+    'popover',
+    'popover-foreground',
+    'primary',
+    'primary-foreground',
+    'secondary',
+    'secondary-foreground',
+    'muted',
+    'muted-foreground',
+    'accent',
+    'accent-foreground',
+    'destructive',
+    'destructive-foreground',
+    'border',
+    'input',
+    'ring',
+    'chart-1',
+    'chart-2',
+    'chart-3',
+    'chart-4',
+    'chart-5',
+    'sidebar',
+    'sidebar-foreground',
+    'sidebar-primary',
+    'sidebar-primary-foreground',
+    'sidebar-accent',
+    'sidebar-accent-foreground',
+    'sidebar-border',
+    'sidebar-ring',
+  ]
+
+  colorProps.forEach((prop) => {
+    root.style.removeProperty(`--color-${prop}`)
+  })
+  root.style.removeProperty('--radius')
 }
 
 // Apply tweakcn preset by setting CSS variables directly
 function applyTweakcnPreset(preset: TweakcnPreset) {
   if (typeof document === 'undefined') return
 
+  // Store the current preset for reapplication on theme toggle
+  currentTweakcnPreset.value = preset
+
   const styles = isDark.value ? preset.styles.dark : preset.styles.light
   const root = document.documentElement
 
-  // Apply all color variables
-  Object.entries(styles).forEach(([key, value]) => {
-    if (key === 'radius') {
-      root.style.setProperty('--radius', value)
-    } else if (
-      !key.startsWith('font-') &&
-      !key.startsWith('shadow-') &&
-      !key.startsWith('letter-') &&
-      key !== 'spacing'
-    ) {
-      root.style.setProperty(`--color-${key}`, value)
-    }
+  // Clear any previously applied inline styles first
+  clearInlineStyles()
+
+  // Apply all color variables with nextTick to ensure DOM updates
+  nextTick(() => {
+    Object.entries(styles).forEach(([key, value]) => {
+      if (key === 'radius') {
+        root.style.setProperty('--radius', value)
+      } else if (
+        !key.startsWith('font-') &&
+        !key.startsWith('shadow-') &&
+        !key.startsWith('letter-') &&
+        key !== 'spacing'
+      ) {
+        root.style.setProperty(`--color-${key}`, value)
+      }
+    })
   })
 
   activePresetId.value = `tweakcn-${preset.id}`
   isEdited.value = false
 }
+
+// Watch for theme mode changes and reapply preset if active
+watch(isDark, () => {
+  if (currentTweakcnPreset.value) {
+    applyTweakcnPreset(currentTweakcnPreset.value)
+  }
+})
 
 // Save edited preset
 function saveEditedPreset() {

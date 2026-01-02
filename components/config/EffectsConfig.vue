@@ -2,6 +2,7 @@
 import { watch, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import ConfigSection from './ConfigSection.vue'
+import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
 import { Slider } from '~/components/ui/slider'
 import { Switch } from '~/components/ui/switch'
@@ -123,7 +124,7 @@ function applyPreset(preset: (typeof presets)[0]) {
     title="Effects"
     description="Transparency, blur, and glass effects"
     tour-id="effects-config-section"
-    :default-open="false"
+    :default-open="true"
   >
     <div class="space-y-6">
       <!-- Presets -->
