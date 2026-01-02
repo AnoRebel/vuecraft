@@ -69,7 +69,7 @@ useHead({
       <Button
         variant="outline"
         size="sm"
-        class="lg:hidden fixed bottom-4 left-4 z-50 gap-2 shadow-lg"
+        class="lg:hidden fixed bottom-4 left-4 z-[60] gap-2 shadow-lg bg-background"
         @click="showMobileConfig = !showMobileConfig"
       >
         <Icon name="lucide:settings" class="h-4 w-4" />
@@ -83,30 +83,16 @@ useHead({
         @click="showMobileConfig = false"
       />
 
-      <!-- Config Panel (Left Sidebar) - Resizable on desktop -->
+      <!-- Config Panel (Left Sidebar) -->
       <aside
-        :class="[
-          'border-r flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out z-50 relative',
-          'bg-background',
-          'fixed lg:static inset-y-0 left-0',
-          showMobileConfig
-            ? 'translate-x-0 w-[85vw] sm:w-80'
-            : '-translate-x-full lg:translate-x-0',
-        ]"
-        :style="{ width: showMobileConfig ? undefined : `${sidebarWidth}px` }"
+        class="hidden lg:flex flex-shrink-0 overflow-hidden border-r bg-background relative"
+        :style="{ width: `${sidebarWidth}px` }"
       >
-        <!-- Mobile header with close button -->
-        <div class="lg:hidden flex items-center justify-between p-4 border-b">
-          <h2 class="font-semibold">Configuration</h2>
-          <Button variant="ghost" size="sm" @click="showMobileConfig = false">
-            <Icon name="lucide:x" class="h-4 w-4" />
-          </Button>
-        </div>
-        <ConfigPanel class="h-full lg:h-auto" />
+        <ConfigPanel class="h-full w-full" />
 
         <!-- Resize Handle - Desktop only -->
         <div
-          class="absolute top-0 right-0 w-1 h-full cursor-ew-resize hidden lg:block hover:bg-primary/20 transition-colors group"
+          class="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-primary/20 transition-colors group"
           :class="{ 'bg-primary/30': isResizing }"
           @mousedown="startResize"
         >
@@ -116,6 +102,24 @@ useHead({
             <Icon name="lucide:grip-vertical" class="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
+      </aside>
+
+      <!-- Mobile Config Panel (Slide-in drawer) -->
+      <aside
+        :class="[
+          'lg:hidden fixed inset-y-0 left-0 z-50 w-[85vw] sm:w-80 border-r bg-background',
+          'transform transition-transform duration-300 ease-in-out',
+          showMobileConfig ? 'translate-x-0' : '-translate-x-full',
+        ]"
+      >
+        <!-- Mobile header with close button -->
+        <div class="flex items-center justify-between p-4 border-b">
+          <h2 class="font-semibold">Configuration</h2>
+          <Button variant="ghost" size="sm" @click="showMobileConfig = false">
+            <Icon name="lucide:x" class="h-4 w-4" />
+          </Button>
+        </div>
+        <ConfigPanel class="h-[calc(100%-57px)]" />
       </aside>
 
       <!-- Preview Panel (Main Content) -->
