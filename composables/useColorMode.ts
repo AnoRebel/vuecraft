@@ -1,45 +1,50 @@
-import { computed, readonly } from 'vue'
-import { useColorMode as useVueUseColorMode, useDark } from '@vueuse/core'
+import { computed, readonly, watch } from 'vue'
+import { useDark, useToggle } from '@vueuse/core'
 
 export function useColorMode() {
-  // Use VueUse's built-in color mode handling
-  const mode = useVueUseColorMode({
-    attribute: 'class',
-    modes: {
-      light: '',
-      dark: 'dark',
-    },
-    storageKey: 'color-mode',
-    initialValue: 'auto',
-  })
-
-  // Use useDark for easy dark mode detection
+  // Use useDark for simple and reliable dark mode toggle
   const isDark = useDark({
-    storageKey: 'color-mode',
+    storageKey: 'vuecraft-color-mode',
     valueDark: 'dark',
     valueLight: 'light',
+    selector: 'html',
+    attribute: 'class',
   })
 
+  const toggleDark = useToggle(isDark)
   const isLight = computed(() => !isDark.value)
 
-  // Get the resolved mode (actual light/dark, not 'auto')
+  // Get the resolved mode (actual light/dark)
   const resolvedMode = computed(() => (isDark.value ? 'dark' : 'light'))
+  const colorMode = computed(() => resolvedMode.value)
 
   // Set color mode
-  function setColorMode(newMode: 'light' | 'dark' | 'auto') {
-    mode.value = newMode
+  function setColorMode(newMode: 'light' | 'dark') {
+    isDark.value = newMode === 'dark'
   }
 
-  // Toggle between light, dark, and auto
+  // Simple toggle between light and dark
   function toggleColorMode() {
-    const modes = ['light', 'dark', 'auto'] as const
-    const currentIndex = modes.indexOf(mode.value as (typeof modes)[number])
-    const nextIndex = (currentIndex + 1) % modes.length
-    mode.value = modes[nextIndex]!
+    toggleDark()
   }
+
+  // Ensure class is applied on changes
+  watch(
+    isDark,
+    (dark) => {
+      if (typeof document !== 'undefined') {
+        if (dark) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+      }
+    },
+    { immediate: true }
+  )
 
   return {
-    colorMode: readonly(mode),
+    colorMode: readonly(colorMode),
     resolvedMode,
     preference: resolvedMode,
     setColorMode,
