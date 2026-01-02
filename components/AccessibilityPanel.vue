@@ -4,6 +4,7 @@ import {
   useAccessibilityChecker,
   type AccessibilityIssue,
 } from '~/composables/useAccessibilityChecker'
+import { Button } from '~/components/ui/button'
 
 const { generateReport, getContrastBadgeClass, getScoreClass, formatRatio, getLevelLabel } =
   useAccessibilityChecker()
