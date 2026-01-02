@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import Toolbar from '~/components/Toolbar.vue'
@@ -39,10 +39,6 @@ function stopResize() {
   document.removeEventListener('mousemove', onResize)
   document.removeEventListener('mouseup', stopResize)
 }
-
-const sidebarStyle = computed(() => ({
-  width: `${sidebarWidth.value}px`,
-}))
 
 // Initialize from URL on mount
 onMounted(() => {
@@ -90,12 +86,14 @@ useHead({
       <!-- Config Panel (Left Sidebar) - Resizable on desktop -->
       <aside
         :class="[
-          'border-r flex-shrink-0 overflow-hidden transition-transform duration-300 ease-in-out z-50 relative',
+          'border-r flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out z-50 relative',
           'bg-background',
-          'fixed lg:relative inset-y-0 left-0 w-[85vw] sm:w-80 lg:w-auto',
-          showMobileConfig ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          'fixed lg:static inset-y-0 left-0',
+          showMobileConfig
+            ? 'translate-x-0 w-[85vw] sm:w-80'
+            : '-translate-x-full lg:translate-x-0',
         ]"
-        :style="sidebarStyle"
+        :style="{ width: showMobileConfig ? undefined : `${sidebarWidth}px` }"
       >
         <!-- Mobile header with close button -->
         <div class="lg:hidden flex items-center justify-between p-4 border-b">
@@ -104,7 +102,7 @@ useHead({
             <Icon name="lucide:x" class="h-4 w-4" />
           </Button>
         </div>
-        <ConfigPanel />
+        <ConfigPanel class="h-full lg:h-auto" />
 
         <!-- Resize Handle - Desktop only -->
         <div
@@ -121,7 +119,7 @@ useHead({
       </aside>
 
       <!-- Preview Panel (Main Content) -->
-      <main class="flex-1 overflow-hidden relative w-full">
+      <main class="flex-1 overflow-hidden relative min-w-0">
         <PreviewPanel />
 
         <!-- CSS Editor Toggle Button - Desktop -->
