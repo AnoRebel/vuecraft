@@ -1,6 +1,6 @@
 {
   "name": "vuecraft",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A universal Vue/Nuxt theme builder - create beautiful themes for shadcn-vue, Nuxt UI, or plain Tailwind",
   "license": "MIT",
   "private": true,
@@ -21,8 +21,8 @@
     "@nuxt/fonts": "^0.12.1",
     "@nuxt/icon": "^2.1.1",
     "@nuxt/image": "^2.0.0",
-    "@simplewebauthn/browser": "11",
-    "@simplewebauthn/server": "13",
+    "@simplewebauthn/browser": "^13.2.2",
+    "@simplewebauthn/server": "^13.2.2",
     "@vite-pwa/nuxt": "^1.1.0",
     "@vue-dnd-kit/core": "^1.7.0",
     "@vueuse/core": "^14.1.0",
@@ -53,5 +53,21 @@
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.1"
   },
-  "packageManager": "bun@1.3.5"
+  "author": {
+    "name": "Ano Rebel",
+    "email": "adamsalehe31@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnoRebel/vuecraft.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vuecraft/vuecraft/issues"
+  },
+  "homepage": "https://vuecraft.anorebel.net",
+  "packageManager": "bun@1.3.5",
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "unrs-resolver"
+  ]
 }
