@@ -75,8 +75,8 @@ function onDragStart(event: MouseEvent | TouchEvent) {
     </div>
     <Switch
       :id="`section-${section.id}`"
-      :checked="section.visible"
-      @update:checked="emit('toggle', section.id)"
+      :model-value="section.visible"
+      @update:model-value="emit('toggle', section.id)"
     />
   </div>
 </template>
