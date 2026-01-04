@@ -387,3 +387,55 @@ abbr[title],
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Effects system - transparency, blur, and glassmorphism */
+:root {
+  --effects-header-opacity: 1;
+  --effects-sidebar-opacity: 1;
+  --effects-card-opacity: 1;
+  --effects-blur: 0px;
+  --effects-glass-bg: transparent;
+  --effects-glass-border: transparent;
+  --effects-glass-shadow: none;
+}
+
+/* Apply effects to preview elements */
+.effects-header,
+[data-effects='header'] {
+  background-color: color-mix(
+    in oklch,
+    var(--color-background) calc(var(--effects-header-opacity) * 100%),
+    transparent
+  );
+  backdrop-filter: blur(var(--effects-blur));
+  -webkit-backdrop-filter: blur(var(--effects-blur));
+}
+
+.effects-sidebar,
+[data-effects='sidebar'] {
+  background-color: color-mix(
+    in oklch,
+    var(--color-sidebar, var(--color-background)) calc(var(--effects-sidebar-opacity) * 100%),
+    transparent
+  );
+  backdrop-filter: blur(var(--effects-blur));
+  -webkit-backdrop-filter: blur(var(--effects-blur));
+}
+
+.effects-card,
+[data-effects='card'] {
+  background-color: color-mix(
+    in oklch,
+    var(--color-card, var(--color-background)) calc(var(--effects-card-opacity) * 100%),
+    transparent
+  );
+  backdrop-filter: blur(var(--effects-blur));
+  -webkit-backdrop-filter: blur(var(--effects-blur));
+}
+
+/* Glassmorphism effect class */
+.effects-glass {
+  background: var(--effects-glass-bg, transparent);
+  border-color: var(--effects-glass-border, var(--color-border));
+  box-shadow: var(--effects-glass-shadow, none);
+}
