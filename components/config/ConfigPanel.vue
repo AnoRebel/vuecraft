@@ -92,22 +92,21 @@ const visibleSections = computed(() => {
   return sections
 })
 
-// Toggle section visibility
+// Toggle section visibility - create new array to properly trigger reactivity
 function toggleSection(id: string) {
-  const section = sectionConfigs.value.find((s) => s.id === id)
-  if (section) {
-    section.visible = !section.visible
-  }
+  sectionConfigs.value = sectionConfigs.value.map((s) =>
+    s.id === id ? { ...s, visible: !s.visible } : s
+  )
 }
 
-// Handle reorder from drag-and-drop
+// Handle reorder from drag-and-drop - create new array with new objects
 function handleReorder(reorderedSections: SectionConfig[]) {
-  sectionConfigs.value = reorderedSections
+  sectionConfigs.value = reorderedSections.map((s) => ({ ...s }))
 }
 
-// Reset to defaults
+// Reset to defaults - create deep copy
 function resetSections() {
-  sectionConfigs.value = [...defaultSections]
+  sectionConfigs.value = defaultSections.map((s) => ({ ...s }))
 }
 </script>
 

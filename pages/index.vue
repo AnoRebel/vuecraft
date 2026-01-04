@@ -85,7 +85,7 @@ useHead({
 
       <!-- Config Panel (Left Sidebar) -->
       <aside
-        class="hidden lg:flex flex-shrink-0 overflow-hidden border-r bg-background relative effects-sidebar effects-glass"
+        class="hidden lg:flex flex-shrink-0 overflow-hidden border-r bg-background relative effects-sidebar"
         :style="{ width: `${sidebarWidth}px` }"
       >
         <ConfigPanel class="h-full w-full" />
@@ -107,7 +107,7 @@ useHead({
       <!-- Mobile Config Panel (Slide-in drawer) -->
       <aside
         :class="[
-          'lg:hidden fixed inset-y-0 left-0 z-50 w-[85vw] sm:w-80 border-r bg-background effects-sidebar effects-glass',
+          'lg:hidden fixed inset-y-0 left-0 z-50 w-[85vw] sm:w-80 border-r bg-background effects-sidebar',
           'transform transition-transform duration-300 ease-in-out',
           showMobileConfig ? 'translate-x-0' : '-translate-x-full',
         ]"
@@ -151,7 +151,7 @@ useHead({
       <!-- CSS Editor Panel (Right Sidebar) - Hidden on mobile -->
       <aside
         v-if="showCSSEditor"
-        class="w-[400px] border-l flex-shrink-0 overflow-hidden p-4 hidden lg:block bg-background effects-sidebar effects-glass"
+        class="w-[400px] border-l flex-shrink-0 overflow-hidden p-4 hidden lg:block bg-background effects-sidebar"
       >
         <div class="flex items-center justify-between mb-4">
           <h2 class="font-semibold">CSS Editor</h2>
