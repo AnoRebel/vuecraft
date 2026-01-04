@@ -26,8 +26,11 @@ const { elementRef } = useDroppable({
     onDrop(dndStore) {
       // Apply the transfer operation to reorder items
       DnDOperations.applyTransfer(dndStore)
-      // Emit the reordered sections
-      emit('reorder', [...props.sections])
+      // Create deep copy to emit and ensure proper reactivity
+      emit(
+        'reorder',
+        props.sections.map((s) => ({ ...s }))
+      )
     },
   },
 })
@@ -39,32 +42,13 @@ function handleToggle(id: string) {
 
 <template>
   <div ref="elementRef" class="space-y-1.5 min-h-[100px]">
-    <TransitionGroup name="sortable-list">
-      <SortableSectionItem
-        v-for="(section, index) in sections"
-        :key="section.id"
-        :section="section"
-        :index="index"
-        :source="sections"
-        @toggle="handleToggle"
-      />
-    </TransitionGroup>
+    <SortableSectionItem
+      v-for="(section, index) in sections"
+      :key="section.id"
+      :section="section"
+      :index="index"
+      :source="sections"
+      @toggle="handleToggle"
+    />
   </div>
 </template>
-
-<style scoped>
-.sortable-list-move {
-  transition: transform 0.2s ease;
-}
-
-.sortable-list-enter-active,
-.sortable-list-leave-active {
-  transition: all 0.2s ease;
-}
-
-.sortable-list-enter-from,
-.sortable-list-leave-to {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-</style>
