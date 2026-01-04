@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useDroppable, DnDOperations } from '@vue-dnd-kit/core'
 import SortableSectionItem from './SortableSectionItem.vue'
 
@@ -17,16 +18,20 @@ const emit = defineEmits<{
   (e: 'reorder', sections: SectionConfig[]): void
 }>()
 
+// Use computed to ensure the DnD library always has the latest reference
+const sectionsRef = computed(() => props.sections)
+
 const { elementRef } = useDroppable({
   groups: ['sections'],
-  data: {
-    source: props.sections,
-  },
+  data: computed(() => ({
+    source: sectionsRef.value,
+  })),
   events: {
     onDrop(dndStore) {
-      // Apply the transfer operation to reorder items
+      // Apply the transfer operation (modifies the source array in place)
       DnDOperations.applyTransfer(dndStore)
-      // Create deep copy to emit and ensure proper reactivity
+
+      // Emit the reordered sections with deep copy to ensure reactivity
       emit(
         'reorder',
         props.sections.map((s) => ({ ...s }))
