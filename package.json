@@ -21,7 +21,7 @@
     "@nuxt/fonts": "^0.12.1",
     "@nuxt/icon": "^2.1.1",
     "@nuxt/image": "^2.0.0",
-    "@simplewebauthn/browser": "11",
+    "@simplewebauthn/browser": "13",
     "@simplewebauthn/server": "13",
     "@vite-pwa/nuxt": "^1.1.0",
     "@vue-dnd-kit/core": "^1.7.0",
