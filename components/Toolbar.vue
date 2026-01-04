@@ -34,7 +34,7 @@ function startTour() {
 
 <template>
   <div
-    class="flex items-center justify-between border-b px-2 sm:px-4 py-2 bg-background effects-header effects-glass"
+    class="flex items-center justify-between border-b px-2 sm:px-4 py-2 bg-background effects-header"
   >
     <!-- Left side - Logo & Title -->
     <div class="flex items-center gap-2 sm:gap-3">
