@@ -394,21 +394,31 @@ abbr[title],
   --effects-sidebar-opacity: 1;
   --effects-card-opacity: 1;
   --effects-blur: 0px;
-  --effects-glassmorphism-enabled: 0;
 }
 
-/* Apply effects to elements - only backdrop-filter, not background override */
+/* Apply effects to header elements */
 .effects-header {
+  background-color: oklch(
+    from var(--color-background) l c h / var(--effects-header-opacity)
+  ) !important;
   backdrop-filter: blur(var(--effects-blur));
   -webkit-backdrop-filter: blur(var(--effects-blur));
 }
 
+/* Apply effects to sidebar elements */
 .effects-sidebar {
+  background-color: oklch(
+    from var(--color-background) l c h / var(--effects-sidebar-opacity)
+  ) !important;
   backdrop-filter: blur(var(--effects-blur));
   -webkit-backdrop-filter: blur(var(--effects-blur));
 }
 
+/* Apply effects to card elements */
 .effects-card {
+  background-color: oklch(from var(--color-card) l c h / var(--effects-card-opacity)) !important;
   backdrop-filter: blur(var(--effects-blur));
   -webkit-backdrop-filter: blur(var(--effects-blur));
 }
+
+/* Glassmorphism effects - applied via inline styles when enabled */
