@@ -148,11 +148,11 @@ function applyPreset(preset: (typeof presets)[0]) {
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <Label class="text-sm">Enable Blur</Label>
-          <Switch v-model:checked="settings.enableBlur" />
+          <Switch v-model="settings.enableBlur" />
         </div>
         <div class="flex items-center justify-between">
           <Label class="text-sm">Glassmorphism</Label>
-          <Switch v-model:checked="settings.enableGlassmorphism" />
+          <Switch v-model="settings.enableGlassmorphism" />
         </div>
       </div>
 
