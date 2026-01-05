@@ -4,46 +4,56 @@
 export default defineNuxtPlugin(() => {
   if (typeof window === 'undefined') return
 
+  // Default settings
+  const defaults = {
+    headerTransparency: 100,
+    sidebarTransparency: 100,
+    cardTransparency: 100,
+    blurAmount: 8,
+    enableBlur: false,
+    enableGlassmorphism: false,
+  }
+
   // Get effects settings from localStorage
   const storageKey = 'vuecraft-effects'
   const stored = localStorage.getItem(storageKey)
 
-  if (!stored) return
+  // Use stored settings or defaults
+  const settings = stored ? { ...defaults, ...JSON.parse(stored) } : defaults
+  const root = document.documentElement
 
   try {
-    const settings = JSON.parse(stored)
-    const root = document.documentElement
-
     // Apply header transparency
-    if (typeof settings.headerTransparency === 'number') {
-      const headerAlpha = settings.headerTransparency / 100
-      root.style.setProperty('--effects-header-opacity', headerAlpha.toString())
-    }
+    const headerAlpha = (settings.headerTransparency ?? 100) / 100
+    root.style.setProperty('--effects-header-opacity', headerAlpha.toString())
 
     // Apply sidebar transparency
-    if (typeof settings.sidebarTransparency === 'number') {
-      const sidebarAlpha = settings.sidebarTransparency / 100
-      root.style.setProperty('--effects-sidebar-opacity', sidebarAlpha.toString())
-    }
+    const sidebarAlpha = (settings.sidebarTransparency ?? 100) / 100
+    root.style.setProperty('--effects-sidebar-opacity', sidebarAlpha.toString())
 
     // Apply card transparency
-    if (typeof settings.cardTransparency === 'number') {
-      const cardAlpha = settings.cardTransparency / 100
-      root.style.setProperty('--effects-card-opacity', cardAlpha.toString())
-    }
+    const cardAlpha = (settings.cardTransparency ?? 100) / 100
+    root.style.setProperty('--effects-card-opacity', cardAlpha.toString())
 
     // Apply blur
-    if (settings.enableBlur && typeof settings.blurAmount === 'number') {
-      root.style.setProperty('--effects-blur', `${settings.blurAmount}px`)
-    }
+    const blurValue = settings.enableBlur ? `${settings.blurAmount ?? 8}px` : '0px'
+    root.style.setProperty('--effects-blur', blurValue)
 
     // Apply glassmorphism
     if (settings.enableGlassmorphism) {
       root.style.setProperty('--effects-glass-bg', 'rgba(255, 255, 255, 0.1)')
       root.style.setProperty('--effects-glass-border', 'rgba(255, 255, 255, 0.2)')
       root.style.setProperty('--effects-glass-shadow', '0 8px 32px 0 rgba(0, 0, 0, 0.1)')
+    } else {
+      root.style.removeProperty('--effects-glass-bg')
+      root.style.removeProperty('--effects-glass-border')
+      root.style.removeProperty('--effects-glass-shadow')
     }
   } catch {
-    // Ignore parse errors
+    // Ignore parse errors - apply defaults
+    root.style.setProperty('--effects-header-opacity', '1')
+    root.style.setProperty('--effects-sidebar-opacity', '1')
+    root.style.setProperty('--effects-card-opacity', '1')
+    root.style.setProperty('--effects-blur', '0px')
   }
 })
