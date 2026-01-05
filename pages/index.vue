@@ -69,7 +69,7 @@ useHead({
       <Button
         variant="outline"
         size="sm"
-        class="lg:hidden fixed bottom-4 left-4 z-[60] gap-2 shadow-lg bg-background"
+        class="!flex lg:!hidden fixed bottom-4 left-4 z-[60] gap-2 shadow-lg bg-background"
         @click="showMobileConfig = !showMobileConfig"
       >
         <Icon name="lucide:settings" class="h-4 w-4" />
@@ -130,7 +130,7 @@ useHead({
         <Button
           variant="outline"
           size="sm"
-          class="absolute bottom-4 right-4 gap-2 hidden lg:flex"
+          class="absolute bottom-4 right-4 gap-2 !hidden lg:!flex"
           @click="showCSSEditor = !showCSSEditor"
         >
           <Icon name="lucide:code-2" class="h-4 w-4" />
@@ -141,7 +141,7 @@ useHead({
         <Button
           variant="outline"
           size="icon"
-          class="absolute bottom-4 right-4 lg:hidden shadow-lg bg-background"
+          class="absolute bottom-4 right-4 !flex lg:!hidden shadow-lg bg-background"
           @click="showCSSDialog = true"
         >
           <Icon name="lucide:code-2" class="h-4 w-4" />
