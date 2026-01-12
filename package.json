@@ -19,10 +19,12 @@
   },
   "dependencies": {
     "@nuxt/fonts": "^0.12.1",
-    "@nuxt/icon": "^2.1.1",
+    "@nuxt/icon": "^2.2.0",
     "@nuxt/image": "^2.0.0",
+    "@nuxt/scripts": "0.13.2",
     "@simplewebauthn/browser": "^13.2.2",
     "@simplewebauthn/server": "^13.2.2",
+    "@unhead/vue": "^2.1.2",
     "@vite-pwa/nuxt": "^1.1.0",
     "@vue-dnd-kit/core": "^1.7.0",
     "@vueuse/core": "^14.1.0",
@@ -32,6 +34,7 @@
     "defu": "^6.1.4",
     "nuxt": "^4.2.2",
     "nuxt-auth-utils": "^0.5.26",
+    "nuxt-umami": "3.2.1",
     "reka-ui": "^2.7.0",
     "tailwind-merge": "^3.4.0",
     "v-tour-guide": "^1.0.11",
@@ -43,7 +46,7 @@
   "devDependencies": {
     "@nuxt/eslint": "^1.12.1",
     "@tailwindcss/vite": "^4.1.18",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.0.6",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -51,7 +54,7 @@
     "prettier": "^3.7.4",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "vue-tsc": "^3.2.1"
+    "vue-tsc": "^3.2.2"
   },
   "author": {
     "name": "Ano Rebel",

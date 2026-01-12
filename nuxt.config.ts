@@ -14,6 +14,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@vite-pwa/nuxt',
     'nuxt-auth-utils',
+    '@nuxt/scripts',
+    'nuxt-umami',
   ],
 
   // Authentication configuration
@@ -21,9 +23,40 @@ export default defineNuxtConfig({
     webAuthn: true,
   },
 
+  umami: {
+    id: process.env.NUXT_UMAMI_SITE_ID || '',
+    host: 'https://umami.anorebel.net',
+    autoTrack: true,
+    proxy: 'cloak',
+    // useDirective: true,
+    // ignoreLocalhost: true,
+    // excludeQueryParams: false,
+    // domains: ['cool-site.app', 'my-space.site'],
+    // customEndpoint: '/my-custom-endpoint',
+    // enabled: false,
+    // logErrors: true,
+  },
+
+  scripts: {
+    registry: {
+      rybbitAnalytics: {
+        scriptInput: {
+          src: 'https://rybbit.anorebel.net/api/script.js',
+        },
+        siteId: process.env.NUXT_RYBBIT_SITE_ID || '',
+      },
+    },
+  },
+
   runtimeConfig: {
     session: {
       password: process.env.NUXT_SESSION_PASSWORD || 'a-secure-password-of-at-least-32-characters',
+    },
+    rybbit: {
+      siteId: process.env.NUXT_RYBBIT_SITE_ID || '',
+    },
+    umami: {
+      id: process.env.NUXT_UMAMI_SITE_ID || '',
     },
     oauth: {
       google: {
