@@ -11,7 +11,7 @@
         "@nuxt/scripts": "0.13.2",
         "@simplewebauthn/browser": "^13.2.2",
         "@simplewebauthn/server": "^13.2.2",
-        "@unhead/vue": "^2.1.2",
+        "@unhead/vue": "^2.1.4",
         "@vite-pwa/nuxt": "^1.1.0",
         "@vue-dnd-kit/core": "^1.7.0",
         "@vueuse/core": "^14.1.0",
@@ -816,7 +816,7 @@
 
     "@typescript-eslint/visitor-keys": ["@typescript-eslint/visitor-keys@8.50.1", "", { "dependencies": { "@typescript-eslint/types": "8.50.1", "eslint-visitor-keys": "^4.2.1" } }, "sha512-IrDKrw7pCRUR94zeuCSUWQ+w8JEf5ZX5jl/e6AHGSLi1/zIr0lgutfn/7JpfCey+urpgQEdrZVYzCaVVKiTwhQ=="],
 
-    "@unhead/vue": ["@unhead/vue@2.1.2", "", { "dependencies": { "hookable": "^6.0.1", "unhead": "2.1.2" }, "peerDependencies": { "vue": ">=3.5.18" } }, "sha512-w5yxH/fkkLWAFAOnMSIbvAikNHYn6pgC7zGF/BasXf+K3CO1cYIPFehYAk5jpcsbiNPMc3goyyw1prGLoyD14g=="],
+    "@unhead/vue": ["@unhead/vue@2.1.4", "", { "dependencies": { "hookable": "^6.0.1", "unhead": "2.1.4" }, "peerDependencies": { "vue": ">=3.5.18" } }, "sha512-MFvywgkHMt/AqbhmKOqRuzvuHBTcmmmnUa7Wm/Sg11leXAeRShv2PcmY7IiYdeeJqBMCm1jwhcs6201jj6ggZg=="],
 
     "@unrs/resolver-binding-android-arm-eabi": ["@unrs/resolver-binding-android-arm-eabi@1.11.1", "", { "os": "android", "cpu": "arm" }, "sha512-ppLRUgHVaGRWUx0R0Ut06Mjo9gBaBkg3v/8AxusGLhsIotbBLuRk51rAzqLC8gq6NyyAojEXglNjzf6R948DNw=="],
 
@@ -2186,7 +2186,7 @@
 
     "unenv": ["unenv@2.0.0-rc.24", "", { "dependencies": { "pathe": "^2.0.3" } }, "sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw=="],
 
-    "unhead": ["unhead@2.1.2", "", { "dependencies": { "hookable": "^6.0.1" } }, "sha512-vSihrxyb+zsEUfEbraZBCjdE0p/WSoc2NGDrpwwSNAwuPxhYK1nH3eegf02IENLpn1sUhL8IoO84JWmRQ6tILA=="],
+    "unhead": ["unhead@2.1.4", "", { "dependencies": { "hookable": "^6.0.1" } }, "sha512-+5091sJqtNNmgfQ07zJOgUnMIMKzVKAWjeMlSrTdSGPB6JSozhpjUKuMfWEoLxlMAfhIvgOU8Me0XJvmMA/0fA=="],
 
     "unicode-canonical-property-names-ecmascript": ["unicode-canonical-property-names-ecmascript@2.0.1", "", {}, "sha512-dA8WbNeb2a6oQzAQ55YlT5vQAWGV9WXOsi3SskE3bcCdM0P4SDd+24zS/OCacdRq5BkdsRj9q3Pg6YyQoxIGqg=="],
 
