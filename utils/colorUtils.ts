@@ -27,19 +27,10 @@ export interface HslColor {
 }
 
 export type ColorBlindnessType =
-  | 'normal'
-  | 'protanopia'
-  | 'deuteranopia'
-  | 'tritanopia'
-  | 'achromatopsia'
+  'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'
 
 export type HarmonyType =
-  | 'complementary'
-  | 'analogous'
-  | 'triadic'
-  | 'split-complementary'
-  | 'tetradic'
-  | 'monochromatic'
+  'complementary' | 'analogous' | 'triadic' | 'split-complementary' | 'tetradic' | 'monochromatic'
 
 export interface ContrastResult {
   ratio: number
