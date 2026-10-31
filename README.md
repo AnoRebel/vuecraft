@@ -7,8 +7,8 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Vue 3](https://img.shields.io/badge/Vue-3.5-42b883.svg)](https://vuejs.org/)
-[![Nuxt](https://img.shields.io/badge/Nuxt-4.2-00dc82.svg)](https://nuxt.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8.svg)](https://tailwindcss.com/)
+[![Nuxt](https://img.shields.io/badge/Nuxt-4.6-00dc82.svg)](https://nuxt.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.3-38bdf8.svg)](https://tailwindcss.com/)
 
 </div>
 
@@ -23,8 +23,9 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes), [tweakcn](http
 ### Core Features
 
 - **Multi-Framework Export**: Export themes for shadcn-vue, Nuxt UI, or plain Tailwind CSS
-- **Real-time Preview**: See changes instantly as you customize
-- **30+ Preset Themes**: Quick-start with Vuecraft presets and TweakCN themes (Default, Ocean, Catppuccin, Neo Brutalism, etc.)
+- **Real-time Preview**: Seven preview templates (Dashboard, Cards, Forms, Auth, Components, Colors, Typography) that react to every setting
+- **35+ Preset Themes**: Vuecraft presets, the six Crystal Neuo materials and tweakcn themes, all saved in your configuration so they export, share and undo
+- **What you see is what you export**: The preview and every export are generated from the same resolved tokens
 - **Interactive Tour Guide**: Built-in guided tour to learn all features
 - **Dark Mode**: Full dark mode support with system preference detection
 - **PWA Support**: Install as a Progressive Web App for offline access
@@ -35,14 +36,15 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes), [tweakcn](http
 - **Color Palette Generator**: Generate harmonious palettes (complementary, analogous, triadic, etc.) with instant apply
 - **Effects Configuration**: Transparency and blur effects for glassmorphism-style UI
 - **Custom Color Picker**: Pick any custom color with native color picker
-- **Responsive Preview**: Preview themes at different device breakpoints (mobile, tablet, desktop)
+- **Responsive Preview**: Device frames (mobile, tablet, desktop) that reflow the preview, zoom and fullscreen
 - **Theme History/Undo**: Full undo/redo support with 50-step history
 - **Brand Color Import**: Extract dominant colors from uploaded logos/images
 - **Color Blindness Simulation**: Preview for protanopia, deuteranopia, tritanopia, achromatopsia
 - **Element Inspector**: Hover to inspect preview elements, see component names, Tailwind classes, and CSS variables
 - **Theme Comparison**: Side-by-side diff view to compare themes
-- **Animation Customizer**: Configure transition timing, easing curves, and animation effects
-- **Keyboard Shortcuts**: Power-user shortcuts (Ctrl+Z, Ctrl+E, Ctrl+D, etc.)
+- **Live CSS Editor**: Edit the generated variables and apply them back to the theme
+- **Saved Configurations**: Save, rename, load and delete named themes in the browser
+- **Keyboard Shortcuts**: Undo/redo, export, import, share, dark mode, randomize and template switching
 - **Theme Gallery**: Browse and fork community themes
 - **Drag-and-Drop Sections**: Reorder configuration sections with drag-and-drop
 - **Resizable Sidebar**: Adjust the configuration panel width to your preference
@@ -56,7 +58,7 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes), [tweakcn](http
 
 ### Authentication
 
-- **OAuth Support**: Sign in with Google or GitHub
+- **OAuth Support**: Sign in with Google or GitHub (shown only when the provider is configured)
 - **Passkey/WebAuthn**: Passwordless authentication with biometric or security key
 - **Email/Password**: Traditional email authentication
 - **Session Management**: Secure session handling with nuxt-auth-utils
@@ -162,18 +164,21 @@ bun run preview
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut       | Action                  |
-| -------------- | ----------------------- |
-| `Ctrl+Z`       | Undo                    |
-| `Ctrl+Shift+Z` | Redo                    |
-| `Ctrl+S`       | Save configuration      |
-| `Ctrl+E`       | Open export dialog      |
-| `Ctrl+I`       | Open import dialog      |
-| `Ctrl+D`       | Toggle dark mode        |
-| `Ctrl+R`       | Randomize theme         |
-| `1-5`          | Switch preview template |
-| `?`            | Show keyboard shortcuts |
-| `Escape`       | Close dialogs           |
+`Ctrl` is `⌘` on macOS. Single-key shortcuts only work when no text field is focused and no dialog is open.
+
+| Shortcut                  | Action                                 |
+| ------------------------- | -------------------------------------- |
+| `Ctrl+Z`                  | Undo                                   |
+| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo                                   |
+| `Ctrl+S`                  | Saved configurations                   |
+| `Ctrl+E`                  | Export                                 |
+| `Ctrl+I`                  | Import                                 |
+| `Ctrl+Shift+S`            | Share link                             |
+| `D`                       | Toggle dark mode                       |
+| `R`                       | Randomize theme                        |
+| `1` – `7`                 | Switch preview template                |
+| `?`                       | Show keyboard shortcuts                |
+| `Esc`                     | Close dialogs, inspector or fullscreen |
 
 ## 📦 Export Options
 
@@ -183,7 +188,7 @@ Beautiful components built with Reka UI and Tailwind CSS.
 
 **Exports:**
 
-- `main.css` - Theme CSS with Tailwind CSS v4 configuration
+- `main.css` - Tokens on `:root`/`.dark` mapped to utilities with `@theme inline` (shadcn-vue v4 layout), with an optional variable prefix
 - `components.json` - shadcn-vue CLI configuration
 - CLI commands for `npx shadcn-vue@latest init/add`
 
@@ -193,7 +198,7 @@ Fully styled and customizable components for Nuxt.
 
 **Exports:**
 
-- `main.css` - CSS with `--ui-*` variable customizations
+- `main.css` - `--ui-*` colour, text, background, border and radius variables for light and dark
 - `app.config.ts` - Nuxt UI color configuration
 - CLI commands for `npx nuxi module add ui`
 
@@ -203,12 +208,12 @@ Just CSS variables for your own custom components.
 
 **Exports:**
 
-- `main.css` - Minimal CSS variables for Tailwind CSS v4
+- `main.css` - Theme tokens in `@theme`, so `bg-primary`, `rounded-lg`, `shadow-md` and `font-sans` follow the theme
 - Setup script for Vue or Nuxt projects
 
 ### Design Tokens
 
-Export your theme as design tokens for design tools:
+Export your theme as design tokens from the **Tokens** tab of the export dialog:
 
 - **Figma Tokens** - Compatible with the Figma Tokens plugin
 - **Style Dictionary** - Amazon's design token format
@@ -217,6 +222,27 @@ Export your theme as design tokens for design tools:
 - **Tailwind Config** - Ready-to-use Tailwind configuration
 
 ## 🎨 Preset Themes
+
+### Crystal Neuo materials
+
+Six presets generated from the [Crystal Neuo](https://crystal-neuo.anorebel.net) token source. Each carries its light and dark palette, corner radius, typefaces, shadows and border width:
+
+| Material   | Character                                               |
+| ---------- | ------------------------------------------------------- |
+| Refraction | Calm opaque content on cool neutrals, iris accent       |
+| Tactile    | Ink borders and hard offset shadows, cobalt accent      |
+| Signal     | Machined aluminium neutrals with soft extruded surfaces |
+| Folio      | Flat, shadowless and dense with hairline separators     |
+| Bloom      | Large radii and tonal surfaces from a magenta seed      |
+| Hybrid     | Refraction's palette with Tactile's ink edges           |
+
+Regenerate them after a Crystal Neuo token update with:
+
+```bash
+bun scripts/sync-crystal-neuo-presets.ts ../crystal-neuo/packages/tokens/src/tokens.json
+```
+
+### Vuecraft presets
 
 Quick-start with 10 curated preset themes, each with full light and dark mode support:
 
@@ -306,9 +332,10 @@ Elegant rose pink metallic theme.
 
 - Base color (Neutral, Stone, Zinc, Gray, Slate)
 - Accent theme (20+ colors)
-- Custom color picker
-- Border radius
+- Custom primary color picker
+- Border radius presets plus an exact rem slider
 - Shadow intensity
+- Menu color and accent (used by the preview sidebar)
 
 ### Effects
 
@@ -322,10 +349,12 @@ Elegant rose pink metallic theme.
 - Font family (Inter, Roboto, DM Sans, and more)
 - Monospace font (JetBrains Mono, Fira Code, etc.)
 - Font scale (Compact, Default, Relaxed, Spacious)
+- Heading weight and body line height
+- Fonts are loaded on demand from Google Fonts
 
 ### Components
 
-- Style (Default, New York, Miami, Brutal, Soft)
+- Style (Default, New York, Miami, Brutal, Soft), each changing buttons, cards, inputs and badges
 - Border width
 - Animation speed
 - Focus ring configuration
@@ -345,59 +374,38 @@ Elegant rose pink metallic theme.
 
 ```
 vuecraft/
-├── assets/css/              # Global styles
+├── assets/css/main.css      # Tailwind v4 theme, preview component styles
 ├── components/
-│   ├── config/              # Configuration panel components
-│   │   ├── EffectsConfig.vue
-│   │   ├── SortableSectionItem.vue
-│   │   ├── SortableSectionList.vue
-│   │   └── ...
-│   ├── preview/             # Preview template components
-│   │   ├── ElementInspector.vue
-│   │   └── ...
-│   ├── ui/                  # Reusable UI components
-│   ├── AccessibilityPanel.vue
-│   ├── AuthDialog.vue
-│   ├── BrandColorImportDialog.vue
-│   ├── ColorBlindnessControls.vue
-│   ├── ColorPalettePanel.vue
-│   ├── ExportDialog.vue
-│   ├── KeyboardShortcutsDialog.vue
-│   ├── ResponsivePreviewControls.vue
-│   ├── ThemeCompareDialog.vue
-│   ├── ThemeGalleryDialog.vue
-│   ├── Toolbar.vue
-│   └── UserMenu.vue
+│   ├── config/              # Configuration panel sections
+│   ├── preview/             # Preview templates, inspector, icons, avatars
+│   ├── ui/                  # Reka UI based primitives (dialog, select, tabs, ...)
+│   ├── Toolbar.vue          # Toolbar, tools menu and dialogs
+│   └── ...                  # Export, import, share, gallery, compare dialogs
 ├── composables/
-│   ├── useAccessibilityChecker.ts
-│   ├── useAnimationCustomizer.ts
-│   ├── useAuth.ts
-│   ├── useBrandColorExtractor.ts
-│   ├── useColorBlindnessSimulation.ts
-│   ├── useColorPaletteGenerator.ts
-│   ├── useDesignSystem.ts
+│   ├── useDesignSystem.ts   # Configuration state, persistence, sharing, history
+│   ├── useBuilderUi.ts      # Shared panel and dialog state
 │   ├── useKeyboardShortcuts.ts
-│   ├── useResponsivePreview.ts
-│   ├── useThemeComparison.ts
-│   ├── useThemeGallery.ts
-│   └── useThemeHistory.ts
+│   └── ...
 ├── config/
-│   ├── defaults.ts          # Default values and presets
-│   └── themes.ts            # Theme color definitions (OKLCH)
-├── server/
-│   ├── api/auth/            # Authentication endpoints
-│   └── api/webauthn/        # Passkey/WebAuthn endpoints
-├── utils/
-│   ├── cliGenerator.ts      # CLI command generation
-│   ├── colorUtils.ts        # Color manipulation utilities
-│   ├── cssGenerator.ts      # CSS variable generation
-│   ├── designTokenExporter.ts
-│   ├── nuxtUIGenerator.ts
-│   └── tailwindGenerator.ts
+│   ├── defaults.ts          # Defaults, options and built-in presets
+│   ├── themes.ts            # Base and accent palettes (OKLCH)
+│   ├── tweakcnPresets.ts    # tweakcn presets
+│   ├── crystalNeuoPresets.ts # Generated Crystal Neuo presets
+│   └── previewIcons.ts      # Preview icons for every icon library
 ├── plugins/
-│   └── vue-dnd-kit.client.ts # Drag-and-drop plugin
-├── pages/
-│   └── index.vue
+│   ├── theme-runtime.client.ts # Applies the theme and loads fonts
+│   └── effects.client.ts
+├── scripts/
+│   └── sync-crystal-neuo-presets.ts
+├── server/api/              # Auth, OAuth, WebAuthn endpoints
+├── utils/
+│   ├── themeTokens.ts       # Resolves a configuration into design tokens
+│   ├── cssGenerator.ts      # Runtime CSS and shadcn-vue export
+│   ├── tailwindGenerator.ts
+│   ├── nuxtUIGenerator.ts
+│   ├── designTokenExporter.ts
+│   └── fontLoader.ts
+├── pages/index.vue
 └── nuxt.config.ts
 ```
 
