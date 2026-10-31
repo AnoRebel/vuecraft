@@ -1,40 +1,28 @@
 <script setup lang="ts">
-import { inject, computed } from 'vue'
+import type { HTMLAttributes } from 'vue'
+import { TabsTrigger } from 'reka-ui'
 import { cn } from '~/lib/utils'
 
-interface Props {
-  class?: string
-  value: string
-}
-
-const props = defineProps<Props>()
-
-const tabs = inject<{
-  activeTab: Ref<string>
-  setActiveTab: (value: string) => void
-}>('tabs')
-
-const isActive = computed(() => tabs?.activeTab.value === props.value)
-
-function handleClick() {
-  tabs?.setActiveTab(props.value)
-}
+const props = withDefaults(
+  defineProps<{ class?: HTMLAttributes['class']; value: string; disabled?: boolean }>(),
+  {
+    class: '',
+    disabled: false,
+  }
+)
 </script>
 
 <template>
-  <button
-    type="button"
-    role="tab"
-    :aria-selected="isActive"
+  <TabsTrigger
+    :value="props.value"
+    :disabled="props.disabled"
     :class="
       cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-        { 'bg-background text-foreground shadow': isActive },
+        'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
         props.class
       )
     "
-    @click="handleClick"
   >
     <slot />
-  </button>
+  </TabsTrigger>
 </template>

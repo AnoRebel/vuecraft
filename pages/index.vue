@@ -1,51 +1,68 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui'
+import { toast } from 'vue-sonner'
 import { useDesignSystem } from '~/composables/useDesignSystem'
+import { useBuilderUi } from '~/composables/useBuilderUi'
 import Toolbar from '~/components/Toolbar.vue'
 import ConfigPanel from '~/components/config/ConfigPanel.vue'
 import PreviewPanel from '~/components/preview/PreviewPanel.vue'
 import LiveCSSEditor from '~/components/config/LiveCSSEditor.vue'
 import { Button } from '~/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent as UiDialogContent,
+  DialogHeader,
+  DialogTitle as UiDialogTitle,
+} from '~/components/ui/dialog'
 
 const { initFromUrl } = useDesignSystem()
+const { showMobileConfig, showCSSPanel, showCSSDialog } = useBuilderUi()
 
-const showCSSEditor = ref(false)
-const showMobileConfig = ref(false)
-const showCSSDialog = ref(false)
-
-// Resizable sidebar
+// Resizable sidebar (desktop)
 const sidebarWidth = useStorage('vuecraft-sidebar-width', 320)
 const isResizing = ref(false)
-const minWidth = 280
-const maxWidth = 500
+const MIN_WIDTH = 280
+const MAX_WIDTH = 520
 
-function startResize(e: MouseEvent) {
+function startResize(e: PointerEvent) {
   e.preventDefault()
   isResizing.value = true
-  document.addEventListener('mousemove', onResize)
-  document.addEventListener('mouseup', stopResize)
+  const move = (ev: PointerEvent) => {
+    sidebarWidth.value = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, ev.clientX))
+  }
+  const stop = () => {
+    isResizing.value = false
+    window.removeEventListener('pointermove', move)
+    window.removeEventListener('pointerup', stop)
+  }
+  window.addEventListener('pointermove', move)
+  window.addEventListener('pointerup', stop)
 }
 
-function onResize(e: MouseEvent) {
-  if (!isResizing.value) return
-  const newWidth = Math.min(maxWidth, Math.max(minWidth, e.clientX))
-  sidebarWidth.value = newWidth
+function resizeWithKeyboard(e: KeyboardEvent) {
+  if (e.key === 'ArrowLeft') sidebarWidth.value = Math.max(MIN_WIDTH, sidebarWidth.value - 16)
+  if (e.key === 'ArrowRight') sidebarWidth.value = Math.min(MAX_WIDTH, sidebarWidth.value + 16)
 }
 
-function stopResize() {
-  isResizing.value = false
-  document.removeEventListener('mousemove', onResize)
-  document.removeEventListener('mouseup', stopResize)
+const OAUTH_ERRORS: Record<string, string> = {
+  github_oauth_failed: 'GitHub sign-in failed. Please try again.',
+  google_oauth_failed: 'Google sign-in failed. Please try again.',
 }
 
-// Initialize from URL on mount
 onMounted(() => {
   initFromUrl()
+
+  const route = useRoute()
+  const error = route.query.error
+  if (typeof error === 'string') {
+    toast.error(OAUTH_ERRORS[error] ?? 'Sign-in failed. Please try again.')
+    const { error: _e, ...rest } = route.query
+    useRouter().replace({ query: rest })
+  }
 })
 
-// SEO
 useHead({
   title: 'Vuecraft - Universal Vue/Nuxt Theme Builder',
   meta: [
@@ -59,147 +76,92 @@ useHead({
 </script>
 
 <template>
-  <div class="h-screen flex flex-col overflow-hidden">
-    <!-- Toolbar -->
+  <div class="flex h-dvh flex-col overflow-hidden">
     <Toolbar />
 
-    <!-- Main Content -->
-    <div class="flex-1 flex overflow-hidden relative">
-      <!-- Mobile Config Toggle Button -->
-      <Button
-        variant="outline"
-        size="sm"
-        class="!flex lg:!hidden fixed bottom-4 left-4 z-[60] gap-2 shadow-lg bg-background"
-        @click="showMobileConfig = !showMobileConfig"
-      >
-        <Icon name="lucide:settings" class="h-4 w-4" />
-        {{ showMobileConfig ? 'Close' : 'Config' }}
-      </Button>
-
-      <!-- Mobile Overlay -->
-      <div
-        v-if="showMobileConfig"
-        class="lg:hidden fixed inset-0 bg-black/50 z-40"
-        @click="showMobileConfig = false"
-      />
-
-      <!-- Config Panel (Left Sidebar) -->
+    <div class="relative flex min-h-0 flex-1 overflow-hidden">
+      <!-- Config panel (desktop) -->
       <aside
-        class="hidden lg:flex flex-shrink-0 overflow-hidden border-r bg-background relative effects-sidebar"
+        class="effects-sidebar relative hidden shrink-0 overflow-hidden border-r bg-background lg:flex"
         :style="{ width: `${sidebarWidth}px` }"
+        aria-label="Theme configuration"
       >
         <ConfigPanel class="h-full w-full" />
-
-        <!-- Resize Handle - Desktop only -->
         <div
-          class="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-primary/20 transition-colors group"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize configuration panel"
+          :aria-valuenow="sidebarWidth"
+          :aria-valuemin="MIN_WIDTH"
+          :aria-valuemax="MAX_WIDTH"
+          tabindex="0"
+          class="group absolute right-0 top-0 z-10 h-full w-1.5 cursor-ew-resize transition-colors hover:bg-primary/20 focus-visible:bg-primary/30 focus-visible:outline-none"
           :class="{ 'bg-primary/30': isResizing }"
-          @mousedown="startResize"
-        >
-          <div
-            class="absolute top-1/2 -translate-y-1/2 right-0 w-4 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          @pointerdown="startResize"
+          @keydown="resizeWithKeyboard"
+        />
+      </aside>
+
+      <!-- Config panel (mobile sheet) -->
+      <DialogRoot v-model:open="showMobileConfig">
+        <DialogPortal>
+          <DialogOverlay class="vc-overlay fixed inset-0 z-[80] bg-black/50 lg:hidden" />
+          <DialogContent
+            class="effects-sidebar fixed inset-y-0 left-0 z-[80] flex w-[88vw] max-w-sm flex-col border-r bg-background shadow-xl transition-transform data-[state=closed]:-translate-x-full lg:hidden"
+            aria-describedby="mobile-config-desc"
           >
-            <Icon name="lucide:grip-vertical" class="h-4 w-4 text-muted-foreground" />
-          </div>
-        </div>
-      </aside>
+            <DialogTitle class="sr-only">Configuration</DialogTitle>
+            <p id="mobile-config-desc" class="sr-only">Adjust the theme. Press Escape to close.</p>
+            <ConfigPanel class="min-h-0 flex-1" closable @close="showMobileConfig = false" />
+          </DialogContent>
+        </DialogPortal>
+      </DialogRoot>
 
-      <!-- Mobile Config Panel (Slide-in drawer) -->
-      <aside
-        :class="[
-          'lg:hidden fixed inset-y-0 left-0 z-50 w-[85vw] sm:w-80 border-r bg-background effects-sidebar',
-          'transform transition-transform duration-300 ease-in-out',
-          showMobileConfig ? 'translate-x-0' : '-translate-x-full',
-        ]"
-      >
-        <!-- Mobile header with close button -->
-        <div class="flex items-center justify-between p-4 border-b">
-          <h2 class="font-semibold">Configuration</h2>
-          <Button variant="ghost" size="sm" @click="showMobileConfig = false">
-            <Icon name="lucide:x" class="h-4 w-4" />
-          </Button>
-        </div>
-        <ConfigPanel class="h-[calc(100%-57px)]" />
-      </aside>
-
-      <!-- Preview Panel (Main Content) -->
-      <main class="flex-1 overflow-hidden relative min-w-0">
+      <!-- Preview -->
+      <main class="relative min-w-0 flex-1 overflow-hidden">
         <PreviewPanel />
 
-        <!-- CSS Editor Toggle Button - Desktop -->
         <Button
+          v-if="!showMobileConfig"
           variant="outline"
-          size="sm"
-          class="absolute bottom-4 right-4 gap-2 !hidden lg:!flex"
-          @click="showCSSEditor = !showCSSEditor"
+          class="fixed bottom-4 left-4 z-30 bg-background shadow-lg lg:hidden"
+          aria-label="Open configuration"
+          @click="showMobileConfig = true"
         >
-          <Icon name="lucide:code-2" class="h-4 w-4" />
-          {{ showCSSEditor ? 'Hide CSS' : 'Show CSS' }}
-        </Button>
-
-        <!-- CSS Editor Toggle Button - Mobile (icon only, opens dialog) -->
-        <Button
-          variant="outline"
-          size="icon"
-          class="absolute bottom-4 right-4 !flex lg:!hidden shadow-lg bg-background"
-          @click="showCSSDialog = true"
-        >
-          <Icon name="lucide:code-2" class="h-4 w-4" />
+          <Icon name="lucide:sliders-horizontal" />
+          Customize
         </Button>
       </main>
 
-      <!-- CSS Editor Panel (Right Sidebar) - Hidden on mobile -->
+      <!-- CSS panel (desktop) -->
       <aside
-        v-if="showCSSEditor"
-        class="w-[400px] border-l flex-shrink-0 overflow-hidden p-4 hidden lg:block bg-background effects-sidebar"
+        v-if="showCSSPanel"
+        class="effects-sidebar hidden w-[400px] shrink-0 flex-col overflow-hidden border-l bg-background p-4 lg:flex"
+        aria-label="Theme CSS"
       >
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-semibold">CSS Editor</h2>
-          <Button variant="ghost" size="sm" @click="showCSSEditor = false">
-            <Icon name="lucide:x" class="h-4 w-4" />
+        <div class="mb-3 flex items-center justify-between">
+          <h2 class="font-semibold">Theme CSS</h2>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Close CSS panel"
+            @click="showCSSPanel = false"
+          >
+            <Icon name="lucide:x" />
           </Button>
         </div>
         <LiveCSSEditor />
       </aside>
     </div>
 
-    <!-- Mobile CSS Editor Dialog -->
+    <!-- CSS editor (mobile) -->
     <Dialog v-model:open="showCSSDialog">
-      <DialogContent class="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-hidden">
+      <UiDialogContent class="max-w-lg">
         <DialogHeader>
-          <DialogTitle>CSS Editor</DialogTitle>
+          <UiDialogTitle>Theme CSS</UiDialogTitle>
         </DialogHeader>
-        <div class="overflow-auto max-h-[calc(90vh-100px)]">
-          <LiveCSSEditor />
-        </div>
-      </DialogContent>
+        <LiveCSSEditor />
+      </UiDialogContent>
     </Dialog>
-
-    <!-- Floating Footer -->
-    <footer
-      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-background/80 backdrop-blur-md border shadow-lg hidden lg:flex items-center gap-2 text-xs text-muted-foreground"
-    >
-      <span>Made with</span>
-      <Icon name="lucide:heart" class="h-3 w-3 text-red-500" />
-      <span>by</span>
-      <a
-        href="https://github.com/AnoRebel"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="font-medium text-foreground hover:text-primary transition-colors"
-      >
-        AnoRebel
-      </a>
-      <span class="mx-1">|</span>
-      <a
-        href="https://github.com/AnoRebel/vuecraft"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="flex items-center gap-1 hover:text-primary transition-colors"
-      >
-        <Icon name="mdi:github" class="h-3 w-3" />
-        <span>GitHub</span>
-      </a>
-    </footer>
   </div>
 </template>
