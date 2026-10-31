@@ -1,190 +1,100 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed } from 'vue'
+import { toast } from 'vue-sonner'
 import { useDesignSystem, useConfigOptions } from '~/composables/useDesignSystem'
 import { useColorMode } from '~/composables/useColorMode'
-import { useAuth } from '~/composables/useAuth'
-import { TWEAKCN_PRESETS, PRESET_CATEGORIES, type TweakcnPreset } from '~/config/tweakcnPresets'
+import { useBuilderUi } from '~/composables/useBuilderUi'
+import { TWEAKCN_PRESETS, PRESET_CATEGORIES, tweakcnToCustomPreset } from '~/config/tweakcnPresets'
+import { CRYSTAL_NEUO_PRESETS } from '~/config/crystalNeuoPresets'
+import type { CustomThemePreset } from '~/types/config'
 import ConfigSection from './ConfigSection.vue'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Badge } from '~/components/ui/badge'
 import { cn } from '~/lib/utils'
 
-const { applyPreset, config, saveConfiguration } = useDesignSystem()
+const { applyPreset, applyCustomPreset, config, undo } = useDesignSystem()
 const { PRESET_THEMES } = useConfigOptions()
 const { isDark } = useColorMode()
-const { isLoggedIn } = useAuth()
+const { openDialog } = useBuilderUi()
 
-// Search and filter state
 const searchQuery = ref('')
 const selectedCategory = ref<string>('all')
-const activePresetId = ref<string | null>(null)
-const isEdited = ref(false)
-const currentTweakcnPreset = ref<TweakcnPreset | null>(null)
+const activeBuiltin = ref<string | null>(null)
 
-// Track when config changes from preset
-watch(
-  () => config,
-  () => {
-    if (activePresetId.value) {
-      isEdited.value = true
-    }
-  },
-  { deep: true }
+const categories = [
+  PRESET_CATEGORIES[0],
+  { id: 'crystal-neuo', label: 'Crystal Neuo' },
+  ...PRESET_CATEGORIES.slice(1),
+]
+
+const tweakcnPresets = TWEAKCN_PRESETS.map((p) => ({
+  category: p.category as string,
+  preset: tweakcnToCustomPreset(p),
+}))
+
+function matches(p: { label: string; description: string; tags?: readonly string[] }) {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return true
+  return (
+    p.label.toLowerCase().includes(q) ||
+    p.description.toLowerCase().includes(q) ||
+    (p.tags ?? []).some((t) => t.toLowerCase().includes(q))
+  )
+}
+
+const filteredCrystal = computed(() =>
+  ['all', 'crystal-neuo'].includes(selectedCategory.value)
+    ? CRYSTAL_NEUO_PRESETS.filter(matches)
+    : []
 )
 
-// Filter tweakcn presets based on search and category
-const filteredTweakcnPresets = computed(() => {
-  let presets = TWEAKCN_PRESETS
+const filteredBuiltin = computed(() =>
+  selectedCategory.value === 'all' ? PRESET_THEMES.filter(matches) : []
+)
 
-  if (selectedCategory.value !== 'all') {
-    presets = presets.filter((p) => p.category === selectedCategory.value)
-  }
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    presets = presets.filter(
+const filteredTweakcn = computed(() =>
+  tweakcnPresets
+    .filter(
       (p) =>
-        p.label.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query) ||
-        p.tags.some((tag) => tag.toLowerCase().includes(query))
+        (selectedCategory.value === 'all' || p.category === selectedCategory.value) &&
+        matches(p.preset)
+    )
+    .map((p) => p.preset)
+)
+
+const activeSource = computed(() => config.theme.custom?.source ?? null)
+
+const activeLabel = computed(() => {
+  if (activeSource.value) {
+    return (
+      [...CRYSTAL_NEUO_PRESETS, ...tweakcnPresets.map((p) => p.preset)].find(
+        (p) => p.id === activeSource.value
+      )?.label ?? null
     )
   }
-
-  return presets
+  return PRESET_THEMES.find((p) => p.name === activeBuiltin.value)?.label ?? null
 })
 
-// Filter built-in presets based on search
-const filteredBuiltinPresets = computed(() => {
-  if (!searchQuery.value) return PRESET_THEMES
-
-  const query = searchQuery.value.toLowerCase()
-  return PRESET_THEMES.filter(
-    (p) => p.label.toLowerCase().includes(query) || p.description.toLowerCase().includes(query)
-  )
-})
-
-// Check if current config matches a preset (approximately)
-function isActivePreset(presetName: string): boolean {
-  const preset = PRESET_THEMES.find((p) => p.name === presetName)
-  if (!preset) return false
-
-  return (
-    activePresetId.value === `builtin-${presetName}` ||
-    (config.theme.accentTheme === preset.config.theme.accentTheme &&
-      config.theme.radius === preset.config.theme.radius &&
-      config.components.style === preset.config.components.style)
-  )
+function isActiveBuiltin(name: string) {
+  return !activeSource.value && activeBuiltin.value === name
 }
 
-function isActiveTweakcnPreset(presetId: string): boolean {
-  return activePresetId.value === `tweakcn-${presetId}`
+function applyBuiltin(name: string, label: string) {
+  applyPreset(name)
+  activeBuiltin.value = name
+  toast(`Applied ${label}`, { action: { label: 'Undo', onClick: undo } })
 }
 
-// Apply built-in preset
-function handleApplyBuiltinPreset(presetName: string) {
-  // Clear any inline styles from tweakcn presets first
-  clearInlineStyles()
-  currentTweakcnPreset.value = null
-  applyPreset(presetName)
-  activePresetId.value = `builtin-${presetName}`
-  isEdited.value = false
+function applyCustom(preset: CustomThemePreset) {
+  applyCustomPreset(preset)
+  activeBuiltin.value = null
+  toast(`Applied ${preset.label}`, { action: { label: 'Undo', onClick: undo } })
 }
 
-// Clear all inline CSS variables
-function clearInlineStyles() {
-  if (typeof document === 'undefined') return
-  const root = document.documentElement
-
-  // List of all color properties to clear
-  const colorProps = [
-    'background',
-    'foreground',
-    'card',
-    'card-foreground',
-    'popover',
-    'popover-foreground',
-    'primary',
-    'primary-foreground',
-    'secondary',
-    'secondary-foreground',
-    'muted',
-    'muted-foreground',
-    'accent',
-    'accent-foreground',
-    'destructive',
-    'destructive-foreground',
-    'border',
-    'input',
-    'ring',
-    'chart-1',
-    'chart-2',
-    'chart-3',
-    'chart-4',
-    'chart-5',
-    'sidebar',
-    'sidebar-foreground',
-    'sidebar-primary',
-    'sidebar-primary-foreground',
-    'sidebar-accent',
-    'sidebar-accent-foreground',
-    'sidebar-border',
-    'sidebar-ring',
-  ]
-
-  colorProps.forEach((prop) => {
-    root.style.removeProperty(`--color-${prop}`)
-  })
-  root.style.removeProperty('--radius')
-}
-
-// Apply tweakcn preset by setting CSS variables directly
-function applyTweakcnPreset(preset: TweakcnPreset) {
-  if (typeof document === 'undefined') return
-
-  // Store the current preset for reapplication on theme toggle
-  currentTweakcnPreset.value = preset
-
-  const styles = isDark.value ? preset.styles.dark : preset.styles.light
-  const root = document.documentElement
-
-  // Clear any previously applied inline styles first
-  clearInlineStyles()
-
-  // Apply all color variables with nextTick to ensure DOM updates
-  nextTick(() => {
-    Object.entries(styles).forEach(([key, value]) => {
-      if (key === 'radius') {
-        root.style.setProperty('--radius', value)
-      } else if (
-        !key.startsWith('font-') &&
-        !key.startsWith('shadow-') &&
-        !key.startsWith('letter-') &&
-        key !== 'spacing'
-      ) {
-        root.style.setProperty(`--color-${key}`, value)
-      }
-    })
-  })
-
-  activePresetId.value = `tweakcn-${preset.id}`
-  isEdited.value = false
-}
-
-// Watch for theme mode changes and reapply preset if active
-watch(isDark, () => {
-  if (currentTweakcnPreset.value) {
-    applyTweakcnPreset(currentTweakcnPreset.value)
-  }
-})
-
-// Save edited preset
-function saveEditedPreset() {
-  const name = prompt('Enter a name for this theme:')
-  if (name) {
-    saveConfiguration(name)
-    isEdited.value = false
-  }
+function swatches(preset: CustomThemePreset) {
+  const set = (isDark.value ? preset.tokens.dark : preset.tokens.light) ?? {}
+  return [set.primary, set.background, set['chart-2'] ?? set.accent].filter(Boolean) as string[]
 }
 </script>
 
@@ -195,50 +105,44 @@ function saveEditedPreset() {
     tour-id="preset-themes-section"
   >
     <div class="space-y-4">
-      <!-- Active Preset Indicator -->
+      <!-- Active preset -->
       <div
-        v-if="activePresetId"
-        class="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+        v-if="activeLabel"
+        class="flex items-center justify-between gap-2 rounded-lg bg-muted/50 p-2"
       >
-        <div class="flex items-center gap-2">
-          <Icon name="lucide:palette" class="h-4 w-4 text-primary" />
-          <span class="text-sm font-medium">
-            {{ activePresetId.replace('builtin-', '').replace('tweakcn-', '') }}
-          </span>
-          <Badge v-if="isEdited" variant="secondary" class="text-xs">Edited</Badge>
+        <div class="flex min-w-0 items-center gap-2">
+          <Icon name="lucide:palette" class="size-4 shrink-0 text-primary" />
+          <span class="truncate text-sm font-medium">{{ activeLabel }}</span>
         </div>
-        <Button
-          v-if="isEdited && isLoggedIn"
-          variant="ghost"
-          size="sm"
-          class="h-6 px-2 text-xs"
-          @click="saveEditedPreset"
-        >
-          <Icon name="lucide:save" class="h-3 w-3 mr-1" />
-          Save
+        <Button variant="ghost" size="sm" class="h-6 px-2 text-xs" @click="openDialog('save')">
+          <Icon name="lucide:save" class="size-3" />Save
         </Button>
       </div>
 
-      <!-- Search Input -->
       <div class="relative">
         <Icon
           name="lucide:search"
-          class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+          class="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
         />
-        <Input v-model="searchQuery" placeholder="Search themes..." class="pl-8 h-8 text-sm" />
+        <Input
+          v-model="searchQuery"
+          placeholder="Search themes..."
+          class="h-8 pl-8 text-sm"
+          aria-label="Search themes"
+        />
       </div>
 
-      <!-- Category Filter -->
-      <div class="flex flex-wrap gap-1">
+      <div class="flex flex-wrap gap-1" role="group" aria-label="Filter presets">
         <button
-          v-for="category in PRESET_CATEGORIES"
+          v-for="category in categories"
           :key="category.id"
           type="button"
+          :aria-pressed="selectedCategory === category.id"
           :class="[
-            'px-2 py-0.5 text-xs rounded-full border transition-colors',
+            'rounded-full border px-2 py-0.5 text-xs transition-colors',
             selectedCategory === category.id
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-transparent text-muted-foreground hover:bg-muted border-border',
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-transparent text-muted-foreground hover:bg-muted',
           ]"
           @click="selectedCategory = category.id"
         >
@@ -246,127 +150,153 @@ function saveEditedPreset() {
         </button>
       </div>
 
-      <!-- Built-in Presets Section -->
-      <div v-if="filteredBuiltinPresets.length > 0 && selectedCategory === 'all'" class="space-y-2">
-        <h4 class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+      <!-- Crystal Neuo -->
+      <section v-if="filteredCrystal.length" class="space-y-2">
+        <h4
+          class="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        >
+          Crystal Neuo
+          <Badge variant="outline" class="px-1 py-0 text-[9px]">{{ filteredCrystal.length }}</Badge>
+        </h4>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            v-for="preset in filteredCrystal"
+            :key="preset.id"
+            type="button"
+            :aria-pressed="activeSource === preset.id"
+            :class="
+              cn(
+                'group relative flex flex-col items-start rounded-lg border p-2.5 text-left transition-all',
+                activeSource === preset.id
+                  ? 'border-primary ring-2 ring-primary/20'
+                  : 'border-border hover:border-primary/50'
+              )
+            "
+            :title="preset.description"
+            @click="applyCustom(preset)"
+          >
+            <div class="mb-1.5 flex gap-1">
+              <span
+                v-for="(c, i) in swatches(preset)"
+                :key="i"
+                class="size-5 border"
+                :style="{ backgroundColor: c, borderRadius: preset.tokens.radius }"
+              />
+            </div>
+            <span class="text-xs font-medium transition-colors group-hover:text-primary">
+              {{ preset.label.replace('Crystal Neuo ', '') }}
+            </span>
+            <span class="line-clamp-2 text-[10px] text-muted-foreground">{{
+              preset.description
+            }}</span>
+            <Icon
+              v-if="activeSource === preset.id"
+              name="lucide:circle-check"
+              class="absolute right-1.5 top-1.5 size-3.5 text-primary"
+            />
+          </button>
+        </div>
+      </section>
+
+      <!-- Built-in -->
+      <section v-if="filteredBuiltin.length" class="space-y-2">
+        <h4 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Vuecraft Presets
         </h4>
         <div class="grid grid-cols-2 gap-2">
           <button
-            v-for="preset in filteredBuiltinPresets"
+            v-for="preset in filteredBuiltin"
             :key="preset.name"
             type="button"
+            :aria-pressed="isActiveBuiltin(preset.name)"
             :class="
               cn(
-                'relative flex flex-col items-start p-2.5 rounded-lg border transition-all text-left group',
-                isActivePreset(preset.name)
+                'group relative flex flex-col items-start rounded-lg border p-2.5 text-left transition-all',
+                isActiveBuiltin(preset.name)
                   ? 'border-primary ring-2 ring-primary/20'
                   : 'border-border hover:border-primary/50'
               )
             "
-            @click="handleApplyBuiltinPreset(preset.name)"
+            @click="applyBuiltin(preset.name, preset.label)"
           >
-            <!-- Preview Colors -->
-            <div class="flex gap-1 mb-1.5">
-              <div
-                class="w-5 h-5 rounded-full border"
+            <div class="mb-1.5 flex gap-1">
+              <span
+                class="size-5 rounded-full border"
                 :style="{ backgroundColor: preset.preview.primary }"
               />
-              <div
-                class="w-5 h-5 rounded-full border"
+              <span
+                class="size-5 rounded-full border"
                 :style="{ backgroundColor: preset.preview.background }"
               />
             </div>
-
-            <!-- Name and Description -->
-            <div class="text-xs font-medium group-hover:text-primary transition-colors">
-              {{ preset.label }}
-            </div>
-            <div class="text-[10px] text-muted-foreground line-clamp-1">
-              {{ preset.description }}
-            </div>
-
-            <!-- Active Indicator -->
-            <div v-if="isActivePreset(preset.name)" class="absolute top-1.5 right-1.5">
-              <Icon name="lucide:check-circle" class="h-3.5 w-3.5 text-primary" />
-            </div>
+            <span class="text-xs font-medium transition-colors group-hover:text-primary">{{
+              preset.label
+            }}</span>
+            <span class="line-clamp-1 text-[10px] text-muted-foreground">{{
+              preset.description
+            }}</span>
+            <Icon
+              v-if="isActiveBuiltin(preset.name)"
+              name="lucide:circle-check"
+              class="absolute right-1.5 top-1.5 size-3.5 text-primary"
+            />
           </button>
         </div>
-      </div>
+      </section>
 
-      <!-- TweakCN Presets Section -->
-      <div v-if="filteredTweakcnPresets.length > 0" class="space-y-2">
+      <!-- tweakcn -->
+      <section v-if="filteredTweakcn.length" class="space-y-2">
         <h4
-          class="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2"
+          class="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground"
         >
-          <span>TweakCN Presets</span>
-          <Badge variant="outline" class="text-[9px] px-1 py-0">{{
-            filteredTweakcnPresets.length
-          }}</Badge>
+          tweakcn Presets
+          <Badge variant="outline" class="px-1 py-0 text-[9px]">{{ filteredTweakcn.length }}</Badge>
         </h4>
-        <div class="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1">
+        <div class="grid max-h-[400px] grid-cols-2 gap-2 overflow-y-auto pr-1">
           <button
-            v-for="preset in filteredTweakcnPresets"
+            v-for="preset in filteredTweakcn"
             :key="preset.id"
             type="button"
+            :aria-pressed="activeSource === preset.id"
             :class="
               cn(
-                'relative flex flex-col items-start p-2.5 rounded-lg border transition-all text-left group',
-                isActiveTweakcnPreset(preset.id)
+                'group relative flex flex-col items-start rounded-lg border p-2.5 text-left transition-all',
+                activeSource === preset.id
                   ? 'border-primary ring-2 ring-primary/20'
                   : 'border-border hover:border-primary/50'
               )
             "
-            @click="applyTweakcnPreset(preset)"
+            @click="applyCustom(preset)"
           >
-            <!-- Preview Colors -->
-            <div class="flex gap-1 mb-1.5">
-              <div
-                class="w-5 h-5 rounded-full border"
-                :style="{
-                  backgroundColor: isDark
-                    ? preset.styles.dark.primary
-                    : preset.styles.light.primary,
-                }"
-              />
-              <div
-                class="w-5 h-5 rounded-full border"
-                :style="{
-                  backgroundColor: isDark
-                    ? preset.styles.dark.background
-                    : preset.styles.light.background,
-                }"
+            <div class="mb-1.5 flex gap-1">
+              <span
+                v-for="(c, i) in swatches(preset)"
+                :key="i"
+                class="size-5 rounded-full border"
+                :style="{ backgroundColor: c }"
               />
             </div>
-
-            <!-- Name and Description -->
-            <div class="text-xs font-medium group-hover:text-primary transition-colors">
-              {{ preset.label }}
-            </div>
-            <div class="text-[10px] text-muted-foreground line-clamp-1">
-              {{ preset.description }}
-            </div>
-
-            <!-- Category Badge -->
-            <Badge variant="outline" class="absolute top-1.5 right-1.5 text-[8px] px-1 py-0">
-              {{ preset.category }}
-            </Badge>
-
-            <!-- Active Indicator -->
-            <div v-if="isActiveTweakcnPreset(preset.id)" class="absolute bottom-1.5 right-1.5">
-              <Icon name="lucide:check-circle" class="h-3.5 w-3.5 text-primary" />
-            </div>
+            <span class="text-xs font-medium transition-colors group-hover:text-primary">{{
+              preset.label
+            }}</span>
+            <span class="line-clamp-1 text-[10px] text-muted-foreground">{{
+              preset.description
+            }}</span>
+            <Icon
+              v-if="activeSource === preset.id"
+              name="lucide:circle-check"
+              class="absolute right-1.5 top-1.5 size-3.5 text-primary"
+            />
           </button>
         </div>
-      </div>
+      </section>
 
-      <!-- No Results -->
-      <div
-        v-if="filteredBuiltinPresets.length === 0 && filteredTweakcnPresets.length === 0"
+      <p
+        v-if="!filteredCrystal.length && !filteredBuiltin.length && !filteredTweakcn.length"
         class="py-8 text-center text-sm text-muted-foreground"
       >
-        No themes found for "{{ searchQuery }}"
-      </div>
+        No themes found for “{{ searchQuery }}”
+      </p>
     </div>
   </ConfigSection>
 </template>

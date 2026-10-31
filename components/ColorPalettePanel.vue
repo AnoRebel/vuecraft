@@ -2,6 +2,10 @@
 import { ref, watch } from 'vue'
 import { useColorPaletteGenerator, type PaletteColor } from '~/composables/useColorPaletteGenerator'
 import { Button } from '~/components/ui/button'
+import { toast } from 'vue-sonner'
+import { useDesignSystem } from '~/composables/useDesignSystem'
+
+const { config, setTheme, setCustomColors, undo } = useDesignSystem()
 
 const {
   baseColor,
@@ -43,99 +47,50 @@ function selectHarmony(value: string) {
   generate()
 }
 
-// Apply a generated color as the primary color
+// Generated colours are stored in the configuration (both colour modes)
 function applyColor(color: PaletteColor, target: 'primary' | 'accent' | 'secondary' = 'primary') {
-  if (typeof document !== 'undefined') {
-    const root = document.documentElement
-    switch (target) {
-      case 'primary':
-        root.style.setProperty('--color-primary', color.cssValue)
-        root.style.setProperty('--color-ring', color.cssValue)
-        break
-      case 'accent':
-        root.style.setProperty('--color-accent', color.cssValue)
-        break
-      case 'secondary':
-        root.style.setProperty('--color-secondary', color.cssValue)
-        break
-    }
-  }
+  if (target === 'primary') setTheme({ customPrimary: color.cssValue })
+  else setCustomColors('both', { [target]: color.cssValue })
+  toast.success(`Applied as ${target}`, { action: { label: 'Undo', onClick: undo } })
 }
 
-// Apply full palette to theme
 function applyPalette() {
-  if (!currentPalette.value || typeof document === 'undefined') return
-
-  const colors = currentPalette.value.colors
-  const root = document.documentElement
-
-  if (colors.length > 0) {
-    // Apply primary from first color
-    root.style.setProperty('--color-primary', colors[0]!.cssValue)
-    root.style.setProperty('--color-ring', colors[0]!.cssValue)
-
-    // Apply accent from second color if available
-    if (colors.length > 1) {
-      root.style.setProperty('--color-accent', colors[1]!.cssValue)
-    }
-
-    // Apply secondary from third color if available
-    if (colors.length > 2) {
-      root.style.setProperty('--color-secondary', colors[2]!.cssValue)
-    }
-
-    // Apply chart colors
-    colors.slice(0, 5).forEach((color, index) => {
-      root.style.setProperty(`--color-chart-${index + 1}`, color.cssValue)
-    })
-  }
+  const colors = currentPalette.value?.colors ?? []
+  if (!colors.length) return
+  setTheme({ customPrimary: colors[0]!.cssValue })
+  const tokens: Record<string, string> = {}
+  colors.slice(0, 5).forEach((c, i) => (tokens[`chart-${i + 1}`] = c.cssValue))
+  setCustomColors('both', tokens)
+  toast.success('Palette applied', { action: { label: 'Undo', onClick: undo } })
 }
 
-// Clear applied colors - more comprehensive clearing
+// Remove only the tokens this panel sets, keeping any preset palette
+const PALETTE_TOKENS = [
+  'accent',
+  'secondary',
+  'chart-1',
+  'chart-2',
+  'chart-3',
+  'chart-4',
+  'chart-5',
+]
+
 function clearAppliedColors() {
-  if (typeof document === 'undefined') return
-  const root = document.documentElement
-
-  // Clear all color properties that might have been set inline
-  const colorProps = [
-    'background',
-    'foreground',
-    'card',
-    'card-foreground',
-    'popover',
-    'popover-foreground',
-    'primary',
-    'primary-foreground',
-    'secondary',
-    'secondary-foreground',
-    'muted',
-    'muted-foreground',
-    'accent',
-    'accent-foreground',
-    'destructive',
-    'destructive-foreground',
-    'border',
-    'input',
-    'ring',
-    'chart-1',
-    'chart-2',
-    'chart-3',
-    'chart-4',
-    'chart-5',
-    'sidebar',
-    'sidebar-foreground',
-    'sidebar-primary',
-    'sidebar-primary-foreground',
-    'sidebar-accent',
-    'sidebar-accent-foreground',
-    'sidebar-border',
-    'sidebar-ring',
-  ]
-
-  colorProps.forEach((prop) => {
-    root.style.removeProperty(`--color-${prop}`)
-  })
-  root.style.removeProperty('--radius')
+  const current = config.theme.custom
+  const keep = (set?: Record<string, string>) =>
+    set
+      ? Object.fromEntries(Object.entries(set).filter(([k]) => !PALETTE_TOKENS.includes(k)))
+      : undefined
+  const custom = current
+    ? JSON.parse(
+        JSON.stringify({
+          ...current,
+          light: keep(current.light as Record<string, string>),
+          dark: keep(current.dark as Record<string, string>),
+        })
+      )
+    : null
+  setTheme({ customPrimary: null, custom })
 }
 
 // Initialize

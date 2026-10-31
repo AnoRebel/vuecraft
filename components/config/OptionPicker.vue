@@ -45,6 +45,7 @@ const gridCols = {
         v-for="option in options"
         :key="option.name"
         type="button"
+        :aria-pressed="modelValue === option.name"
         :class="
           cn(
             'flex flex-col items-center justify-center p-3 rounded-md border transition-all text-center',

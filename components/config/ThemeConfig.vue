@@ -7,6 +7,7 @@ import OptionPicker from './OptionPicker.vue'
 import { Label } from '~/components/ui/label'
 import { Slider } from '~/components/ui/slider'
 import { Input } from '~/components/ui/input'
+import type { BaseColorName, RadiusValue, ThemeName } from '~/types/config'
 
 const { config, setTheme } = useDesignSystem()
 const { BASE_COLORS, ACCENT_THEMES, RADIUS_OPTIONS, SHADOW_INTENSITIES } = useConfigOptions()
@@ -19,88 +20,54 @@ const vibrantThemes = ACCENT_THEMES.filter(
   (t) => !['neutral', 'stone', 'zinc', 'gray', 'slate'].includes(t.name)
 )
 
-// Custom color picker - always visible
+// Custom primary colour (stored in the configuration)
 const customColorHex = ref('#6366f1')
-const isCustomColorActive = ref(false)
+const isCustomColorActive = computed(() => !!config.theme.customPrimary)
 
-// Apply custom color to CSS variables
-function applyCustomColor() {
-  if (typeof document !== 'undefined' && isCustomColorActive.value) {
-    const color = customColorHex.value
-    // Apply to primary colors - supports hex input
-    document.documentElement.style.setProperty('--color-primary', color)
-    document.documentElement.style.setProperty('--color-ring', color)
-  }
-}
+watch(
+  () => config.theme.customPrimary,
+  (value) => {
+    if (value && /^#[0-9a-f]{6}$/i.test(value)) customColorHex.value = value
+  },
+  { immediate: true }
+)
 
-// Clear custom color override
-function clearCustomColor() {
-  if (typeof document !== 'undefined') {
-    document.documentElement.style.removeProperty('--color-primary')
-    document.documentElement.style.removeProperty('--color-ring')
-  }
-  isCustomColorActive.value = false
-}
-
-// Handle accent theme selection - clears custom color
 function selectAccentTheme(themeName: string) {
-  clearCustomColor()
-  setTheme({ accentTheme: themeName as any })
+  setTheme({ accentTheme: themeName as ThemeName })
 }
 
-// Handle custom color selection
 function selectCustomColor() {
-  isCustomColorActive.value = true
-  applyCustomColor()
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(customColorHex.value)) {
+    setTheme({ customPrimary: customColorHex.value })
+  }
 }
 
-watch(customColorHex, () => {
-  if (isCustomColorActive.value) {
-    applyCustomColor()
-  }
-})
+function clearCustomColor() {
+  setTheme({ customPrimary: null })
+}
 
-// Custom radius value support
-const customRadiusValue = ref(0.5)
-
-// Map preset to slider value
+// Exact radius (rem) - stored as radiusValue so in-between values survive
 const radiusPresetToValue: Record<string, number> = {
   none: 0,
   sm: 0.25,
   md: 0.5,
   lg: 0.75,
   xl: 1,
-  full: 1.5,
+  full: 2,
 }
 
-// Initialize custom radius from current preset
-watch(
-  () => config.theme.radius,
-  (preset) => {
-    customRadiusValue.value = radiusPresetToValue[preset] ?? 0.5
-  },
-  { immediate: true }
-)
+const customRadiusValue = computed(() => {
+  if (typeof config.theme.radiusValue === 'number') return config.theme.radiusValue
+  return radiusPresetToValue[config.theme.radius] ?? 0.5
+})
 
-// Get closest preset from custom value
-function getClosestPreset(value: number): string {
-  const presets = Object.entries(radiusPresetToValue)
-  let closest = presets[0]!
-  let minDiff = Math.abs(value - closest[1])
-
-  for (const [name, presetValue] of presets) {
-    const diff = Math.abs(value - presetValue)
-    if (diff < minDiff) {
-      minDiff = diff
-      closest = [name, presetValue]
-    }
-  }
-
-  return closest[0]
+function setRadiusValue(value: number) {
+  setTheme({ radiusValue: Math.round(value * 100) / 100 })
 }
 
-// Current radius display value
 const currentRadiusDisplay = computed(() => {
+  if (typeof config.theme.radiusValue === 'number') return `${config.theme.radiusValue}rem`
+  if (config.theme.custom?.radius) return config.theme.custom.radius
   const option = RADIUS_OPTIONS.find((r) => r.name === config.theme.radius)
   return option?.value ?? '0.5rem'
 })
@@ -119,7 +86,7 @@ const currentRadiusDisplay = computed(() => {
         :options="BASE_COLORS"
         label="Base Color"
         :show-format="true"
-        @update:model-value="(v) => setTheme({ baseColor: v as any })"
+        @update:model-value="(v) => setTheme({ baseColor: v as BaseColorName })"
       />
 
       <!-- Accent Theme -->
@@ -183,6 +150,7 @@ const currentRadiusDisplay = computed(() => {
                   ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
                   : 'border-border',
               ]"
+              aria-label="Custom primary color"
               @input="selectCustomColor"
             />
             <Input
@@ -221,10 +189,14 @@ const currentRadiusDisplay = computed(() => {
         </div>
 
         <OptionPicker
-          :model-value="config.theme.radius"
+          :model-value="
+            config.theme.radiusValue == null && !config.theme.custom?.radius
+              ? config.theme.radius
+              : ''
+          "
           :options="RADIUS_OPTIONS.map((r) => ({ name: r.name, label: r.label }))"
           :columns="3"
-          @update:model-value="(v) => setTheme({ radius: v as any })"
+          @update:model-value="(v) => setTheme({ radius: v as RadiusValue })"
         />
 
         <!-- Custom radius slider -->
@@ -234,17 +206,13 @@ const currentRadiusDisplay = computed(() => {
             <span class="text-xs text-muted-foreground">{{ customRadiusValue.toFixed(2) }}rem</span>
           </div>
           <Slider
-            v-model="customRadiusValue"
+            :model-value="customRadiusValue"
             :min="0"
             :max="2"
             :step="0.05"
             class="w-full"
-            @update:model-value="
-              (v: number) => {
-                customRadiusValue = v
-                setTheme({ radius: getClosestPreset(v) as any })
-              }
-            "
+            aria-label="Radius in rem"
+            @update:model-value="setRadiusValue"
           />
         </div>
       </div>
