@@ -24,6 +24,7 @@ const activePreset = ref<string | null>(null)
 const customDimensions = ref<CustomDimensions | null>(null)
 const isRotated = ref(false)
 const zoom = ref(100) // Percentage
+const activeQuick = ref<string>('full')
 
 const DEVICE_PRESETS: DevicePreset[] = [
   // Mobile
@@ -295,12 +296,15 @@ export function useResponsivePreview() {
     const preset = quickPresets.find((p) => p.id === presetId)
     if (!preset || !preset.width) {
       reset()
+      activeQuick.value = 'full'
     } else {
       setCustomDimensions(preset.width, 800)
+      activeQuick.value = preset.id
     }
   }
 
   return {
+    activeQuick,
     // State
     activePreset,
     customDimensions,

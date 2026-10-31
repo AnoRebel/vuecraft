@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 interface Props {
   enabled: boolean
@@ -43,7 +43,11 @@ const elementInfo = ref({
 // Get component name from element
 function getComponentName(el: HTMLElement): string {
   // Check for Vue component name via __vueParentComponent
-  const vueInstance = (el as any).__vueParentComponent
+  const vueInstance = (
+    el as HTMLElement & {
+      __vueParentComponent?: { type?: { name?: string; __name?: string } }
+    }
+  ).__vueParentComponent
   if (vueInstance?.type?.name) {
     return vueInstance.type.name
   }
@@ -132,11 +136,15 @@ function handleMouseMove(event: MouseEvent) {
   const rect = target.getBoundingClientRect()
   const containerRect = props.containerRef.getBoundingClientRect()
 
+  // The highlight lives inside the (possibly zoomed) preview frame, so convert
+  // viewport pixels back into the frame's own coordinate space.
+  const container = props.containerRef
+  const scale = container.offsetWidth ? containerRect.width / container.offsetWidth : 1
   highlightBox.value = {
-    x: rect.left - containerRect.left,
-    y: rect.top - containerRect.top,
-    width: rect.width,
-    height: rect.height,
+    x: (rect.left - containerRect.left) / scale - container.clientLeft,
+    y: (rect.top - containerRect.top) / scale - container.clientTop,
+    width: rect.width / scale,
+    height: rect.height / scale,
   }
 
   tooltipPosition.value = { x: event.clientX + 15, y: event.clientY + 15 }
@@ -166,30 +174,43 @@ function handleClick(event: MouseEvent) {
   event.stopPropagation()
 }
 
-// Setup/cleanup event listeners
+// Setup/cleanup event listeners (the container ref arrives after mount)
+function attach(el: HTMLElement) {
+  el.addEventListener('mousemove', handleMouseMove)
+  el.addEventListener('mouseleave', handleMouseLeave)
+  el.addEventListener('click', handleClick, true)
+}
+
+function detach(el: HTMLElement) {
+  el.removeEventListener('mousemove', handleMouseMove)
+  el.removeEventListener('mouseleave', handleMouseLeave)
+  el.removeEventListener('click', handleClick, true)
+}
+
+watch(
+  () => props.containerRef,
+  (el, old) => {
+    if (old) detach(old)
+    if (el) attach(el)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.enabled,
+  (on) => {
+    if (!on) hoveredElement.value = null
+  }
+)
+
 onMounted(() => {
   updateWindowSize()
-  if (typeof window !== 'undefined') {
-    window.addEventListener('resize', updateWindowSize)
-  }
-  nextTick(() => {
-    if (props.containerRef) {
-      props.containerRef.addEventListener('mousemove', handleMouseMove)
-      props.containerRef.addEventListener('mouseleave', handleMouseLeave)
-      props.containerRef.addEventListener('click', handleClick, true)
-    }
-  })
+  window.addEventListener('resize', updateWindowSize)
 })
 
 onUnmounted(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', updateWindowSize)
-  }
-  if (props.containerRef) {
-    props.containerRef.removeEventListener('mousemove', handleMouseMove)
-    props.containerRef.removeEventListener('mouseleave', handleMouseLeave)
-    props.containerRef.removeEventListener('click', handleClick, true)
-  }
+  window.removeEventListener('resize', updateWindowSize)
+  if (props.containerRef) detach(props.containerRef)
 })
 </script>
 
