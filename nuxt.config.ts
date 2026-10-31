@@ -28,6 +28,8 @@ export default defineNuxtConfig({
     host: 'https://umami.anorebel.net',
     autoTrack: true,
     proxy: 'cloak',
+    // Only load the tracker when a site id is configured
+    enabled: Boolean(process.env.NUXT_UMAMI_SITE_ID),
     // useDirective: true,
     // ignoreLocalhost: true,
     // excludeQueryParams: false,
@@ -124,9 +126,14 @@ export default defineNuxtConfig({
   },
 
   icon: {
-    serverBundle: 'remote',
+    // Icons are bundled from the locally installed @iconify-json collections,
+    // so the UI does not depend on the Iconify CDN at runtime.
+    serverBundle: {
+      collections: ['lucide', 'mdi'],
+    },
     clientBundle: {
       scan: true,
+      sizeLimitKb: 512,
     },
   },
 
