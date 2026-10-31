@@ -163,3 +163,28 @@ export interface SerializedConfig {
   i: IconsConfig
   l: LayoutConfig
 }
+
+// Explicit design tokens that override the generated palette (used by
+// imported presets such as tweakcn and Crystal Neuo themes)
+export interface CustomThemeTokens {
+  light: Record<string, string>
+  dark: Record<string, string>
+  radius?: string
+  fontSans?: string
+  fontHeading?: string
+  fontMono?: string
+  borderWidth?: string
+  blur?: string
+  shadows?: {
+    light: Record<string, string>
+    dark: Record<string, string>
+  }
+}
+
+export interface CustomThemePreset {
+  id: string
+  label: string
+  description: string
+  tags: string[]
+  tokens: CustomThemeTokens
+}
