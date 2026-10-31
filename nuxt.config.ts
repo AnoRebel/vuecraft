@@ -49,9 +49,6 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    session: {
-      password: process.env.NUXT_SESSION_PASSWORD || 'a-secure-password-of-at-least-32-characters',
-    },
     rybbit: {
       siteId: process.env.NUXT_RYBBIT_SITE_ID || '',
     },

@@ -68,5 +68,8 @@
     "url": "https://github.com/vuecraft/vuecraft/issues"
   },
   "homepage": "https://vuecraft.anorebel.net",
-  "packageManager": "bun@1.4.4"
+  "packageManager": "bun@1.4.4",
+  "trustedDependencies": [
+    "unrs-resolver"
+  ]
 }

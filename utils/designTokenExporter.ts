@@ -6,7 +6,7 @@
 import type { DesignSystemConfig } from '~/types/config'
 import { parseOklch, oklchToRgb, rgbToHex } from './colorUtils'
 
-export type ExportFormat =
+export type TokenExportFormat =
   | 'figma'
   | 'style-dictionary'
   | 'css-in-js'
@@ -281,7 +281,7 @@ export default {
 /**
  * Main export function
  */
-export function generateDesignTokens(config: DesignSystemConfig, format: ExportFormat): string {
+export function generateDesignTokens(config: DesignSystemConfig, format: TokenExportFormat): string {
   switch (format) {
     case 'figma':
       return generateFigmaTokens(config)
@@ -301,7 +301,7 @@ export function generateDesignTokens(config: DesignSystemConfig, format: ExportF
 /**
  * Get file extension for format
  */
-export function getFormatExtension(format: ExportFormat): string {
+export function getFormatExtension(format: TokenExportFormat): string {
   switch (format) {
     case 'figma':
     case 'style-dictionary':
@@ -319,7 +319,7 @@ export function getFormatExtension(format: ExportFormat): string {
 /**
  * Get format description
  */
-export function getFormatDescription(format: ExportFormat): string {
+export function getFormatDescription(format: TokenExportFormat): string {
   switch (format) {
     case 'figma':
       return 'Figma Tokens plugin format'

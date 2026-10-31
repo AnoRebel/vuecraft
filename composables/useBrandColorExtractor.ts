@@ -150,8 +150,9 @@ export function useBrandColorExtractor() {
     // This is simplified - in practice you'd match to your theme palette
     const hue = result.suggestedPrimary.oklch.h
 
-    let accentTheme = 'neutral'
-    if (hue >= 0 && hue < 30) accentTheme = 'red'
+    let accentTheme: string
+    if (result.suggestedPrimary.oklch.c < 0.03) accentTheme = 'neutral'
+    else if (hue >= 0 && hue < 30) accentTheme = 'red'
     else if (hue >= 30 && hue < 60) accentTheme = 'orange'
     else if (hue >= 60 && hue < 90) accentTheme = 'yellow'
     else if (hue >= 90 && hue < 150) accentTheme = 'green'

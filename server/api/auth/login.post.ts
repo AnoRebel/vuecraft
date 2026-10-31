@@ -2,7 +2,7 @@
  * Email/password login handler
  */
 
-import { createError } from 'h3'
+import { createError } from 'nuxt/server'
 import { findUserByEmail } from '~/server/utils/auth'
 
 interface LoginBody {
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
   if (!body.email || !body.password) {
     throw createError({
-      statusCode: 400,
+      status: 400,
       message: 'Email and password are required',
     })
   }
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   if (!user || user.password !== body.password) {
     throw createError({
-      statusCode: 401,
+      status: 401,
       message: 'Invalid email or password',
     })
   }
