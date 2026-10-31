@@ -3,6 +3,8 @@
  * Converted from https://github.com/jnsahaj/tweakcn
  */
 
+import type { CustomThemePreset } from '~/types/config'
+
 export interface TweakcnThemeStyle {
   background: string
   foreground: string
@@ -44,14 +46,7 @@ export interface TweakcnPreset {
   label: string
   description: string
   category:
-    | 'professional'
-    | 'colorful'
-    | 'nature'
-    | 'warm'
-    | 'cool'
-    | 'brand'
-    | 'retro'
-    | 'monochrome'
+    'professional' | 'colorful' | 'nature' | 'warm' | 'cool' | 'brand' | 'retro' | 'monochrome'
   tags: string[]
   styles: {
     light: TweakcnThemeStyle
@@ -1155,3 +1150,22 @@ export const PRESET_CATEGORIES = [
   { id: 'retro', label: 'Retro' },
   { id: 'monochrome', label: 'Monochrome' },
 ] as const
+
+/** Convert a tweakcn preset into configuration tokens */
+export function tweakcnToCustomPreset(preset: TweakcnPreset): CustomThemePreset {
+  const strip = (style: TweakcnThemeStyle): Record<string, string> => {
+    const { radius: _radius, ...colors } = style
+    return colors as Record<string, string>
+  }
+  return {
+    id: `tweakcn-${preset.id}`,
+    label: preset.label,
+    description: preset.description,
+    tags: preset.tags,
+    tokens: {
+      light: strip(preset.styles.light),
+      dark: strip(preset.styles.dark),
+      ...(preset.styles.light.radius ? { radius: preset.styles.light.radius } : {}),
+    },
+  }
+}

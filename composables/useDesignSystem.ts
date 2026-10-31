@@ -1,4 +1,3 @@
-import { defu } from 'defu'
 import { useStorage, useClipboard, watchDebounced } from '@vueuse/core'
 import type {
   DesignSystemConfig,
@@ -9,6 +8,8 @@ import type {
   LayoutConfig,
   ExportConfig,
   SerializedConfig,
+  CustomThemePreset,
+  CustomThemeTokens,
 } from '~/types/config'
 import {
   DEFAULT_CONFIG,
@@ -37,15 +38,16 @@ import {
   PREVIEW_TEMPLATES as PREVIEW_TEMPLATES_OPTIONS,
   PRESET_THEMES as PRESET_THEMES_LIST,
 } from '~/config/defaults'
+import { useThemeHistory } from '~/composables/useThemeHistory'
 
 // Current version of the config serialization format
-const CONFIG_VERSION = 1
+// v2 adds export settings (`e`) and imported preset tokens (`t.custom`)
+const CONFIG_VERSION = 2
 
-// Storage key for saved configurations
+// Storage keys
 const STORAGE_KEY = 'vuecraft-config'
 const SAVED_CONFIGS_KEY = 'vuecraft-saved-configs'
 
-// Saved configuration type
 export interface SavedConfig {
   id: string
   name: string
@@ -53,194 +55,289 @@ export interface SavedConfig {
   config: SerializedConfig
 }
 
-// State using VueUse's useStorage for persistence
-const config = reactive<DesignSystemConfig>(structuredClone(DEFAULT_CONFIG))
+type GroupKey = keyof DesignSystemConfig
+
+const GROUP_DEFAULTS: { [K in GroupKey]: DesignSystemConfig[K] } = {
+  theme: DEFAULT_THEME_CONFIG,
+  typography: DEFAULT_TYPOGRAPHY_CONFIG,
+  components: DEFAULT_COMPONENTS_CONFIG,
+  icons: DEFAULT_ICONS_CONFIG,
+  layout: DEFAULT_LAYOUT_CONFIG,
+  export: DEFAULT_EXPORT_CONFIG,
+}
+
+/** Plain deep copy (works for reactive proxies, unlike structuredClone) */
+function clone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T
+}
+
+// Shared state (module level so every component sees the same config)
+const config = reactive<DesignSystemConfig>(clone(DEFAULT_CONFIG))
 const isInitialized = ref(false)
 const isDirty = ref(false)
 
-// Use VueUse's useStorage for saved configurations
 const savedConfigs = useStorage<SavedConfig[]>(SAVED_CONFIGS_KEY, [])
+const { copy, copied, isSupported: isClipboardSupported } = useClipboard({ legacy: true })
 
-// Use VueUse's useClipboard for clipboard operations
-const { copy, copied, isSupported: isClipboardSupported } = useClipboard()
+// ---------------------------------------------------------------------------
+// Serialization
+// ---------------------------------------------------------------------------
 
-// Serialize config for URL/JSON
 function serializeConfig(): SerializedConfig {
+  // Deep copies: reading every nested field also makes callers inside a
+  // computed() track the whole config, so share links never go stale.
   return {
     v: CONFIG_VERSION,
-    t: toRaw(config.theme),
-    ty: toRaw(config.typography),
-    c: toRaw(config.components),
-    i: toRaw(config.icons),
-    l: toRaw(config.layout),
+    t: clone(config.theme),
+    ty: clone(config.typography),
+    c: clone(config.components),
+    i: clone(config.icons),
+    l: clone(config.layout),
+    e: clone(config.export),
   }
 }
 
-// Deserialize config from URL/JSON
 function deserializeConfig(serialized: SerializedConfig): Partial<DesignSystemConfig> {
-  // Handle version migrations here if needed
-  if (serialized.v !== CONFIG_VERSION) {
-    console.warn(`Config version mismatch: expected ${CONFIG_VERSION}, got ${serialized.v}`)
-  }
-
   return {
     theme: serialized.t,
     typography: serialized.ty,
     components: serialized.c,
     icons: serialized.i,
     layout: serialized.l,
+    ...(serialized.e ? { export: serialized.e } : {}),
   }
 }
 
-// Encode config to URL-safe base64
+function isSerializedConfig(value: unknown): value is SerializedConfig {
+  if (!value || typeof value !== 'object') return false
+  const v = value as Record<string, unknown>
+  return typeof v.v === 'number' && !!v.t && !!v.ty && !!v.c && !!v.i && !!v.l
+}
+
+/** Replace the whole config, filling every missing field from fresh defaults */
+function replaceConfig(next: Partial<DesignSystemConfig>, keep: GroupKey[] = []) {
+  for (const key of Object.keys(GROUP_DEFAULTS) as GroupKey[]) {
+    if (keep.includes(key) && !next[key]) continue
+    const merged = { ...clone(GROUP_DEFAULTS[key]), ...(next[key] ? clone(next[key]) : {}) }
+    Object.assign(config[key], merged)
+  }
+}
+
+// URL-safe base64 of UTF-8 JSON
+function toBase64Url(text: string): string {
+  const bytes = new TextEncoder().encode(text)
+  let binary = ''
+  bytes.forEach((b) => (binary += String.fromCharCode(b)))
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function fromBase64Url(code: string): string {
+  let b64 = code.replace(/-/g, '+').replace(/_/g, '/').replace(/ /g, '+')
+  while (b64.length % 4) b64 += '='
+  const binary = atob(b64)
+  // Legacy links: btoa(encodeURIComponent(json))
+  if (binary.startsWith('%7B')) return decodeURIComponent(binary)
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
+  return new TextDecoder().decode(bytes)
+}
+
 function encodeConfig(): string {
-  const serialized = serializeConfig()
-  const json = JSON.stringify(serialized)
-  if (import.meta.client) {
-    return btoa(encodeURIComponent(json))
-  }
-  return ''
+  if (!import.meta.client) return ''
+  return toBase64Url(JSON.stringify(serializeConfig()))
 }
 
-// Decode config from URL-safe base64
 function decodeConfig(encoded: string): Partial<DesignSystemConfig> | null {
+  if (!import.meta.client) return null
   try {
-    if (import.meta.client) {
-      const json = decodeURIComponent(atob(encoded))
-      const serialized = JSON.parse(json) as SerializedConfig
-      return deserializeConfig(serialized)
-    }
-    return null
+    const parsed: unknown = JSON.parse(fromBase64Url(encoded))
+    return isSerializedConfig(parsed) ? deserializeConfig(parsed) : null
   } catch {
-    console.error('Failed to decode config')
     return null
   }
 }
+
+// ---------------------------------------------------------------------------
+// Persistence and history (registered once, client only)
+// ---------------------------------------------------------------------------
+
+let watchersRegistered = false
+const history = useThemeHistory()
+
+function registerWatchers() {
+  if (watchersRegistered || !import.meta.client) return
+  watchersRegistered = true
+
+  watchDebounced(
+    () => serializeConfig(),
+    (serialized) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(serialized))
+      } catch {
+        // storage full or unavailable - keep working in memory
+      }
+      if (!history.isApplying()) history.push(serialized)
+      isDirty.value = true
+    },
+    { deep: true, debounce: 300 }
+  )
+}
+
+function applyHistoryEntry(entry: SerializedConfig | null) {
+  if (!entry) return
+  history.setApplyingHistory(true)
+  replaceConfig(deserializeConfig(entry))
+  // Release after the debounced watcher has seen the change
+  setTimeout(() => history.setApplyingHistory(false), 400)
+}
+
+// ---------------------------------------------------------------------------
+// Composable
+// ---------------------------------------------------------------------------
 
 export function useDesignSystem() {
-  const route = useRoute()
-  const router = useRouter()
+  registerWatchers()
 
-  // Initialize from URL params or localStorage on first load
+  /** Load config from ?c= (then drop it from the URL) or from localStorage */
   function initFromUrl() {
     if (isInitialized.value) return
 
-    // First check URL params
-    const configParam = route.query.c as string | undefined
-    if (configParam) {
-      const decoded = decodeConfig(configParam)
+    const route = useRoute()
+    const router = useRouter()
+    const configParam = route.query.c
+    const code = Array.isArray(configParam) ? configParam[0] : configParam
+
+    let loaded = false
+    if (code) {
+      const decoded = decodeConfig(code)
       if (decoded) {
-        Object.assign(config, defu(decoded, DEFAULT_CONFIG))
-        isInitialized.value = true
-        return
+        replaceConfig(decoded, ['export'])
+        loaded = true
       }
+      // Remove the code so later edits are not overridden on reload
+      const { c: _c, ...rest } = route.query
+      router.replace({ query: rest })
     }
 
-    // Then check localStorage
-    if (import.meta.client) {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored) as SerializedConfig
-          const decoded = deserializeConfig(parsed)
-          Object.assign(config, defu(decoded, DEFAULT_CONFIG))
-        } catch {
-          console.error('Failed to load config from localStorage')
+    if (!loaded && import.meta.client) {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const parsed: unknown = JSON.parse(stored)
+          if (isSerializedConfig(parsed)) replaceConfig(deserializeConfig(parsed))
         }
+      } catch {
+        // ignore corrupt storage
       }
     }
 
+    history.initialize(serializeConfig())
     isInitialized.value = true
   }
 
-  // Sync config to URL
+  /** Write the current config into the address bar (opt-in) */
   function syncToUrl() {
     const encoded = encodeConfig()
     if (encoded) {
-      router.replace({
-        query: { ...route.query, c: encoded },
-      })
+      const route = useRoute()
+      useRouter().replace({ query: { ...route.query, c: encoded } })
     }
   }
 
-  // Auto-save to localStorage with debounce using VueUse
-  if (import.meta.client) {
-    watchDebounced(
-      () => config,
-      () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeConfig()))
-        isDirty.value = true
-      },
-      { deep: true, debounce: 500 }
-    )
+  // --- Setters -------------------------------------------------------------
+  // Editing a control overrides the matching token imported from a preset.
+
+  function dropCustom(keys: (keyof CustomThemeTokens)[]) {
+    const custom = config.theme.custom
+    if (!custom) return
+    const next = Object.fromEntries(
+      Object.entries(custom).filter(([k]) => !keys.includes(k as keyof CustomThemeTokens))
+    ) as CustomThemeTokens
+    const remaining = Object.keys(next).filter((k) => k !== 'source')
+    config.theme.custom = remaining.length ? next : null
   }
 
-  // Theme config helpers
   function setTheme(newTheme: Partial<ThemeConfig>) {
+    if ('baseColor' in newTheme || 'accentTheme' in newTheme) {
+      dropCustom(['light', 'dark'])
+      if (!('customPrimary' in newTheme)) config.theme.customPrimary = null
+    }
+    if ('radius' in newTheme) {
+      dropCustom(['radius'])
+      if (!('radiusValue' in newTheme)) config.theme.radiusValue = null
+    }
+    if ('radiusValue' in newTheme) dropCustom(['radius'])
+    if ('shadowIntensity' in newTheme) dropCustom(['shadows'])
     Object.assign(config.theme, newTheme)
   }
 
   function resetTheme() {
-    Object.assign(config.theme, structuredClone(DEFAULT_THEME_CONFIG))
+    Object.assign(config.theme, clone(DEFAULT_THEME_CONFIG))
   }
 
-  // Typography config helpers
   function setTypography(newTypography: Partial<TypographyConfig>) {
+    if ('fontFamily' in newTypography) dropCustom(['fontSans', 'fontHeading'])
+    if ('monoFontFamily' in newTypography) dropCustom(['fontMono'])
     Object.assign(config.typography, newTypography)
   }
 
   function resetTypography() {
-    Object.assign(config.typography, structuredClone(DEFAULT_TYPOGRAPHY_CONFIG))
+    dropCustom(['fontSans', 'fontHeading', 'fontMono'])
+    Object.assign(config.typography, clone(DEFAULT_TYPOGRAPHY_CONFIG))
   }
 
-  // Components config helpers
   function setComponents(newComponents: Partial<ComponentsConfig>) {
+    if ('borderWidth' in newComponents) dropCustom(['borderWidth'])
     Object.assign(config.components, newComponents)
   }
 
   function resetComponents() {
-    Object.assign(config.components, structuredClone(DEFAULT_COMPONENTS_CONFIG))
+    dropCustom(['borderWidth'])
+    Object.assign(config.components, clone(DEFAULT_COMPONENTS_CONFIG))
   }
 
-  // Icons config helpers
   function setIcons(newIcons: Partial<IconsConfig>) {
     Object.assign(config.icons, newIcons)
   }
 
   function resetIcons() {
-    Object.assign(config.icons, structuredClone(DEFAULT_ICONS_CONFIG))
+    Object.assign(config.icons, clone(DEFAULT_ICONS_CONFIG))
   }
 
-  // Layout config helpers
   function setLayout(newLayout: Partial<LayoutConfig>) {
     Object.assign(config.layout, newLayout)
   }
 
   function resetLayout() {
-    Object.assign(config.layout, structuredClone(DEFAULT_LAYOUT_CONFIG))
+    Object.assign(config.layout, clone(DEFAULT_LAYOUT_CONFIG))
   }
 
-  // Export config helpers
   function setExport(newExport: Partial<ExportConfig>) {
     Object.assign(config.export, newExport)
   }
 
   function resetExport() {
-    Object.assign(config.export, structuredClone(DEFAULT_EXPORT_CONFIG))
+    Object.assign(config.export, clone(DEFAULT_EXPORT_CONFIG))
   }
 
-  // Reset all config to defaults
+  /** Store explicit colour overrides (palette generator, accessibility fixes) */
+  function setCustomColors(mode: 'light' | 'dark' | 'both', colors: Record<string, string>) {
+    const custom: CustomThemeTokens = clone(config.theme.custom ?? {})
+    for (const m of mode === 'both' ? (['light', 'dark'] as const) : [mode]) {
+      custom[m] = { ...(custom[m] ?? {}), ...colors }
+    }
+    config.theme.custom = custom
+  }
+
   function resetAll() {
-    Object.assign(config, structuredClone(DEFAULT_CONFIG))
+    replaceConfig({}, [])
     isDirty.value = false
   }
 
-  // Randomize config
   function randomize() {
     const { BASE_COLORS, ACCENT_THEMES, STYLES, RADIUS_OPTIONS, FONT_FAMILIES } = useConfigOptions()
-
     const randomItem = <T>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)]!
 
+    config.theme.custom = null
     setTheme({
       baseColor: randomItem(BASE_COLORS).name as ThemeConfig['baseColor'],
       accentTheme: randomItem(ACCENT_THEMES).name as ThemeConfig['accentTheme'],
@@ -248,74 +345,87 @@ export function useDesignSystem() {
       shadowIntensity: randomItem(['none', 'subtle', 'default', 'strong'] as const),
       menuAccent: randomItem(['subtle', 'bold'] as const),
       menuColor: randomItem(['default', 'inverted'] as const),
+      customPrimary: null,
+      radiusValue: null,
     })
-
-    setTypography({
-      fontFamily: randomItem(FONT_FAMILIES).name as TypographyConfig['fontFamily'],
-    })
-
-    setComponents({
-      style: randomItem(STYLES).name as ComponentsConfig['style'],
-    })
+    setTypography({ fontFamily: randomItem(FONT_FAMILIES).name as TypographyConfig['fontFamily'] })
+    setComponents({ style: randomItem(STYLES).name as ComponentsConfig['style'] })
   }
 
-  // Apply a preset theme
-  function applyPreset(presetName: string) {
+  /** Built-in presets reset theme, typography and components to defaults first */
+  function applyPreset(presetName: string): boolean {
     const preset = PRESET_THEMES_LIST.find((p) => p.name === presetName)
-    if (preset) {
-      setTheme(preset.config.theme as Partial<ThemeConfig>)
-      setTypography(preset.config.typography as Partial<TypographyConfig>)
-      setComponents(preset.config.components as Partial<ComponentsConfig>)
-      isDirty.value = true
-    }
+    if (!preset) return false
+    replaceConfig(
+      {
+        theme: { ...clone(DEFAULT_THEME_CONFIG), ...preset.config.theme },
+        typography: { ...clone(DEFAULT_TYPOGRAPHY_CONFIG), ...preset.config.typography },
+        components: { ...clone(DEFAULT_COMPONENTS_CONFIG), ...preset.config.components },
+      },
+      ['icons', 'layout', 'export']
+    )
+    return true
   }
 
-  // Import config from JSON
+  /** Imported presets (tweakcn, Crystal Neuo) become the theme's custom tokens */
+  function applyCustomPreset(preset: CustomThemePreset) {
+    replaceConfig(
+      {
+        theme: {
+          ...clone(DEFAULT_THEME_CONFIG),
+          custom: { ...clone(preset.tokens), source: preset.id },
+        },
+        typography: clone(config.typography),
+        components: { ...clone(config.components), style: 'default' },
+      },
+      ['icons', 'layout', 'export']
+    )
+  }
+
+  function applySerialized(serialized: SerializedConfig) {
+    replaceConfig(deserializeConfig(serialized), ['export'])
+  }
+
   function importConfig(jsonString: string): boolean {
     try {
-      const parsed = JSON.parse(jsonString)
-      if (parsed.v && parsed.t && parsed.ty && parsed.c && parsed.i && parsed.l) {
-        const decoded = deserializeConfig(parsed as SerializedConfig)
-        Object.assign(config, defu(decoded, DEFAULT_CONFIG))
-        isDirty.value = true
-        return true
-      }
-      return false
+      const parsed: unknown = JSON.parse(jsonString)
+      if (!isSerializedConfig(parsed)) return false
+      applySerialized(parsed)
+      isDirty.value = true
+      return true
     } catch {
       return false
     }
   }
 
-  // Export config to JSON
   function exportConfigJson(): string {
     return JSON.stringify(serializeConfig(), null, 2)
   }
 
-  // Get shareable URL
   function getShareableUrl(): string {
-    const encoded = encodeConfig()
-    if (import.meta.client) {
-      const baseUrl = window.location.origin + window.location.pathname
-      return `${baseUrl}?c=${encoded}`
-    }
-    return ''
+    if (!import.meta.client) return ''
+    const url = new URL(window.location.href)
+    url.search = ''
+    url.hash = ''
+    url.searchParams.set('c', encodeConfig())
+    return url.toString()
   }
 
-  // Copy shareable URL to clipboard using VueUse
   async function copyShareableUrl(): Promise<boolean> {
-    if (!isClipboardSupported.value) return false
-    await copy(getShareableUrl())
-    return copied.value
+    return copyToClipboard(getShareableUrl())
   }
 
-  // Copy text to clipboard using VueUse
   async function copyToClipboard(text: string): Promise<boolean> {
-    if (!isClipboardSupported.value) return false
-    await copy(text)
-    return copied.value
+    try {
+      await copy(text)
+      return true
+    } catch {
+      return false
+    }
   }
 
-  // Save current configuration with a name
+  // --- Saved configurations -----------------------------------------------
+
   function saveConfiguration(name: string): SavedConfig {
     const newConfig: SavedConfig = {
       id: crypto.randomUUID(),
@@ -327,42 +437,42 @@ export function useDesignSystem() {
     return newConfig
   }
 
-  // Load a saved configuration
   function loadConfiguration(id: string): boolean {
     const saved = savedConfigs.value.find((c) => c.id === id)
-    if (saved) {
-      const decoded = deserializeConfig(saved.config)
-      Object.assign(config, defu(decoded, DEFAULT_CONFIG))
-      isDirty.value = true
-      return true
-    }
-    return false
+    if (!saved) return false
+    applySerialized(saved.config)
+    isDirty.value = true
+    return true
   }
 
-  // Delete a saved configuration
   function deleteConfiguration(id: string): boolean {
-    const index = savedConfigs.value.findIndex((c) => c.id === id)
-    if (index !== -1) {
-      savedConfigs.value = savedConfigs.value.filter((c) => c.id !== id)
-      return true
-    }
-    return false
+    const exists = savedConfigs.value.some((c) => c.id === id)
+    if (exists) savedConfigs.value = savedConfigs.value.filter((c) => c.id !== id)
+    return exists
   }
 
-  // Rename a saved configuration
   function renameConfiguration(id: string, newName: string): boolean {
-    const savedConfig = savedConfigs.value.find((c) => c.id === id)
-    if (savedConfig) {
-      savedConfig.name = newName
-      savedConfigs.value = [...savedConfigs.value]
-      return true
+    const exists = savedConfigs.value.some((c) => c.id === id)
+    if (exists) {
+      savedConfigs.value = savedConfigs.value.map((c) =>
+        c.id === id ? { ...c, name: newName } : c
+      )
     }
-    return false
+    return exists
   }
 
-  // Get all saved configurations
   function getSavedConfigurations(): SavedConfig[] {
     return savedConfigs.value
+  }
+
+  // --- History --------------------------------------------------------------
+
+  function undo() {
+    applyHistoryEntry(history.undo())
+  }
+
+  function redo() {
+    applyHistoryEntry(history.redo())
   }
 
   return {
@@ -373,6 +483,8 @@ export function useDesignSystem() {
     savedConfigs: readonly(savedConfigs),
     isClipboardSupported,
     copied,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
 
     // Initialization
     initFromUrl,
@@ -385,6 +497,7 @@ export function useDesignSystem() {
     setIcons,
     setLayout,
     setExport,
+    setCustomColors,
 
     // Reset functions
     resetTheme,
@@ -398,11 +511,17 @@ export function useDesignSystem() {
     // Utility functions
     randomize,
     applyPreset,
+    applyCustomPreset,
+    applySerialized,
     importConfig,
     exportConfigJson,
     getShareableUrl,
     copyShareableUrl,
     copyToClipboard,
+
+    // History
+    undo,
+    redo,
 
     // Save/Load functions
     saveConfiguration,
