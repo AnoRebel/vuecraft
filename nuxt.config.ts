@@ -39,12 +39,12 @@ export default defineNuxtConfig({
 
   scripts: {
     registry: {
-      rybbitAnalytics: {
-        scriptInput: {
-          src: 'https://rybbit.anorebel.net/api/script.js',
-        },
-        siteId: process.env.NUXT_RYBBIT_SITE_ID || '',
-      },
+      // rybbitAnalytics: {
+      //   scriptInput: {
+      //     src: 'https://rybbit.anorebel.net/api/script.js',
+      //   },
+      //   siteId: process.env.NUXT_RYBBIT_SITE_ID || '',
+      // },
     },
   },
 
@@ -197,6 +197,15 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
         { rel: 'canonical', href: 'https://vuecraft.anorebel.net' },
       ],
+      script: process.env.NUXT_RYBBIT_SITE_ID
+        ? [
+            {
+              src: 'https://rybbit.anorebel.net/api/script.js',
+              defer: true,
+              'data-site-id': process.env.NUXT_RYBBIT_SITE_ID,
+            },
+          ]
+        : [],
     },
   },
 

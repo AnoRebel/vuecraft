@@ -29,9 +29,15 @@ logs
 !.vscode/settings.json
 
 # Bun
-bun.lockb
+bun.lock
 
 # NPM/Yarn/PNPM lockfiles (using bun)
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# AI
+.claude/
+.opencode/
+.pi/
+.mcp.json
