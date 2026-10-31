@@ -8,7 +8,7 @@
 
 ### Drag and drop: provider + child zone component
 
-`makeDroppable` / `makeDraggable` inject the provider context, so they must run in a component rendered *inside* `<DnDProvider>`. `SortableSectionList` now only renders the provider; a new `SortableSectionZone` owns the drop zone and computes the new order with `event.helpers.suggestSort('vertical')`. Items register `() => [index, items]` as their payload and use a dedicated grip handle (`dragHandle`) with a 4px activation distance so clicks on the switch are not hijacked.
+`makeDroppable` / `makeDraggable` inject the provider context, so they must run in a component rendered _inside_ `<DnDProvider>`. `SortableSectionList` now only renders the provider; a new `SortableSectionZone` owns the drop zone and computes the new order with `event.helpers.suggestSort('vertical')`. Items register `() => [index, items]` as their payload and use a dedicated grip handle (`dragHandle`) with a 4px activation distance so clicks on the switch are not hijacked.
 
 ### Auth secret
 
