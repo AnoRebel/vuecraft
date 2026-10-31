@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import { Toaster } from 'vue-sonner'
 import PWAInstallPrompt from '~/components/PWAInstallPrompt.vue'
 
-// Provide the design system context to the entire app
+// Keeps the .dark class on <html> in sync with the stored colour mode
 const { isDark } = useColorMode()
 </script>
 
 <template>
-  <div :class="{ dark: isDark }">
+  <div>
     <NuxtPage />
     <PWAInstallPrompt />
+    <Toaster :theme="isDark ? 'dark' : 'light'" position="bottom-right" rich-colors close-button />
   </div>
 </template>

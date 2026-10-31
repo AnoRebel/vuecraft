@@ -15,6 +15,9 @@ export const DEFAULT_THEME_CONFIG: ThemeConfig = {
   shadowIntensity: 'default',
   menuAccent: 'subtle',
   menuColor: 'default',
+  radiusValue: null,
+  customPrimary: null,
+  custom: null,
 }
 
 export const DEFAULT_TYPOGRAPHY_CONFIG: TypographyConfig = {
@@ -180,6 +183,8 @@ export const FONT_FAMILIES = [
   { name: 'manrope', label: 'Manrope', category: 'sans-serif' },
   { name: 'lexend', label: 'Lexend', category: 'sans-serif' },
   { name: 'sora', label: 'Sora', category: 'sans-serif' },
+  { name: 'ibm-plex-sans', label: 'IBM Plex Sans', category: 'sans-serif' },
+  { name: 'bricolage-grotesque', label: 'Bricolage Grotesque', category: 'sans-serif' },
 ] as const
 
 export const MONO_FONT_FAMILIES = [
@@ -191,7 +196,6 @@ export const MONO_FONT_FAMILIES = [
   { name: 'roboto-mono', label: 'Roboto Mono' },
   { name: 'inconsolata', label: 'Inconsolata' },
   { name: 'ubuntu-mono', label: 'Ubuntu Mono' },
-  { name: 'cascadia-code', label: 'Cascadia Code' },
   { name: 'space-mono', label: 'Space Mono' },
 ] as const
 

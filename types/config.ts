@@ -43,8 +43,29 @@ export type FontFamily =
   | 'public-sans'
   | 'outfit'
   | 'geist'
+  | 'poppins'
+  | 'open-sans'
+  | 'lato'
+  | 'montserrat'
+  | 'work-sans'
+  | 'plus-jakarta-sans'
+  | 'space-grotesk'
+  | 'manrope'
+  | 'lexend'
+  | 'sora'
+  | 'ibm-plex-sans'
+  | 'bricolage-grotesque'
 
-export type MonoFontFamily = 'jetbrains-mono' | 'geist-mono' | 'fira-code' | 'source-code-pro'
+export type MonoFontFamily =
+  | 'jetbrains-mono'
+  | 'geist-mono'
+  | 'fira-code'
+  | 'source-code-pro'
+  | 'ibm-plex-mono'
+  | 'roboto-mono'
+  | 'inconsolata'
+  | 'ubuntu-mono'
+  | 'space-mono'
 
 export type FontScale = 'compact' | 'default' | 'relaxed' | 'spacious'
 
@@ -76,6 +97,12 @@ export interface ThemeConfig {
   shadowIntensity: ShadowIntensity
   menuAccent: MenuAccent
   menuColor: MenuColor
+  /** Exact radius in rem from the fine-tune slider; overrides `radius` when set */
+  radiusValue?: number | null
+  /** Custom primary colour (any CSS colour) applied over the palette */
+  customPrimary?: string | null
+  /** Tokens imported from a preset (tweakcn, Crystal Neuo, ...) */
+  custom?: CustomThemeTokens | null
 }
 
 export interface TypographyConfig {
@@ -147,12 +174,7 @@ export interface CSSVariables {
 
 // Preview template types
 export type PreviewTemplate =
-  | 'dashboard'
-  | 'cards'
-  | 'forms'
-  | 'authentication'
-  | 'settings'
-  | 'components'
+  'dashboard' | 'cards' | 'forms' | 'authentication' | 'settings' | 'components'
 
 // Serializable config for URL/JSON
 export interface SerializedConfig {
@@ -162,13 +184,17 @@ export interface SerializedConfig {
   c: ComponentsConfig
   i: IconsConfig
   l: LayoutConfig
+  e?: ExportConfig
 }
 
 // Explicit design tokens that override the generated palette (used by
 // imported presets such as tweakcn and Crystal Neuo themes)
 export interface CustomThemeTokens {
-  light: Record<string, string>
-  dark: Record<string, string>
+  /** Id of the preset the tokens came from */
+  source?: string
+  /** shadcn colour tokens keyed by kebab-case name (background, card-foreground, ...) */
+  light?: Record<string, string>
+  dark?: Record<string, string>
   radius?: string
   fontSans?: string
   fontHeading?: string

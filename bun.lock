@@ -31,8 +31,12 @@
         "vue-sonner": "^2.0.9",
       },
       "devDependencies": {
+        "@iconify-json/heroicons": "^1.2.3",
         "@iconify-json/lucide": "^1.2.149",
         "@iconify-json/mdi": "^1.2.3",
+        "@iconify-json/ph": "^1.2.2",
+        "@iconify-json/radix-icons": "^1.2.6",
+        "@iconify-json/tabler": "^1.2.43",
         "@nuxt/eslint": "^1.17.0",
         "@tailwindcss/vite": "^4.3.3",
         "@types/node": "^26.6.6",
@@ -373,9 +377,17 @@
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
 
+    "@iconify-json/heroicons": ["@iconify-json/heroicons@1.2.3", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-n+vmCEgTesRsOpp5AB5ILB6srsgsYK+bieoQBNlafvoEhjVXLq8nIGN4B0v/s4DUfa0dOrjwE/cKJgIKdJXOEg=="],
+
     "@iconify-json/lucide": ["@iconify-json/lucide@1.2.149", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-5NG9YdbtRS03hG1A+EIE6nLhhdAYsf0mKu1ZRi6kLMlCG8DxmDsRM6DAhwlNMLiSiQKFbHpKTJ2VddZdwUkUyw=="],
 
     "@iconify-json/mdi": ["@iconify-json/mdi@1.2.3", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-O3cLwbDOK7NNDf2ihaQOH5F9JglnulNDFV7WprU2dSoZu3h3cWH//h74uQAB87brHmvFVxIOkuBX2sZSzYhScg=="],
+
+    "@iconify-json/ph": ["@iconify-json/ph@1.2.2", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-PgkEZNtqa8hBGjHXQa4pMwZa93hmfu8FUSjs/nv4oUU6yLsgv+gh9nu28Kqi8Fz9CCVu4hj1MZs9/60J57IzFw=="],
+
+    "@iconify-json/radix-icons": ["@iconify-json/radix-icons@1.2.6", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-izgVBJwk37dSvsma1QsRMfCWQ4FIImbBmJId1WUURzRZA5fFyKlCcG/nZC8se0KhOBWszo2mYgLmhKJv/DFPoA=="],
+
+    "@iconify-json/tabler": ["@iconify-json/tabler@1.2.43", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-EKhyOj6nASi25ZjuRpEhPL1fwiKVtg/e/VX6v6X3FPKpjG9og26ypW8ItnWYSTn6fdNuQe3VPeyuThWlP6QuWw=="],
 
     "@iconify/collections": ["@iconify/collections@1.0.758", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-i6z8ImaR9gH/Kj51H81JmGaX1K5OF+SuNZB4DxJwgdweZUBguMaL62EDFqIwF1V8xKfGrOJRB/tx4csYXaNl0w=="],
 
