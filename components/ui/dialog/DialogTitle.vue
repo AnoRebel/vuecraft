@@ -1,15 +1,13 @@
 <script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
+import { DialogTitle } from 'reka-ui'
 import { cn } from '~/lib/utils'
 
-interface Props {
-  class?: string
-}
-
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<{ class?: HTMLAttributes['class'] }>(), { class: '' })
 </script>
 
 <template>
-  <h2 :class="cn('text-lg font-semibold leading-none tracking-tight', props.class)">
+  <DialogTitle :class="cn('text-lg font-semibold leading-none tracking-tight pr-6', props.class)">
     <slot />
-  </h2>
+  </DialogTitle>
 </template>

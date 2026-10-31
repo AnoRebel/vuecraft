@@ -1,11 +1,9 @@
 <script setup lang="ts">
-const emit = defineEmits<{
-  click: []
-}>()
+import { DialogTrigger } from 'reka-ui'
 </script>
 
 <template>
-  <div @click="emit('click')">
+  <DialogTrigger as-child>
     <slot />
-  </div>
+  </DialogTrigger>
 </template>

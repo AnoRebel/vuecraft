@@ -1,28 +1,16 @@
 <script setup lang="ts">
-import { provide, toRef } from 'vue'
+import { DialogRoot } from 'reka-ui'
 
-interface Props {
-  open?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<{ open?: boolean; modal?: boolean }>(), {
   open: false,
+  modal: true,
 })
 
-const emit = defineEmits<{
-  'update:open': [value: boolean]
-}>()
-
-function close() {
-  emit('update:open', false)
-}
-
-provide('dialog', {
-  open: toRef(props, 'open'),
-  close,
-})
+const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 </script>
 
 <template>
-  <slot />
+  <DialogRoot :open="props.open" :modal="props.modal" @update:open="emit('update:open', $event)">
+    <slot />
+  </DialogRoot>
 </template>

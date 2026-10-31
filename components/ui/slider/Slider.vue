@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
 import { computed } from 'vue'
 import { cn } from '~/lib/utils'
 
 interface Props {
-  class?: string
+  class?: HTMLAttributes['class']
   modelValue?: number
   min?: number
   max?: number
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  class: '',
   modelValue: 0,
   min: 0,
   max: 100,

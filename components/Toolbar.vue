@@ -1,5 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuRoot,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from 'reka-ui'
+import { toast } from 'vue-sonner'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { Tooltip } from '~/components/ui/tooltip'
@@ -8,248 +17,239 @@ import ImportDialog from './ImportDialog.vue'
 import ShareDialog from './ShareDialog.vue'
 import AuthDialog from './AuthDialog.vue'
 import UserMenu from './UserMenu.vue'
+import ThemeGalleryDialog from './ThemeGalleryDialog.vue'
+import ThemeCompareDialog from './ThemeCompareDialog.vue'
+import BrandColorImportDialog from './BrandColorImportDialog.vue'
+import KeyboardShortcutsDialog from './KeyboardShortcutsDialog.vue'
+import SaveConfigDialog from './SaveConfigDialog.vue'
 import { useAppTour } from '~/composables/useAppTour'
 import { useColorMode } from '~/composables/useColorMode'
 import { useAuth } from '~/composables/useAuth'
+import { useDesignSystem } from '~/composables/useDesignSystem'
+import { useBuilderUi, type BuilderDialog } from '~/composables/useBuilderUi'
+import { useKeyboardShortcuts, formatShortcut } from '~/composables/useKeyboardShortcuts'
+import type { SerializedConfig } from '~/types/config'
 
-const exportDialogOpen = ref(false)
-const importDialogOpen = ref(false)
-const shareDialogOpen = ref(false)
-const authDialogOpen = ref(false)
-
-// Color mode
 const { toggleColorMode, isDark } = useColorMode()
+const { isLoggedIn } = useAuth()
+const { undo, redo, canUndo, canRedo, randomize, applySerialized, setTheme, setCustomColors } =
+  useDesignSystem()
+const { dialogs, openDialog, activeTemplate } = useBuilderUi()
 
-// Auth
-const { isLoggedIn, user } = useAuth()
-
-// Tour Guide
 const { tourSteps, tourLabels } = useAppTour()
 const tourManagerRef = ref<{ startTourGuide: () => void } | null>(null)
+
+const TEMPLATES = ['dashboard', 'cards', 'forms', 'auth', 'components', 'colors', 'typography']
 
 function startTour() {
   tourManagerRef.value?.startTourGuide()
 }
+
+function handleUndo() {
+  if (canUndo.value) undo()
+}
+
+function handleRedo() {
+  if (canRedo.value) redo()
+}
+
+useKeyboardShortcuts({
+  onUndo: handleUndo,
+  onRedo: handleRedo,
+  onSave: () => openDialog('save'),
+  onExport: () => openDialog('export'),
+  onImport: () => openDialog('import'),
+  onShare: () => openDialog('share'),
+  onToggleDarkMode: toggleColorMode,
+  onRandomize: () => {
+    randomize()
+    toast('Theme randomized', { action: { label: 'Undo', onClick: handleUndo } })
+  },
+  onShowShortcuts: () => openDialog('shortcuts'),
+  onPreviewTemplate: (i) => {
+    const t = TEMPLATES[i]
+    if (t) activeTemplate.value = t
+  },
+})
+
+function applyGalleryTheme(config: SerializedConfig) {
+  applySerialized(config)
+  toast.success('Theme applied')
+}
+
+function applyBrandColors(colors: { primary: string; accent?: string }) {
+  setTheme({ customPrimary: colors.primary })
+  if (colors.accent) setCustomColors('both', { 'chart-2': colors.accent })
+  toast.success('Brand colors applied')
+}
+
+const tools: {
+  label: string
+  icon: string
+  dialog?: BuilderDialog
+  action?: () => void
+  kbd?: string
+  mobileOnly?: boolean
+}[] = [
+  { label: 'Import', icon: 'lucide:upload', dialog: 'import', kbd: 'Ctrl+I', mobileOnly: true },
+  {
+    label: 'Share',
+    icon: 'lucide:share-2',
+    dialog: 'share',
+    kbd: 'Ctrl+Shift+S',
+    mobileOnly: true,
+  },
+  { label: 'Theme gallery', icon: 'lucide:layout-grid', dialog: 'gallery' },
+  { label: 'Compare themes', icon: 'lucide:columns-2', dialog: 'compare' },
+  { label: 'Brand colors from image', icon: 'lucide:image', dialog: 'brand' },
+  { label: 'Save configuration', icon: 'lucide:save', dialog: 'save', kbd: 'Ctrl+S' },
+  { label: 'Keyboard shortcuts', icon: 'lucide:keyboard', dialog: 'shortcuts', kbd: '?' },
+  { label: 'Take a tour', icon: 'lucide:circle-help', action: startTour },
+]
+
+function runTool(tool: (typeof tools)[number]) {
+  if (tool.dialog) openDialog(tool.dialog)
+  else tool.action?.()
+}
 </script>
 
 <template>
-  <div
-    class="flex items-center justify-between border-b px-2 sm:px-4 py-2 bg-background effects-header"
+  <header
+    class="relative z-40 flex items-center justify-between gap-2 border-b bg-background px-2 py-2 sm:px-4 effects-header"
   >
-    <!-- Left side - Logo & Title -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <div class="flex items-center gap-2" data-tour-guide="app-logo">
-        <div
-          class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-slate-700 flex items-center justify-center shadow-sm"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 64 64"
-            fill="none"
-            class="h-4 w-4 sm:h-5 sm:w-5"
-          >
-            <!-- Gem V logo -->
-            <path d="M12 16 L32 52 L32 36 L20 16 Z" fill="white" opacity="0.95" />
-            <path d="M52 16 L32 52 L32 36 L44 16 Z" fill="white" opacity="0.7" />
-            <path d="M20 16 L32 36 L28 16 Z" fill="white" opacity="0.5" />
-            <path d="M44 16 L32 36 L36 16 Z" fill="white" opacity="0.3" />
-            <path d="M32 8 L34 12 L38 14 L34 16 L32 20 L30 16 L26 14 L30 12 Z" fill="white" />
-          </svg>
-        </div>
-        <div class="hidden min-[400px]:block">
-          <h1 class="text-base sm:text-lg font-bold leading-none">Vuecraft</h1>
-          <p class="text-xs text-muted-foreground hidden sm:block">Theme Builder</p>
-        </div>
+    <!-- Logo & title -->
+    <div class="flex min-w-0 items-center gap-2" data-tour-guide="app-logo">
+      <div
+        class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-slate-700 shadow-sm"
+      >
+        <svg viewBox="0 0 64 64" fill="none" class="size-5" aria-hidden="true">
+          <path d="M12 16 L32 52 L32 36 L20 16 Z" fill="white" opacity="0.95" />
+          <path d="M52 16 L32 52 L32 36 L44 16 Z" fill="white" opacity="0.7" />
+          <path d="M20 16 L32 36 L28 16 Z" fill="white" opacity="0.5" />
+          <path d="M44 16 L32 36 L36 16 Z" fill="white" opacity="0.3" />
+          <path d="M32 8 L34 12 L38 14 L34 16 L32 20 L30 16 L26 14 L30 12 Z" fill="white" />
+        </svg>
+      </div>
+      <div class="hidden min-w-0 min-[420px]:block">
+        <h1 class="text-base font-bold leading-none sm:text-lg">Vuecraft</h1>
+        <p class="hidden text-xs text-muted-foreground sm:block">Theme Builder</p>
       </div>
     </div>
 
-    <!-- Right side - Actions -->
-    <div class="flex items-center gap-1 sm:gap-2">
-      <!-- Theme Toggle - Visible on all screens -->
-      <Tooltip content="Toggle theme" side="bottom">
-        <Button variant="ghost" size="icon" data-tour-guide="theme-toggle" @click="toggleColorMode">
-          <svg
-            v-if="isDark"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+    <!-- Actions -->
+    <div class="flex items-center gap-0.5 sm:gap-1.5">
+      <div class="hidden items-center sm:flex">
+        <Tooltip :content="`Undo (${formatShortcut('Ctrl+Z')})`" side="bottom">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Undo"
+            :disabled="!canUndo"
+            @click="handleUndo"
           >
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2" />
-            <path d="M12 20v2" />
-            <path d="m4.93 4.93 1.41 1.41" />
-            <path d="m17.66 17.66 1.41 1.41" />
-            <path d="M2 12h2" />
-            <path d="M20 12h2" />
-            <path d="m6.34 17.66-1.41 1.41" />
-            <path d="m19.07 4.93-1.41 1.41" />
-          </svg>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            <Icon name="lucide:undo-2" />
+          </Button>
+        </Tooltip>
+        <Tooltip :content="`Redo (${formatShortcut('Ctrl+Shift+Z')})`" side="bottom">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Redo"
+            :disabled="!canRedo"
+            @click="handleRedo"
           >
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          </svg>
-        </Button>
-      </Tooltip>
+            <Icon name="lucide:redo-2" />
+          </Button>
+        </Tooltip>
+      </div>
 
-      <!-- Tour Button - Hidden on small screens -->
-      <Tooltip content="Take a tour" side="bottom">
+      <Tooltip :content="isDark ? 'Light mode (D)' : 'Dark mode (D)'" side="bottom">
         <Button
           variant="ghost"
           size="icon"
-          class="hidden sm:flex"
-          data-tour-guide="tour-button"
-          @click="startTour"
+          data-tour-guide="theme-toggle"
+          :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+          @click="toggleColorMode"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-            <path d="M12 17h.01" />
-          </svg>
+          <Icon :name="isDark ? 'lucide:sun' : 'lucide:moon'" />
         </Button>
       </Tooltip>
 
-      <Separator orientation="vertical" class="h-6 hidden sm:block" />
-
-      <!-- Import Button - Single button with responsive content -->
-      <Tooltip content="Import configuration" side="bottom">
-        <Button
-          variant="ghost"
-          size="icon"
-          class="sm:size-auto sm:h-9 sm:px-3"
-          data-tour-guide="import-button"
-          @click="importDialogOpen = true"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+      <DropdownMenuRoot>
+        <DropdownMenuTrigger as-child>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Tools"
+            title="Tools"
+            data-tour-guide="tour-button"
           >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" x2="12" y1="3" y2="15" />
-          </svg>
-          <span class="ml-2 hidden md:inline">Import</span>
-        </Button>
-      </Tooltip>
-
-      <!-- Share Button - Single button with responsive content -->
-      <Tooltip content="Share configuration" side="bottom">
-        <Button
-          variant="ghost"
-          size="icon"
-          class="sm:size-auto sm:h-9 sm:px-3"
-          data-tour-guide="share-button"
-          @click="shareDialogOpen = true"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            <Icon name="lucide:wrench" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuContent
+            align="end"
+            :side-offset="6"
+            class="vc-pop z-[200] w-64 rounded-md border bg-popover p-1 text-popover-foreground shadow-lg"
           >
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-            <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-          </svg>
-          <span class="ml-2 hidden md:inline">Share</span>
-        </Button>
-      </Tooltip>
+            <template v-for="(tool, i) in tools" :key="tool.label">
+              <DropdownMenuSeparator v-if="i === 2" class="my-1 h-px bg-border md:hidden" />
+              <DropdownMenuItem
+                class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                :class="{ 'md:hidden': tool.mobileOnly }"
+                @select="runTool(tool)"
+              >
+                <Icon :name="tool.icon" class="size-4 text-muted-foreground" />
+                <span class="flex-1">{{ tool.label }}</span>
+                <kbd v-if="tool.kbd" class="font-mono text-[0.65rem] text-muted-foreground">
+                  {{ formatShortcut(tool.kbd) }}
+                </kbd>
+              </DropdownMenuItem>
+            </template>
+          </DropdownMenuContent>
+        </DropdownMenuPortal>
+      </DropdownMenuRoot>
 
-      <Separator orientation="vertical" class="h-6 hidden sm:block" />
+      <Separator orientation="vertical" class="mx-1 hidden h-6 md:block" />
 
-      <!-- Export Button -->
       <Button
-        size="sm"
-        class="gap-1 sm:gap-2"
-        data-tour-guide="export-button"
-        @click="exportDialogOpen = true"
+        variant="ghost"
+        class="hidden md:inline-flex"
+        data-tour-guide="import-button"
+        @click="openDialog('import')"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" x2="12" y1="15" y2="3" />
-        </svg>
-        <span class="hidden min-[400px]:inline">Export</span>
+        <Icon name="lucide:upload" />Import
+      </Button>
+      <Button
+        variant="ghost"
+        class="hidden md:inline-flex"
+        data-tour-guide="share-button"
+        @click="openDialog('share')"
+      >
+        <Icon name="lucide:share-2" />Share
       </Button>
 
-      <!-- Auth Button / User Menu -->
-      <UserMenu v-if="isLoggedIn" :user="user!" />
+      <Button data-tour-guide="export-button" class="px-3 sm:px-4" @click="openDialog('export')">
+        <Icon name="lucide:download" />
+        <span class="hidden min-[360px]:inline">Export</span>
+      </Button>
+
+      <UserMenu v-if="isLoggedIn" />
       <Tooltip v-else content="Sign in" side="bottom">
         <Button
           variant="ghost"
           size="icon"
+          aria-label="Sign in"
           data-tour-guide="auth-button"
-          @click="authDialogOpen = true"
+          @click="openDialog('auth')"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          <Icon name="lucide:circle-user-round" />
         </Button>
       </Tooltip>
     </div>
-  </div>
+  </header>
 
-  <!-- Tour Guide Manager -->
   <ClientOnly>
     <TourGuideManager
       ref="tourManagerRef"
@@ -262,9 +262,13 @@ function startTour() {
     />
   </ClientOnly>
 
-  <!-- Dialogs -->
-  <ExportDialog v-model:open="exportDialogOpen" />
-  <ImportDialog v-model:open="importDialogOpen" />
-  <ShareDialog v-model:open="shareDialogOpen" />
-  <AuthDialog v-model:open="authDialogOpen" />
+  <ExportDialog v-model:open="dialogs.export.value" />
+  <ImportDialog v-model:open="dialogs.import.value" />
+  <ShareDialog v-model:open="dialogs.share.value" />
+  <AuthDialog v-model:open="dialogs.auth.value" />
+  <ThemeGalleryDialog v-model:open="dialogs.gallery.value" @apply="applyGalleryTheme" />
+  <ThemeCompareDialog v-model:open="dialogs.compare.value" />
+  <BrandColorImportDialog v-model:open="dialogs.brand.value" @apply="applyBrandColors" />
+  <KeyboardShortcutsDialog v-model:open="dialogs.shortcuts.value" />
+  <SaveConfigDialog v-model:open="dialogs.save.value" />
 </template>

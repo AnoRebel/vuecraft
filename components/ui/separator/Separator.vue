@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
 import { cn } from '~/lib/utils'
 
 interface Props {
-  class?: string
+  class?: HTMLAttributes['class']
   orientation?: 'horizontal' | 'vertical'
   decorative?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  class: '',
   orientation: 'horizontal',
   decorative: true,
 })
