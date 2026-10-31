@@ -3,6 +3,7 @@
  * Uses nuxt-auth-utils defineWebAuthnRegisterEventHandler
  */
 
+import { createError } from 'nuxt/server'
 import {
   findUserByEmail,
   createUser,
@@ -23,7 +24,7 @@ export default defineWebAuthnRegisterEventHandler({
     const challenge = consumeChallenge(attemptId)
     if (!challenge) {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'Challenge expired or not found. Please try again.',
       })
     }
@@ -37,7 +38,7 @@ export default defineWebAuthnRegisterEventHandler({
 
     if (!email || typeof email !== 'string') {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'Email is required',
       })
     }
@@ -46,7 +47,7 @@ export default defineWebAuthnRegisterEventHandler({
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'Invalid email format',
       })
     }

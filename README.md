@@ -137,8 +137,9 @@ The app will be available at `http://localhost:3000`.
 For authentication features, create a `.env` file:
 
 ```env
-# Session (required for auth)
-NUXT_SESSION_PASSWORD=your-secret-password-at-least-32-chars
+# Session sealing secret (required in production, at least 32 characters)
+# Generate one with: openssl rand -base64 32
+NUXT_APP_SECRET=your-generated-secret
 
 # Google OAuth (optional)
 NUXT_OAUTH_GOOGLE_CLIENT_ID=your-google-client-id
