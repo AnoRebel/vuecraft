@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
@@ -11,6 +11,7 @@ import ComponentsConfig from './ComponentsConfig.vue'
 import IconsConfig from './IconsConfig.vue'
 import LayoutConfig from './LayoutConfig.vue'
 import EffectsConfig from './EffectsConfig.vue'
+import MotionConfig from './MotionConfig.vue'
 import ComponentSelection from './ComponentSelection.vue'
 import ExportConfig from './ExportConfig.vue'
 import SortableSectionList from './SortableSectionList.vue'
@@ -49,6 +50,7 @@ const sectionCategories: Record<string, string> = {
   effects: 'appearance',
   typography: 'typography',
   components: 'components',
+  motion: 'components',
   icons: 'components',
   layout: 'components',
   selection: 'components',
@@ -73,6 +75,7 @@ const defaultSections: SectionConfig[] = [
   { id: 'effects', label: 'Effects', visible: true },
   { id: 'typography', label: 'Typography', visible: true },
   { id: 'components', label: 'Components', visible: true },
+  { id: 'motion', label: 'Motion', visible: true },
   { id: 'icons', label: 'Icons', visible: true },
   { id: 'layout', label: 'Layout', visible: true },
   { id: 'selection', label: 'Component Selection', visible: true },
@@ -82,6 +85,21 @@ const defaultSections: SectionConfig[] = [
 ]
 
 const sectionConfigs = useStorage<SectionConfig[]>('vuecraft-section-config', defaultSections)
+
+// Sections added in newer versions are appended to layouts saved earlier
+onMounted(() => {
+  const known = new Set(sectionConfigs.value.map((s) => s.id))
+  const missing = defaultSections.filter((s) => !known.has(s.id))
+  if (missing.length) {
+    const next = [...sectionConfigs.value]
+    for (const section of missing) {
+      const after = defaultSections.findIndex((d) => d.id === section.id) - 1
+      const anchor = next.findIndex((s) => s.id === defaultSections[after]?.id)
+      next.splice(anchor >= 0 ? anchor + 1 : next.length, 0, { ...section })
+    }
+    sectionConfigs.value = next
+  }
+})
 
 // Get visible sections in order with search and category filtering
 const visibleSections = computed(() => {
@@ -233,6 +251,7 @@ function resetSections() {
           <EffectsConfig v-else-if="section.id === 'effects'" />
           <TypographyConfig v-else-if="section.id === 'typography'" />
           <ComponentsConfig v-else-if="section.id === 'components'" />
+          <MotionConfig v-else-if="section.id === 'motion'" />
           <IconsConfig v-else-if="section.id === 'icons'" />
           <LayoutConfig v-else-if="section.id === 'layout'" />
           <ComponentSelection v-else-if="section.id === 'selection'" />

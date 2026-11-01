@@ -52,7 +52,9 @@ const focusRingOffsetOptions = [
 
       <!-- Animation Speed -->
       <OptionPicker
-        :model-value="config.components.animationSpeed"
+        :model-value="
+          config.components.animationDuration == null ? config.components.animationSpeed : ''
+        "
         :options="ANIMATION_SPEEDS.map((a) => ({ name: a.name, label: a.label }))"
         label="Animation Speed"
         :columns="4"

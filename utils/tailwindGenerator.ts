@@ -1,5 +1,11 @@
 import type { DesignSystemConfigInput } from '~/types/config'
-import { resolveTheme, colorDeclarations, SHADOW_KEYS } from '~/utils/themeTokens'
+import {
+  resolveTheme,
+  colorDeclarations,
+  motionThemeDeclarations,
+  REDUCED_MOTION_CSS,
+  SHADOW_KEYS,
+} from '~/utils/themeTokens'
 
 // Generate minimal CSS for plain Tailwind (no component library)
 export function generateTailwindCSS(config: DesignSystemConfigInput): string {
@@ -33,6 +39,7 @@ ${colorDeclarations(t.colors.light, 'color-')}
 ${shadows('light')}
 
   --default-transition-duration: ${t.animationDuration};
+${motionThemeDeclarations(t)}
 }
 
 .dark {
@@ -57,6 +64,8 @@ ${shadows('dark')}
     font-weight: ${t.headingWeight};
   }
 }
+
+${REDUCED_MOTION_CSS}
 `
 }
 

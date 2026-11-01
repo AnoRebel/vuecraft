@@ -287,6 +287,10 @@ export function useDesignSystem() {
 
   function setComponents(newComponents: Partial<ComponentsConfig>) {
     if ('borderWidth' in newComponents) dropCustom(['borderWidth'])
+    // A speed preset replaces an exact duration
+    if ('animationSpeed' in newComponents && !('animationDuration' in newComponents)) {
+      config.components.animationDuration = null
+    }
     Object.assign(config.components, newComponents)
   }
 

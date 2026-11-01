@@ -113,10 +113,25 @@ export interface TypographyConfig {
   bodyLineHeight: 'tight' | 'normal' | 'relaxed'
 }
 
+export interface AnimationEffects {
+  fade: boolean
+  scale: boolean
+  slide: boolean
+  blur: boolean
+}
+
 export interface ComponentsConfig {
   style: StyleName
   borderWidth: BorderWidth
   animationSpeed: AnimationSpeed
+  /** Exact transition duration in ms; overrides `animationSpeed` when set */
+  animationDuration?: number | null
+  /** CSS timing function, e.g. `ease` or `cubic-bezier(0.2, 0, 0, 1)` */
+  animationEasing?: string
+  /** Effects combined into the entrance animation */
+  animationEffects?: AnimationEffects
+  /** Disable transitions and entrance animations in the preview */
+  reducedMotion?: boolean
   focusRingWidth: 'thin' | 'default' | 'thick'
   focusRingOffset: 'none' | 'sm' | 'default'
 }

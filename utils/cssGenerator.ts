@@ -1,5 +1,7 @@
 import type { DesignSystemConfigInput } from '~/types/config'
 import {
+  motionThemeDeclarations,
+  REDUCED_MOTION_CSS,
   resolveTheme,
   colorDeclarations,
   COLOR_KEYS,
@@ -90,7 +92,14 @@ ${shadowUtilities}
 .vc-preview {
   --spacing: ${+spacing.toFixed(4)}rem;
 ${textVars}
-  --default-transition-duration: ${t.animationDuration};
+  --default-transition-duration: ${t.reducedMotion ? '0ms' : t.animationDuration};
+  --default-transition-timing-function: ${t.animationEasing};
+  --vc-motion-duration: ${t.reducedMotion ? '0ms' : t.animationDuration};
+  --vc-motion-easing: ${t.animationEasing};
+  --vc-enter-opacity: ${t.enter.opacity};
+  --vc-enter-y: ${t.enter.y};
+  --vc-enter-scale: ${t.enter.scale};
+  --vc-enter-blur: ${t.enter.blur};
   --vc-border-width: ${t.borderWidth};
   --vc-heading-weight: ${t.headingWeight};
   --vc-ring-width: ${t.focusRingWidth};
@@ -123,7 +132,18 @@ ${textVars}
   outline-offset: var(--vc-ring-offset);
 }
 
-.vc-preview .vc-icon {
+${
+  t.reducedMotion
+    ? `.vc-preview *,
+.vc-preview *::before,
+.vc-preview *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+`
+    : ''
+}.vc-preview .vc-icon {
   width: var(--vc-icon-size);
   height: var(--vc-icon-size);
 }
@@ -179,6 +199,7 @@ ${themeColors}
   --font-mono: var(--${prefix}font-mono);
 ${themeShadows}
   --default-transition-duration: ${t.animationDuration};
+${motionThemeDeclarations(t)}
 }
 
 @layer base {
@@ -194,6 +215,8 @@ ${themeShadows}
     font-weight: ${t.headingWeight};
   }
 }
+
+${REDUCED_MOTION_CSS}
 `
 }
 

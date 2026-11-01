@@ -499,3 +499,27 @@
     animation: none !important;
   }
 }
+
+/* ------------------------------------------------------------------------
+ * Preview entrance animation - effects come from the Motion settings
+ * (opacity, translate, scale and blur start values are CSS variables)
+ * --------------------------------------------------------------------- */
+@keyframes vc-enter {
+  from {
+    opacity: var(--vc-enter-opacity, 0);
+    transform: translateY(var(--vc-enter-y, 8px)) scale(var(--vc-enter-scale, 0.96));
+    filter: blur(var(--vc-enter-blur, 0px));
+  }
+}
+
+.vc-enter,
+.vc-preview [role='tabpanel'][data-state='active'] {
+  animation: vc-enter var(--vc-motion-duration, 200ms) var(--vc-motion-easing, ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-enter,
+  .vc-preview [role='tabpanel'] {
+    animation: none;
+  }
+}
