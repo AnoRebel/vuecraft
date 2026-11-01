@@ -1,65 +1,62 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { cn } from '~/lib/utils'
+import { ref, watch } from 'vue'
 
-interface Props {
-  title: string
-  description?: string
-  defaultOpen?: boolean
-  tourId?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  defaultOpen: true,
-  tourId: undefined,
-})
+const props = withDefaults(
+  defineProps<{
+    title: string
+    description?: string
+    defaultOpen?: boolean
+    tourId?: string
+    /** Hide the collapse toggle (always open) */
+    static?: boolean
+  }>(),
+  { description: undefined, defaultOpen: true, tourId: undefined, static: false }
+)
 
 const isOpen = ref(props.defaultOpen)
+const bodyId = `section-${Math.random().toString(36).slice(2, 9)}`
 
-function toggle() {
-  isOpen.value = !isOpen.value
+// Settings search opens collapsed groups that contain its target
+function open() {
+  isOpen.value = true
 }
+defineExpose({ open })
+
+watch(
+  () => props.defaultOpen,
+  (v) => (isOpen.value = v)
+)
 </script>
 
 <template>
-  <div class="border-b border-border" :data-tour-guide="tourId">
-    <button
-      type="button"
-      class="flex w-full items-center justify-between py-4 text-left hover:bg-accent/50 transition-colors px-1 -mx-1 rounded-sm"
-      @click="toggle"
+  <section class="border-b py-3 last:border-b-0" :data-tour-guide="tourId" data-config-section>
+    <component
+      :is="static ? 'div' : 'button'"
+      :type="static ? undefined : 'button'"
+      class="group flex w-full items-center gap-2 text-left"
+      :aria-expanded="static ? undefined : isOpen"
+      :aria-controls="static ? undefined : bodyId"
+      @click="!static && (isOpen = !isOpen)"
     >
-      <div>
-        <h3 class="text-sm font-semibold">{{ title }}</h3>
-        <p v-if="description" class="text-xs text-muted-foreground mt-0.5">
+      <div class="min-w-0 flex-1">
+        <h3
+          class="text-xs font-semibold uppercase tracking-wide text-muted-foreground group-hover:text-foreground"
+        >
+          {{ title }}
+        </h3>
+        <p v-if="description && isOpen" class="mt-0.5 text-xs text-muted-foreground">
           {{ description }}
         </p>
       </div>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        :class="cn('transition-transform duration-200', { 'rotate-180': isOpen })"
-      >
-        <path d="m6 9 6 6 6-6" />
-      </svg>
-    </button>
-    <Transition
-      enter-active-class="transition-all duration-200 ease-out"
-      enter-from-class="opacity-0 max-h-0"
-      enter-to-class="opacity-100 max-h-96"
-      leave-active-class="transition-all duration-150 ease-in"
-      leave-from-class="opacity-100 max-h-96"
-      leave-to-class="opacity-0 max-h-0"
-    >
-      <div v-if="isOpen" class="pb-4 space-y-4 overflow-hidden">
-        <slot />
-      </div>
-    </Transition>
-  </div>
+      <Icon
+        v-if="!static"
+        name="lucide:chevron-down"
+        class="size-4 shrink-0 text-muted-foreground transition-transform duration-200"
+        :class="{ '-rotate-90': !isOpen }"
+      />
+    </component>
+    <div v-show="isOpen" :id="bodyId" class="mt-3 space-y-4" data-section-body>
+      <slot />
+    </div>
+  </section>
 </template>

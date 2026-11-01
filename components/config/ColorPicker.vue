@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { cn } from '~/lib/utils'
+import { parseColor, rgbToHex, rgbToOklch, formatOklch } from '~/utils/colorUtils'
 
 interface ColorOption {
   name: string
@@ -18,6 +19,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   showFormat: false,
+  label: undefined,
 })
 
 const emit = defineEmits<{
@@ -48,81 +50,67 @@ function getColorStyle(option: ColorOption): string {
   return 'oklch(0.5 0.1 0)'
 }
 
-// Convert oklch to different formats for display
-function oklchToHsl(l: number, c: number, h: number): string {
-  // Simplified conversion - in practice you'd use a proper color library
-  const saturation = Math.min(100, c * 500)
-  const lightness = l * 100
-  return `hsl(${Math.round(h)}, ${Math.round(saturation)}%, ${Math.round(lightness)}%)`
+function rgbToHsl({ r, g, b }: { r: number; g: number; b: number }): string {
+  const rn = r / 255
+  const gn = g / 255
+  const bn = b / 255
+  const max = Math.max(rn, gn, bn)
+  const min = Math.min(rn, gn, bn)
+  const l = (max + min) / 2
+  let h = 0
+  let sat = 0
+  if (max !== min) {
+    const d = max - min
+    sat = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    if (max === rn) h = (gn - bn) / d + (gn < bn ? 6 : 0)
+    else if (max === gn) h = (bn - rn) / d + 2
+    else h = (rn - gn) / d + 4
+    h *= 60
+  }
+  return `hsl(${Math.round(h)} ${Math.round(sat * 100)}% ${Math.round(l * 100)}%)`
 }
 
-function oklchToRgb(l: number, c: number, h: number): string {
-  // Simplified conversion for display purposes
-  const hRad = (h * Math.PI) / 180
-  const a = c * Math.cos(hRad)
-  const b = c * Math.sin(hRad)
-
-  // Simplified Lab to RGB (approximate)
-  let r = l + 0.3963377774 * a + 0.2158037573 * b
-  let g = l - 0.1055613458 * a - 0.0638541728 * b
-  let bl = l - 0.0894841775 * a - 1.291485548 * b
-
-  // Apply gamma correction (simplified)
-  r = Math.round(Math.max(0, Math.min(1, r ** 3)) * 255)
-  g = Math.round(Math.max(0, Math.min(1, g ** 3)) * 255)
-  bl = Math.round(Math.max(0, Math.min(1, bl ** 3)) * 255)
-
-  return `rgb(${r}, ${g}, ${bl})`
-}
-
-function oklchToHex(l: number, c: number, h: number): string {
-  const rgb = oklchToRgb(l, c, h)
-  const match = rgb.match(/rgb\((\d+), (\d+), (\d+)\)/)
-  if (!match) return '#000000'
-  const r = parseInt(match[1]!).toString(16).padStart(2, '0')
-  const g = parseInt(match[2]!).toString(16).padStart(2, '0')
-  const b = parseInt(match[3]!).toString(16).padStart(2, '0')
-  return `#${r}${g}${b}`
-}
-
-// Get formatted color value for display
+// The selected colour in the chosen notation
 const formattedColor = computed(() => {
   const option = props.options.find((o) => o.name === props.modelValue)
   if (!option) return ''
-
-  const l = 0.6
-  const c = 0.15
-  const h = option.hue ?? 0
-
+  const css = getColorStyle(option)
+  const rgb = parseColor(css)
+  if (!rgb) return css
   switch (colorFormat.value) {
     case 'oklch':
-      return `oklch(${l} ${c} ${h})`
+      return css.startsWith('oklch') ? css : formatOklch(rgbToOklch(rgb))
     case 'hsl':
-      return oklchToHsl(l, c, h)
+      return rgbToHsl(rgb)
     case 'rgb':
-      return oklchToRgb(l, c, h)
+      return `rgb(${rgb.r} ${rgb.g} ${rgb.b})`
     case 'hex':
-      return oklchToHex(l, c, h)
+      return rgbToHex(rgb)
     default:
-      return `oklch(${l} ${c} ${h})`
+      return css
   }
 })
 </script>
 
 <template>
-  <div class="space-y-2">
-    <div class="flex items-center justify-between">
-      <label v-if="label" class="text-sm font-medium">{{ label }}</label>
-      <!-- Color Format Toggle -->
-      <div v-if="showFormat" class="flex gap-0.5 bg-muted rounded p-0.5">
+  <div class="space-y-1.5">
+    <div class="flex items-center justify-between gap-2">
+      <span v-if="label" class="text-sm font-medium">{{ label }}</span>
+      <div
+        v-if="showFormat"
+        class="flex gap-0.5 rounded-md bg-muted p-0.5"
+        role="group"
+        aria-label="Colour value format"
+      >
         <button
           v-for="format in formatOptions"
           :key="format.value"
           type="button"
+          :aria-pressed="colorFormat === format.value"
           :class="[
-            'px-1.5 py-0.5 text-[10px] rounded transition-colors',
+            'rounded px-1.5 py-0.5 text-[10px] transition-colors',
             colorFormat === format.value
-              ? 'bg-background text-foreground shadow-sm'
+              ? 'bg-background text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground',
           ]"
           @click="colorFormat = format.value"
@@ -131,31 +119,30 @@ const formattedColor = computed(() => {
         </button>
       </div>
     </div>
-    <div class="grid grid-cols-5 gap-2">
+    <div class="flex flex-wrap gap-1.5" role="radiogroup" :aria-label="label">
       <button
         v-for="option in options"
         :key="option.name"
         type="button"
+        role="radio"
+        :aria-checked="modelValue === option.name"
+        :aria-label="option.label"
         :title="option.label"
         :class="
           cn(
-            'h-8 w-full rounded-md border-2 transition-all hover:scale-105',
-            modelValue === option.name
-              ? 'border-foreground ring-2 ring-offset-2 ring-offset-background ring-ring'
-              : 'border-transparent'
+            'size-7 rounded-full border shadow-xs transition-transform hover:scale-110',
+            modelValue === option.name && 'ring-2 ring-ring ring-offset-2 ring-offset-background'
           )
         "
         :style="{ backgroundColor: getColorStyle(option) }"
         @click="selectColor(option.name)"
-      >
-        <span class="sr-only">{{ option.label }}</span>
-      </button>
+      />
     </div>
-    <div class="flex items-center justify-between text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2 text-xs text-muted-foreground">
       <span>{{ options.find((o) => o.name === modelValue)?.label ?? 'Select a color' }}</span>
       <code
         v-if="showFormat && formattedColor"
-        class="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded"
+        class="truncate rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]"
       >
         {{ formattedColor }}
       </code>

@@ -75,15 +75,15 @@ function applyPreset(preset: (typeof presets)[0]) {
 
 <template>
   <ConfigSection
-    title="Effects"
-    description="Transparency, blur, and glass effects"
+    title="Builder effects"
+    description="Transparency, blur and glass for the builder interface."
     tour-id="effects-config-section"
-    :default-open="true"
+    :default-open="false"
   >
-    <div class="space-y-6">
+    <div id="setting-effects-builder" class="space-y-5">
       <!-- Presets -->
       <div class="space-y-2">
-        <Label>Effect Presets</Label>
+        <Label>Presets</Label>
         <div class="grid grid-cols-2 gap-2">
           <Button
             v-for="preset in presets"

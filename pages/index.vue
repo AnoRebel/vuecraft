@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useStorage } from '@vueuse/core'
+import { useStorage, useMediaQuery } from '@vueuse/core'
 import { DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui'
 import { toast } from 'vue-sonner'
 import { useDesignSystem } from '~/composables/useDesignSystem'
@@ -19,6 +19,9 @@ import {
 
 const { initFromUrl } = useDesignSystem()
 const { showMobileConfig, showCSSPanel, showCSSDialog } = useBuilderUi()
+
+// Only one configuration panel is mounted at a time (sidebar or mobile sheet)
+const isDesktop = useMediaQuery('(min-width: 1024px)')
 
 // Resizable sidebar (desktop)
 const sidebarWidth = useStorage('vuecraft-sidebar-width', 320)
@@ -86,7 +89,9 @@ useHead({
         :style="{ width: `${sidebarWidth}px` }"
         aria-label="Theme configuration"
       >
-        <ConfigPanel class="h-full w-full" />
+        <ClientOnly>
+          <ConfigPanel v-if="isDesktop" class="h-full w-full" />
+        </ClientOnly>
         <div
           role="separator"
           aria-orientation="vertical"

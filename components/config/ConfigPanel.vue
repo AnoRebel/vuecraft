@@ -1,24 +1,35 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { toast } from 'vue-sonner'
 import { useDesignSystem } from '~/composables/useDesignSystem'
+import { useBuilderUi } from '~/composables/useBuilderUi'
+import {
+  CONFIG_TABS,
+  DEFAULT_SECTIONS,
+  SECTION_TAB,
+  migrateSections,
+  searchSettings,
+  type ConfigTabId,
+  type SectionConfig,
+  type SettingEntry,
+} from '~/config/configTabs'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import PresetThemes from './PresetThemes.vue'
-import ThemeConfig from './ThemeConfig.vue'
+import ColorsConfig from './ColorsConfig.vue'
+import StyleConfig from './StyleConfig.vue'
 import TypographyConfig from './TypographyConfig.vue'
-import ComponentsConfig from './ComponentsConfig.vue'
 import IconsConfig from './IconsConfig.vue'
+import MotionConfig from './MotionConfig.vue'
 import LayoutConfig from './LayoutConfig.vue'
 import EffectsConfig from './EffectsConfig.vue'
-import MotionConfig from './MotionConfig.vue'
-import ComponentSelection from './ComponentSelection.vue'
 import ExportConfig from './ExportConfig.vue'
+import ComponentSelection from './ComponentSelection.vue'
+import ConfigSection from './ConfigSection.vue'
 import SortableSectionList from './SortableSectionList.vue'
 import AccessibilityPanel from '~/components/AccessibilityPanel.vue'
 import ColorPalettePanel from '~/components/ColorPalettePanel.vue'
-import { toast } from 'vue-sonner'
-import { useBuilderUi } from '~/composables/useBuilderUi'
 
 defineProps<{ closable?: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -26,130 +37,134 @@ const emit = defineEmits<{ (e: 'close'): void }>()
 const { resetAll, randomize, undo } = useDesignSystem()
 const { openDialog } = useBuilderUi()
 
-function handleReset() {
-  resetAll()
-  toast('All settings reset', { action: { label: 'Undo', onClick: undo } })
-}
+const rootRef = ref<HTMLElement | null>(null)
+const query = ref('')
+const activeTab = useStorage<ConfigTabId>('vuecraft-config-tab', 'themes')
+const activeTabInfo = computed(
+  () => CONFIG_TABS.find((t) => t.id === activeTab.value) ?? CONFIG_TABS[0]!
+)
 
-// Search and filter state
-const searchQuery = ref('')
-const selectedCategoryFilter = ref<string>('all')
-
-const categoryFilters = [
-  { id: 'all', label: 'All' },
-  { id: 'appearance', label: 'Appearance' },
-  { id: 'typography', label: 'Typography' },
-  { id: 'components', label: 'Components' },
-  { id: 'tools', label: 'Tools' },
-]
-
-// Map sections to categories for filtering
-const sectionCategories: Record<string, string> = {
-  presets: 'appearance',
-  theme: 'appearance',
-  effects: 'appearance',
-  typography: 'typography',
-  components: 'components',
-  motion: 'components',
-  icons: 'components',
-  layout: 'components',
-  selection: 'components',
-  export: 'tools',
-  accessibility: 'tools',
-  palette: 'tools',
-}
-
-// Feature dialogs
+// --- Sections (visibility and order, per tab) ------------------------------
+const stored = useStorage<SectionConfig[]>('vuecraft-section-config', DEFAULT_SECTIONS)
 const showSectionSettings = ref(false)
 
-// Section visibility and order preferences (persisted)
-interface SectionConfig {
-  id: string
-  label: string
-  visible: boolean
+onMounted(() => {
+  stored.value = migrateSections(stored.value)
+})
+
+const sectionsByTab = computed(() => {
+  const map = new Map<ConfigTabId, SectionConfig[]>()
+  for (const section of migrateSections(stored.value)) {
+    const tab = SECTION_TAB[section.id]
+    if (tab) map.set(tab, [...(map.get(tab) ?? []), section])
+  }
+  return map
+})
+
+function visibleSections(tab: ConfigTabId) {
+  return (sectionsByTab.value.get(tab) ?? []).filter((s) => s.visible)
 }
 
-const defaultSections: SectionConfig[] = [
-  { id: 'presets', label: 'Preset Themes', visible: true },
-  { id: 'theme', label: 'Theme', visible: true },
-  { id: 'effects', label: 'Effects', visible: true },
-  { id: 'typography', label: 'Typography', visible: true },
-  { id: 'components', label: 'Components', visible: true },
-  { id: 'motion', label: 'Motion', visible: true },
-  { id: 'icons', label: 'Icons', visible: true },
-  { id: 'layout', label: 'Layout', visible: true },
-  { id: 'selection', label: 'Component Selection', visible: true },
-  { id: 'export', label: 'Export', visible: true },
-  { id: 'accessibility', label: 'Accessibility', visible: true },
-  { id: 'palette', label: 'Color Palette', visible: true },
-]
+const tabSections = computed(() => sectionsByTab.value.get(activeTab.value) ?? [])
 
-const sectionConfigs = useStorage<SectionConfig[]>('vuecraft-section-config', defaultSections)
-
-// Sections added in newer versions are appended to layouts saved earlier
-onMounted(() => {
-  const known = new Set(sectionConfigs.value.map((s) => s.id))
-  const missing = defaultSections.filter((s) => !known.has(s.id))
-  if (missing.length) {
-    const next = [...sectionConfigs.value]
-    for (const section of missing) {
-      const after = defaultSections.findIndex((d) => d.id === section.id) - 1
-      const anchor = next.findIndex((s) => s.id === defaultSections[after]?.id)
-      next.splice(anchor >= 0 ? anchor + 1 : next.length, 0, { ...section })
-    }
-    sectionConfigs.value = next
-  }
-})
-
-// Get visible sections in order with search and category filtering
-const visibleSections = computed(() => {
-  let sections = sectionConfigs.value.filter((s) => s.visible)
-
-  // Apply category filter
-  if (selectedCategoryFilter.value !== 'all') {
-    sections = sections.filter((s) => sectionCategories[s.id] === selectedCategoryFilter.value)
-  }
-
-  // Apply search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    sections = sections.filter((s) => s.label.toLowerCase().includes(query))
-  }
-
-  return sections
-})
-
-// Toggle section visibility - create new array to properly trigger reactivity
 function toggleSection(id: string) {
-  sectionConfigs.value = sectionConfigs.value.map((s) =>
+  stored.value = migrateSections(stored.value).map((s) =>
     s.id === id ? { ...s, visible: !s.visible } : s
   )
 }
 
-// Handle reorder from drag-and-drop - create new array with new objects
-function handleReorder(reorderedSections: SectionConfig[]) {
-  sectionConfigs.value = reorderedSections.map((s) => ({ ...s }))
+/** Reorder the active tab's sections, keeping the others in place */
+function handleReorder(reordered: SectionConfig[]) {
+  const ids = new Set(reordered.map((s) => s.id))
+  const queue = [...reordered]
+  stored.value = migrateSections(stored.value).map((s) =>
+    ids.has(s.id) ? { ...queue.shift()!, visible: s.visible } : s
+  )
 }
 
-// Reset to defaults - create deep copy
 function resetSections() {
-  sectionConfigs.value = defaultSections.map((s) => ({ ...s }))
+  stored.value = DEFAULT_SECTIONS.map((s) => ({ ...s }))
+}
+
+// --- Tabs ------------------------------------------------------------------
+function selectTab(id: ConfigTabId) {
+  activeTab.value = id
+  showSectionSettings.value = false
+  query.value = ''
+}
+
+function onRailKeydown(e: KeyboardEvent) {
+  const index = CONFIG_TABS.findIndex((t) => t.id === activeTab.value)
+  let next = index
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (index + 1) % CONFIG_TABS.length
+  else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft')
+    next = (index - 1 + CONFIG_TABS.length) % CONFIG_TABS.length
+  else if (e.key === 'Home') next = 0
+  else if (e.key === 'End') next = CONFIG_TABS.length - 1
+  else return
+  e.preventDefault()
+  selectTab(CONFIG_TABS[next]!.id)
+  nextTick(() =>
+    rootRef.value?.querySelector<HTMLElement>(`[data-tab-id="${CONFIG_TABS[next]!.id}"]`)?.focus()
+  )
+}
+
+// --- Search ----------------------------------------------------------------
+const results = computed(() => searchSettings(query.value))
+
+async function jumpTo(entry: SettingEntry) {
+  selectTab(entry.tab)
+  await nextTick()
+  const el = rootRef.value?.querySelector<HTMLElement>(`#${entry.id}`)
+  if (!el) {
+    toast('That setting is in a hidden section', {
+      description: 'Show it again from the section settings of this tab.',
+    })
+    return
+  }
+  // Open the collapsed group that contains it
+  const body = el.closest<HTMLElement>('[data-section-body]')
+  if (body && body.style.display === 'none') {
+    body.parentElement?.querySelector<HTMLElement>('button[aria-expanded]')?.click()
+    await nextTick()
+  }
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  el.classList.add('vc-setting-flash')
+  setTimeout(() => el.classList.remove('vc-setting-flash'), 1400)
+}
+
+function onSearchKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && results.value[0]) {
+    e.preventDefault()
+    jumpTo(results.value[0])
+  } else if (e.key === 'Escape' && query.value) {
+    e.stopPropagation()
+    query.value = ''
+  }
+}
+
+function handleReset() {
+  resetAll()
+  toast('All settings reset', { action: { label: 'Undo', onClick: undo } })
 }
 </script>
 
 <template>
-  <div class="flex h-full flex-col overflow-hidden">
+  <div ref="rootRef" class="flex h-full min-h-0 flex-col overflow-hidden">
     <!-- Header -->
     <div class="flex min-w-0 shrink-0 items-center justify-between gap-2 border-b px-3 py-2">
-      <h2 class="shrink-0 text-sm font-semibold">Configuration</h2>
+      <div class="min-w-0">
+        <h2 class="truncate text-sm font-semibold">{{ activeTabInfo.label }}</h2>
+        <p class="truncate text-[11px] text-muted-foreground">{{ activeTabInfo.description }}</p>
+      </div>
       <div class="flex shrink-0 items-center gap-0.5" data-tour-guide="shuffle-reset-buttons">
         <Button
           variant="ghost"
           size="icon-sm"
           :class="{ 'bg-muted': showSectionSettings }"
           :aria-pressed="showSectionSettings"
-          aria-label="Customize sections"
-          title="Customize sections"
+          aria-label="Section settings for this tab"
+          title="Show, hide or reorder sections"
           @click="showSectionSettings = !showSectionSettings"
         >
           <Icon name="lucide:list-checks" />
@@ -184,90 +199,168 @@ function resetSections() {
       </div>
     </div>
 
-    <!-- Search and Filter Bar -->
-    <div class="border-b px-3 py-2 space-y-2 flex-shrink-0 bg-muted/20">
+    <!-- Search -->
+    <div class="shrink-0 border-b px-3 py-2">
       <div class="relative">
         <Icon
           name="lucide:search"
-          class="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
+          class="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
         />
         <Input
-          v-model="searchQuery"
-          placeholder="Search configurations..."
-          class="pl-7 h-7 text-xs"
+          v-model="query"
+          type="search"
+          placeholder="Search settings..."
+          class="h-8 pl-8 text-sm"
+          aria-label="Search settings"
+          @keydown="onSearchKeydown"
         />
       </div>
-      <div class="flex flex-wrap gap-1">
+    </div>
+
+    <div class="flex min-h-0 flex-1">
+      <!-- Tab rail -->
+      <nav
+        class="flex w-14 shrink-0 flex-col gap-0.5 overflow-y-auto border-r bg-muted/30 p-1"
+        role="tablist"
+        aria-orientation="vertical"
+        aria-label="Settings categories"
+        @keydown="onRailKeydown"
+      >
         <button
-          v-for="cat in categoryFilters"
-          :key="cat.id"
+          v-for="tab in CONFIG_TABS"
+          :key="tab.id"
           type="button"
-          :class="[
-            'px-2 py-0.5 text-[10px] rounded-full border transition-colors',
-            selectedCategoryFilter === cat.id
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-transparent text-muted-foreground hover:bg-muted border-border',
-          ]"
-          @click="selectedCategoryFilter = cat.id"
+          role="tab"
+          :data-tab-id="tab.id"
+          :data-tour-guide="`config-tab-${tab.id}`"
+          :aria-selected="activeTab === tab.id && !query"
+          :aria-controls="`config-tab-panel-${tab.id}`"
+          :tabindex="activeTab === tab.id ? 0 : -1"
+          :title="tab.description"
+          class="flex flex-col items-center gap-0.5 rounded-md px-1 py-2 text-[10px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring"
+          :class="
+            activeTab === tab.id && !query
+              ? 'bg-background text-foreground shadow-xs'
+              : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+          "
+          @click="selectTab(tab.id)"
         >
-          {{ cat.label }}
+          <Icon :name="tab.icon" class="size-4" />
+          {{ tab.label }}
         </button>
-      </div>
-    </div>
+      </nav>
 
-    <!-- Section Settings Panel (when visible) -->
-    <div
-      v-if="showSectionSettings"
-      class="border-b bg-muted/30 px-3 py-2 space-y-2 max-h-[300px] overflow-y-auto flex-shrink-0"
-    >
-      <div class="flex items-center justify-between">
-        <span class="text-[10px] font-medium uppercase text-muted-foreground">Drag to Reorder</span>
-        <Button variant="ghost" size="sm" class="h-5 px-2 text-[10px]" @click="resetSections">
-          Reset
-        </Button>
-      </div>
-      <SortableSectionList
-        :sections="sectionConfigs"
-        @toggle="toggleSection"
-        @reorder="handleReorder"
-      />
-    </div>
+      <div class="relative min-w-0 flex-1">
+        <!-- Search results -->
+        <div
+          v-if="query"
+          class="absolute inset-0 overflow-y-auto p-2"
+          role="listbox"
+          aria-label="Matching settings"
+        >
+          <button
+            v-for="r in results"
+            :key="r.id"
+            type="button"
+            role="option"
+            :aria-selected="false"
+            class="flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+            @click="jumpTo(r)"
+          >
+            <span class="truncate">{{ r.label }}</span>
+            <span class="shrink-0 text-[11px] text-muted-foreground">
+              {{ CONFIG_TABS.find((t) => t.id === r.tab)?.label }}
+            </span>
+          </button>
+          <p v-if="!results.length" class="px-2 py-8 text-center text-sm text-muted-foreground">
+            No settings match “{{ query }}”
+          </p>
+        </div>
 
-    <!-- Config Sections -->
-    <div class="min-h-0 flex-1 overflow-y-auto px-3">
-      <div class="py-2 space-y-2">
-        <template v-for="section in visibleSections" :key="section.id">
-          <PresetThemes v-if="section.id === 'presets'" />
-          <ThemeConfig v-else-if="section.id === 'theme'" />
-
-          <!-- Quick Actions (after theme) -->
-          <div v-if="section.id === 'theme'" class="mb-4 mt-2">
-            <Button variant="outline" size="sm" class="w-full" @click="openDialog('gallery')">
-              <Icon name="lucide:layout-grid" />
-              Browse Theme Gallery
-            </Button>
+        <!-- Tab panels (kept mounted so scroll position and open groups persist) -->
+        <div
+          v-for="tab in CONFIG_TABS"
+          v-show="activeTab === tab.id && !query"
+          :id="`config-tab-panel-${tab.id}`"
+          :key="tab.id"
+          role="tabpanel"
+          :aria-label="tab.label"
+          class="absolute inset-0 overflow-y-auto px-3"
+        >
+          <!-- Section settings for this tab -->
+          <div
+            v-if="showSectionSettings && activeTab === tab.id"
+            class="mt-3 space-y-2 rounded-lg border bg-muted/30 p-2"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-medium uppercase text-muted-foreground">
+                Sections in {{ tab.label }}
+              </span>
+              <Button variant="ghost" size="sm" class="h-6 px-2 text-[11px]" @click="resetSections">
+                Reset
+              </Button>
+            </div>
+            <SortableSectionList
+              :sections="tabSections"
+              @toggle="toggleSection"
+              @reorder="handleReorder"
+            />
           </div>
 
-          <EffectsConfig v-else-if="section.id === 'effects'" />
-          <TypographyConfig v-else-if="section.id === 'typography'" />
-          <ComponentsConfig v-else-if="section.id === 'components'" />
-          <MotionConfig v-else-if="section.id === 'motion'" />
-          <IconsConfig v-else-if="section.id === 'icons'" />
-          <LayoutConfig v-else-if="section.id === 'layout'" />
-          <ComponentSelection v-else-if="section.id === 'selection'" />
-          <ExportConfig v-else-if="section.id === 'export'" />
+          <template v-for="section in visibleSections(tab.id)" :key="section.id">
+            <div v-if="section.id === 'presets'" id="setting-presets">
+              <PresetThemes />
+              <Button
+                variant="outline"
+                size="sm"
+                class="mb-3 w-full"
+                @click="openDialog('gallery')"
+              >
+                <Icon name="lucide:layout-grid" />Browse theme gallery
+              </Button>
+            </div>
+            <ColorsConfig v-else-if="section.id === 'colors'" />
+            <ConfigSection
+              v-else-if="section.id === 'palette'"
+              id="setting-palette"
+              title="Palette generator"
+              :default-open="false"
+            >
+              <ColorPalettePanel />
+            </ConfigSection>
+            <ConfigSection
+              v-else-if="section.id === 'accessibility'"
+              id="setting-accessibility"
+              title="Contrast check"
+              :default-open="false"
+            >
+              <AccessibilityPanel />
+            </ConfigSection>
+            <StyleConfig v-else-if="section.id === 'style'" />
+            <TypographyConfig v-else-if="section.id === 'typography'" />
+            <IconsConfig v-else-if="section.id === 'icons'" />
+            <MotionConfig v-else-if="section.id === 'motion'" />
+            <LayoutConfig v-else-if="section.id === 'layout'" />
+            <EffectsConfig v-else-if="section.id === 'effects'" />
+            <ExportConfig v-else-if="section.id === 'export'" />
+            <ComponentSelection v-else-if="section.id === 'selection'" />
+          </template>
 
-          <!-- Accessibility Panel (no duplicate heading - component has its own) -->
-          <div v-else-if="section.id === 'accessibility'" class="mt-4 border-t pt-4">
-            <AccessibilityPanel />
-          </div>
-
-          <!-- Color Palette Generator -->
-          <div v-else-if="section.id === 'palette'" class="mt-4 border-t pt-4">
-            <h3 class="text-sm font-medium mb-3">Color Palette Generator</h3>
-            <ColorPalettePanel />
-          </div>
-        </template>
+          <p
+            v-if="!visibleSections(tab.id).length"
+            class="py-10 text-center text-sm text-muted-foreground"
+          >
+            All sections in this tab are hidden.
+            <button
+              type="button"
+              class="text-primary underline"
+              @click="showSectionSettings = true"
+            >
+              Show sections
+            </button>
+          </p>
+          <div class="h-4" aria-hidden="true" />
+        </div>
       </div>
     </div>
 

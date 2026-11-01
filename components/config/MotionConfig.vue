@@ -6,11 +6,13 @@ import {
   type Bezier,
 } from '~/composables/useAnimationCustomizer'
 import ConfigSection from './ConfigSection.vue'
+import OptionPicker from './OptionPicker.vue'
+import { useDesignSystem, useConfigOptions } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
 import { Slider } from '~/components/ui/slider'
 import { Switch } from '~/components/ui/switch'
-import type { AnimationEffects } from '~/types/config'
+import type { AnimationEffects, AnimationSpeed } from '~/types/config'
 
 const {
   durationMs,
@@ -22,7 +24,6 @@ const {
   replayKey,
   demoStyle,
   easingPresets,
-  durationPresets,
   setDuration,
   setEasingPreset,
   setBezierPoint,
@@ -55,8 +56,11 @@ const effectList: { key: keyof AnimationEffects; label: string }[] = [
   { key: 'blur', label: 'Blur' },
 ]
 
-function pickDuration(ms: number) {
-  setDuration(ms)
+const { config, setComponents } = useDesignSystem()
+const { ANIMATION_SPEEDS } = useConfigOptions()
+
+function pickSpeed(speed: string) {
+  setComponents({ animationSpeed: speed as AnimationSpeed })
   replay()
 }
 
@@ -81,107 +85,96 @@ function pointValue(b: Bezier, i: number) {
 </script>
 
 <template>
-  <ConfigSection
-    title="Motion"
-    description="Duration, easing and entrance effects"
-    tour-id="motion-config-section"
-  >
-    <div class="space-y-5">
-      <!-- Demo -->
-      <div class="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-        <div
-          class="flex size-16 shrink-0 items-center justify-center overflow-hidden"
-          :style="demoStyle"
-        >
+  <div>
+    <ConfigSection title="Motion" static tour-id="motion-config-section">
+      <div class="space-y-4">
+        <!-- Demo -->
+        <div class="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
           <div
-            :key="replayKey"
-            class="vc-enter size-12 rounded-lg bg-primary shadow-md"
-            aria-hidden="true"
+            class="flex size-16 shrink-0 items-center justify-center overflow-hidden"
+            :style="demoStyle"
+          >
+            <div
+              :key="replayKey"
+              class="vc-enter size-12 rounded-lg bg-primary shadow-md"
+              aria-hidden="true"
+            />
+          </div>
+          <div class="min-w-0 flex-1 text-xs text-muted-foreground">
+            <p class="font-medium text-foreground">
+              {{ durationMs }}ms · {{ currentPreset?.name ?? 'Custom' }}
+            </p>
+            <p class="truncate font-mono" :title="easing">{{ easing }}</p>
+          </div>
+          <Button size="sm" variant="outline" aria-label="Replay animation" @click="replay">
+            <Icon name="lucide:play" />Play
+          </Button>
+        </div>
+
+        <!-- Speed / duration -->
+        <div id="setting-duration" class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <Label>Speed</Label>
+            <span class="font-mono text-xs text-muted-foreground">{{ durationMs }}ms</span>
+          </div>
+          <Slider
+            :model-value="durationMs"
+            :min="0"
+            :max="1000"
+            :step="10"
+            aria-label="Animation duration in milliseconds"
+            @update:model-value="setDuration"
+          />
+          <OptionPicker
+            id="setting-animation-speed"
+            :model-value="
+              config.components.animationDuration == null ? config.components.animationSpeed : ''
+            "
+            :options="ANIMATION_SPEEDS.map((x) => ({ name: x.name, label: x.label }))"
+            @update:model-value="pickSpeed"
           />
         </div>
-        <div class="min-w-0 flex-1 text-xs text-muted-foreground">
-          <p class="font-medium text-foreground">
-            {{ durationMs }}ms · {{ currentPreset?.name ?? 'Custom' }}
-          </p>
-          <p class="truncate font-mono" :title="easing">{{ easing }}</p>
-        </div>
-        <Button size="sm" variant="outline" aria-label="Replay animation" @click="replay">
-          <Icon name="lucide:play" />Play
-        </Button>
-      </div>
 
-      <!-- Duration -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <Label>Duration</Label>
-          <span class="font-mono text-xs text-muted-foreground">{{ durationMs }}ms</span>
-        </div>
-        <Slider
-          :model-value="durationMs"
-          :min="0"
-          :max="1000"
-          :step="10"
-          aria-label="Animation duration in milliseconds"
-          @update:model-value="setDuration"
-        />
-        <div class="flex flex-wrap gap-1">
-          <button
-            v-for="d in durationPresets"
-            :key="d.value"
-            type="button"
-            :aria-pressed="durationMs === d.value"
-            class="rounded-full border px-2 py-0.5 text-[11px] transition-colors"
-            :class="
-              durationMs === d.value
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted'
-            "
-            @click="pickDuration(d.value)"
-          >
-            {{ d.label }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Easing -->
-      <div class="space-y-2">
-        <Label>Easing</Label>
-        <div class="grid grid-cols-2 gap-1.5">
-          <button
-            v-for="p in easingPresets"
-            :key="p.name"
-            type="button"
-            :aria-pressed="currentPreset?.name === p.name"
-            :title="p.description"
-            class="flex items-center gap-2 rounded-md border p-1.5 text-left text-xs transition-colors"
-            :class="
-              currentPreset?.name === p.name
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'hover:bg-muted'
-            "
-            @click="pickEasing(p.name)"
-          >
-            <svg
-              viewBox="0 -30 100 160"
-              class="h-6 w-6 shrink-0 overflow-visible"
-              aria-hidden="true"
+        <!-- Easing -->
+        <div id="setting-easing" class="space-y-1.5">
+          <Label>Easing</Label>
+          <div class="grid grid-cols-2 gap-1">
+            <button
+              v-for="p in easingPresets"
+              :key="p.name"
+              type="button"
+              :aria-pressed="currentPreset?.name === p.name"
+              :title="p.description"
+              class="flex h-8 items-center gap-1.5 rounded-md border px-1.5 text-left text-xs transition-colors"
+              :class="
+                currentPreset?.name === p.name
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'hover:bg-muted'
+              "
+              @click="pickEasing(p.name)"
             >
-              <path
-                :d="bezierPath(p.bezier, 100, 0)"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="10"
-                stroke-linecap="round"
-              />
-            </svg>
-            <span class="truncate">{{ p.name }}</span>
-          </button>
+              <svg
+                viewBox="0 -30 100 160"
+                class="size-4 shrink-0 overflow-visible"
+                aria-hidden="true"
+              >
+                <path
+                  :d="bezierPath(p.bezier, 100, 0)"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="10"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <span class="truncate">{{ p.name }}</span>
+            </button>
+          </div>
         </div>
       </div>
+    </ConfigSection>
 
-      <!-- Custom curve -->
-      <div class="space-y-2">
-        <Label>Custom curve</Label>
+    <ConfigSection title="Custom curve" :default-open="false">
+      <div id="setting-curve" class="space-y-2">
         <div class="flex gap-3">
           <svg
             :viewBox="`-8 -8 ${SIZE + 16} ${SIZE + PAD * 2 + 16}`"
@@ -239,10 +232,11 @@ function pointValue(b: Bezier, i: number) {
           </div>
         </div>
       </div>
+    </ConfigSection>
 
-      <!-- Effects -->
-      <div class="space-y-2">
-        <Label>Entrance effects</Label>
+    <ConfigSection title="Entrance">
+      <div id="setting-effects" class="space-y-1.5">
+        <Label>Effects</Label>
         <div class="grid grid-cols-2 gap-2">
           <label
             v-for="e in effectList"
@@ -261,7 +255,10 @@ function pointValue(b: Bezier, i: number) {
       </div>
 
       <!-- Reduced motion -->
-      <div class="flex items-center justify-between gap-3 rounded-md border p-2.5">
+      <div
+        id="setting-reduced-motion"
+        class="flex items-center justify-between gap-3 rounded-md border p-2.5"
+      >
         <div>
           <Label for="motion-reduced">Reduced motion</Label>
           <p class="text-xs text-muted-foreground">Preview without transitions or animations.</p>
@@ -276,6 +273,6 @@ function pointValue(b: Bezier, i: number) {
       <Button variant="ghost" size="sm" class="w-full" @click="reset">
         <Icon name="lucide:rotate-ccw" />Reset motion
       </Button>
-    </div>
-  </ConfigSection>
+    </ConfigSection>
+  </div>
 </template>

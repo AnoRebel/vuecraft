@@ -20,10 +20,11 @@ const strokeWidthOptions = [
 </script>
 
 <template>
-  <ConfigSection title="Icons" description="Icon library and styling">
+  <ConfigSection title="Icons">
     <div class="space-y-4">
       <!-- Icon Library -->
       <OptionPicker
+        id="setting-icon-library"
         :model-value="config.icons.library"
         :options="
           ICON_LIBRARIES.map((i) => ({
@@ -32,26 +33,25 @@ const strokeWidthOptions = [
             description: i.description,
           }))
         "
-        label="Icon Library"
-        :columns="2"
+        label="Library"
         @update:model-value="(v) => setIcons({ library: v as any })"
       />
 
       <!-- Default Icon Size -->
       <OptionPicker
+        id="setting-icon-size"
         :model-value="config.icons.defaultSize"
         :options="iconSizeOptions"
-        label="Default Size"
-        :columns="3"
+        label="Size"
         @update:model-value="(v) => setIcons({ defaultSize: v as any })"
       />
 
       <!-- Stroke Width -->
       <OptionPicker
+        id="setting-icon-stroke"
         :model-value="config.icons.strokeWidth"
         :options="strokeWidthOptions"
-        label="Stroke Width"
-        :columns="3"
+        label="Stroke"
         @update:model-value="(v) => setIcons({ strokeWidth: v as any })"
       />
     </div>
