@@ -25,6 +25,8 @@ export const SHORTCUTS: Shortcut[] = [
   { key: 'Ctrl+I', description: 'Import configuration', category: 'Export' },
   { key: 'Ctrl+Shift+S', description: 'Share link', category: 'Export' },
   { key: '1 – 7', description: 'Switch preview template', category: 'Preview' },
+  { key: '↑', description: 'Inspector: select parent element', category: 'Preview' },
+  { key: 'Esc', description: 'Unpin, then exit the inspector', category: 'Preview' },
 ]
 
 export function isMacPlatform(): boolean {
