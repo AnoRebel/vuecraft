@@ -43,8 +43,29 @@ export type FontFamily =
   | 'public-sans'
   | 'outfit'
   | 'geist'
+  | 'poppins'
+  | 'open-sans'
+  | 'lato'
+  | 'montserrat'
+  | 'work-sans'
+  | 'plus-jakarta-sans'
+  | 'space-grotesk'
+  | 'manrope'
+  | 'lexend'
+  | 'sora'
+  | 'ibm-plex-sans'
+  | 'bricolage-grotesque'
 
-export type MonoFontFamily = 'jetbrains-mono' | 'geist-mono' | 'fira-code' | 'source-code-pro'
+export type MonoFontFamily =
+  | 'jetbrains-mono'
+  | 'geist-mono'
+  | 'fira-code'
+  | 'source-code-pro'
+  | 'ibm-plex-mono'
+  | 'roboto-mono'
+  | 'inconsolata'
+  | 'ubuntu-mono'
+  | 'space-mono'
 
 export type FontScale = 'compact' | 'default' | 'relaxed' | 'spacious'
 
@@ -76,6 +97,12 @@ export interface ThemeConfig {
   shadowIntensity: ShadowIntensity
   menuAccent: MenuAccent
   menuColor: MenuColor
+  /** Exact radius in rem from the fine-tune slider; overrides `radius` when set */
+  radiusValue?: number | null
+  /** Custom primary colour (any CSS colour) applied over the palette */
+  customPrimary?: string | null
+  /** Tokens imported from a preset (tweakcn, Crystal Neuo, ...) */
+  custom?: CustomThemeTokens | null
 }
 
 export interface TypographyConfig {
@@ -86,10 +113,25 @@ export interface TypographyConfig {
   bodyLineHeight: 'tight' | 'normal' | 'relaxed'
 }
 
+export interface AnimationEffects {
+  fade: boolean
+  scale: boolean
+  slide: boolean
+  blur: boolean
+}
+
 export interface ComponentsConfig {
   style: StyleName
   borderWidth: BorderWidth
   animationSpeed: AnimationSpeed
+  /** Exact transition duration in ms; overrides `animationSpeed` when set */
+  animationDuration?: number | null
+  /** CSS timing function, e.g. `ease` or `cubic-bezier(0.2, 0, 0, 1)` */
+  animationEasing?: string
+  /** Effects combined into the entrance animation */
+  animationEffects?: AnimationEffects
+  /** Disable transitions and entrance animations in the preview */
+  reducedMotion?: boolean
   focusRingWidth: 'thin' | 'default' | 'thick'
   focusRingOffset: 'none' | 'sm' | 'default'
 }
@@ -147,12 +189,7 @@ export interface CSSVariables {
 
 // Preview template types
 export type PreviewTemplate =
-  | 'dashboard'
-  | 'cards'
-  | 'forms'
-  | 'authentication'
-  | 'settings'
-  | 'components'
+  'dashboard' | 'cards' | 'forms' | 'authentication' | 'settings' | 'components'
 
 // Serializable config for URL/JSON
 export interface SerializedConfig {
@@ -162,4 +199,33 @@ export interface SerializedConfig {
   c: ComponentsConfig
   i: IconsConfig
   l: LayoutConfig
+  e?: ExportConfig
+}
+
+// Explicit design tokens that override the generated palette (used by
+// imported presets such as tweakcn and Crystal Neuo themes)
+export interface CustomThemeTokens {
+  /** Id of the preset the tokens came from */
+  source?: string
+  /** shadcn colour tokens keyed by kebab-case name (background, card-foreground, ...) */
+  light?: Record<string, string>
+  dark?: Record<string, string>
+  radius?: string
+  fontSans?: string
+  fontHeading?: string
+  fontMono?: string
+  borderWidth?: string
+  blur?: string
+  shadows?: {
+    light: Record<string, string>
+    dark: Record<string, string>
+  }
+}
+
+export interface CustomThemePreset {
+  id: string
+  label: string
+  description: string
+  tags: string[]
+  tokens: CustomThemeTokens
 }

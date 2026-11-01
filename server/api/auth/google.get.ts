@@ -3,6 +3,8 @@
  * Requires NUXT_OAUTH_GOOGLE_CLIENT_ID and NUXT_OAUTH_GOOGLE_CLIENT_SECRET env vars
  */
 
+import { sendRedirect } from 'nuxt/server'
+
 export default defineOAuthGoogleEventHandler({
   config: {
     scope: ['email', 'profile'],

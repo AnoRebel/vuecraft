@@ -558,9 +558,21 @@ export function getThemeColors(baseColor: BaseColorName, accentTheme: ThemeName)
   const base = BASE_COLOR_THEMES[baseColor]
   const accent = ACCENT_COLORS[accentTheme]
 
-  // If the accent is the same as a neutral base, just return the base theme
+  // Neutral accents keep the base palette but take the primary colours of the
+  // chosen neutral family, so picking e.g. "Slate" on a Stone base is visible.
   if (['neutral', 'stone', 'zinc', 'gray', 'slate'].includes(accentTheme)) {
-    return base
+    const neutral = BASE_COLOR_THEMES[accentTheme as BaseColorName]
+    if (!neutral || accentTheme === baseColor) return structuredClone(base)
+    const pick = (mode: 'light' | 'dark') => ({
+      ...base[mode],
+      primary: neutral[mode].primary,
+      primaryForeground: neutral[mode].primaryForeground,
+      ring: neutral[mode].ring,
+      sidebarPrimary: neutral[mode].sidebarPrimary,
+      sidebarPrimaryForeground: neutral[mode].sidebarPrimaryForeground,
+      sidebarRing: neutral[mode].sidebarRing,
+    })
+    return { light: pick('light'), dark: pick('dark') }
   }
 
   // Derive accent-related colors from primary

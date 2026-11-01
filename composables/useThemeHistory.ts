@@ -50,13 +50,17 @@ export function useThemeHistory() {
     // Don't record changes while applying history (undo/redo)
     if (isApplyingHistory.value) return
 
+    // Ignore snapshots identical to the current entry (e.g. initial load)
+    const current = history.value[currentIndex.value]
+    if (current && JSON.stringify(current.config) === JSON.stringify(config)) return
+
     const now = Date.now()
 
     // Debounce rapid changes
     if (now - lastChangeTime.value < DEBOUNCE_MS && history.value.length > 0) {
       // Update the most recent entry instead of creating a new one
       history.value[currentIndex.value] = {
-        config: structuredClone(config),
+        config: JSON.parse(JSON.stringify(config)) as SerializedConfig,
         timestamp: now,
         label,
       }
@@ -73,7 +77,7 @@ export function useThemeHistory() {
 
     // Add new entry
     history.value.push({
-      config: structuredClone(config),
+      config: JSON.parse(JSON.stringify(config)) as SerializedConfig,
       timestamp: now,
       label,
     })
@@ -95,7 +99,7 @@ export function useThemeHistory() {
 
     currentIndex.value--
     const entry = history.value[currentIndex.value]
-    return entry ? structuredClone(entry.config) : null
+    return entry ? JSON.parse(JSON.stringify(entry.config)) : null
   }
 
   /**
@@ -107,7 +111,7 @@ export function useThemeHistory() {
 
     currentIndex.value++
     const entry = history.value[currentIndex.value]
-    return entry ? structuredClone(entry.config) : null
+    return entry ? JSON.parse(JSON.stringify(entry.config)) : null
   }
 
   /**
@@ -118,7 +122,7 @@ export function useThemeHistory() {
 
     currentIndex.value = index
     const entry = history.value[index]
-    return entry ? structuredClone(entry.config) : null
+    return entry ? JSON.parse(JSON.stringify(entry.config)) : null
   }
 
   /**
@@ -127,7 +131,7 @@ export function useThemeHistory() {
   function getHistory(): HistoryEntry[] {
     return history.value.map((entry) => ({
       ...entry,
-      config: structuredClone(entry.config),
+      config: JSON.parse(JSON.stringify(entry.config)),
     }))
   }
 
@@ -147,7 +151,7 @@ export function useThemeHistory() {
     if (history.value.length === 0) {
       history.value = [
         {
-          config: structuredClone(config),
+          config: JSON.parse(JSON.stringify(config)) as SerializedConfig,
           timestamp: Date.now(),
           label: 'Initial',
         },

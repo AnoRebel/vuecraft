@@ -9,6 +9,12 @@ import {
   getUILibraryInfo,
 } from '~/utils/cssGenerator'
 import {
+  generateDesignTokens,
+  getFormatDescription,
+  getFormatExtension,
+  type TokenExportFormat,
+} from '~/utils/designTokenExporter'
+import {
   generateInitCommand,
   generateAddCommand,
   generateUniversalSetupScript,
@@ -47,6 +53,17 @@ const libraryInfo = computed(() => getUILibraryInfo(selectedLibrary.value))
 const cssOutput = computed(() => generateUniversalCSS(config))
 const configOutput = computed(() => generateUniversalConfig(config))
 const exportPackage = computed(() => generateUniversalExportPackage(config))
+
+// Design tokens
+const TOKEN_FORMATS: TokenExportFormat[] = [
+  'json-tokens',
+  'figma',
+  'style-dictionary',
+  'css-in-js',
+  'tailwind-config',
+]
+const tokenFormat = ref<TokenExportFormat>('json-tokens')
+const tokensOutput = computed(() => generateDesignTokens(config, tokenFormat.value))
 
 // CLI commands
 const setupScript = computed(() => generateUniversalSetupScript(config))
@@ -103,7 +120,7 @@ function downloadAll() {
 
 <template>
   <Dialog :open="open" @update:open="(v) => emit('update:open', v)">
-    <DialogContent class="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+    <DialogContent class="max-w-3xl max-h-[90dvh] overflow-hidden flex flex-col">
       <DialogHeader>
         <DialogTitle>Export Design System</DialogTitle>
         <DialogDescription>
@@ -130,8 +147,9 @@ function downloadAll() {
       </div>
 
       <Tabs v-model="activeTab" class="flex-1 overflow-hidden flex flex-col">
-        <TabsList class="grid w-full grid-cols-4">
+        <TabsList class="grid w-full grid-cols-5">
           <TabsTrigger value="css">CSS</TabsTrigger>
+          <TabsTrigger value="tokens">Tokens</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
           <TabsTrigger value="cli">CLI</TabsTrigger>
           <TabsTrigger value="readme">README</TabsTrigger>
@@ -159,6 +177,45 @@ function downloadAll() {
           </div>
           <div class="flex-1 overflow-auto rounded-md border bg-muted/50">
             <pre class="p-4 text-xs font-mono overflow-x-auto"><code>{{ cssOutput }}</code></pre>
+          </div>
+        </TabsContent>
+
+        <!-- Design tokens Tab -->
+        <TabsContent value="tokens" class="flex-1 overflow-hidden flex flex-col mt-4">
+          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex min-w-0 items-center gap-2">
+              <label for="token-format" class="sr-only">Token format</label>
+              <select
+                id="token-format"
+                v-model="tokenFormat"
+                class="h-8 rounded-md border border-input bg-background px-2 text-sm"
+              >
+                <option v-for="f in TOKEN_FORMATS" :key="f" :value="f">
+                  {{ getFormatDescription(f) }}
+                </option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <Button variant="ghost" size="sm" @click="copyToClipboard(tokensOutput, 'tokens')">
+                {{ copied === 'tokens' ? 'Copied!' : 'Copy' }}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                @click="
+                  downloadFile(
+                    tokensOutput,
+                    `theme${getFormatExtension(tokenFormat)}`,
+                    'text/plain'
+                  )
+                "
+              >
+                Download
+              </Button>
+            </div>
+          </div>
+          <div class="flex-1 overflow-auto rounded-md border bg-muted/50">
+            <pre class="p-4 text-xs font-mono overflow-x-auto"><code>{{ tokensOutput }}</code></pre>
           </div>
         </TabsContent>
 

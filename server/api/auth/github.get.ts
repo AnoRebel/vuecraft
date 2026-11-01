@@ -3,6 +3,8 @@
  * Requires NUXT_OAUTH_GITHUB_CLIENT_ID and NUXT_OAUTH_GITHUB_CLIENT_SECRET env vars
  */
 
+import { sendRedirect } from 'nuxt/server'
+
 export default defineOAuthGitHubEventHandler({
   config: {
     scope: ['user:email'],

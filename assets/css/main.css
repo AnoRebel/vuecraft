@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* `dark:` variants follow the .dark class set by the colour-mode toggle */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Base theme variables */
 @theme {
   /* Colors - will be dynamically generated */
@@ -18,7 +21,7 @@
   --color-accent: oklch(0.967 0.001 286.375);
   --color-accent-foreground: oklch(0.21 0.006 285.885);
   --color-destructive: oklch(0.577 0.245 27.325);
-  --color-destructive-foreground: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: oklch(0.985 0 0);
   --color-border: oklch(0.92 0.004 286.32);
   --color-input: oklch(0.92 0.004 286.32);
   --color-ring: oklch(0.708 0.022 261.325);
@@ -49,49 +52,8 @@
 
   /* Fonts */
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-
-  /* Spacing scale */
-  --spacing-0: 0px;
-  --spacing-px: 1px;
-  --spacing-0_5: 0.125rem;
-  --spacing-1: 0.25rem;
-  --spacing-1_5: 0.375rem;
-  --spacing-2: 0.5rem;
-  --spacing-2_5: 0.625rem;
-  --spacing-3: 0.75rem;
-  --spacing-3_5: 0.875rem;
-  --spacing-4: 1rem;
-  --spacing-5: 1.25rem;
-  --spacing-6: 1.5rem;
-  --spacing-7: 1.75rem;
-  --spacing-8: 2rem;
-  --spacing-9: 2.25rem;
-  --spacing-10: 2.5rem;
-  --spacing-11: 2.75rem;
-  --spacing-12: 3rem;
-  --spacing-14: 3.5rem;
-  --spacing-16: 4rem;
-  --spacing-20: 5rem;
-  --spacing-24: 6rem;
-  --spacing-28: 7rem;
-  --spacing-32: 8rem;
-  --spacing-36: 9rem;
-  --spacing-40: 10rem;
-  --spacing-44: 11rem;
-  --spacing-48: 12rem;
-  --spacing-52: 13rem;
-  --spacing-56: 14rem;
-  --spacing-60: 15rem;
-  --spacing-64: 16rem;
-  --spacing-72: 18rem;
-  --spacing-80: 20rem;
-  --spacing-96: 24rem;
-
-  /* Animation durations */
-  --animate-duration-fast: 150ms;
-  --animate-duration-normal: 200ms;
-  --animate-duration-slow: 300ms;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -117,7 +79,7 @@
   --color-accent: oklch(0.274 0.006 286.033);
   --color-accent-foreground: oklch(0.985 0 0);
   --color-destructive: oklch(0.704 0.191 22.216);
-  --color-destructive-foreground: oklch(0.704 0.191 22.216);
+  --color-destructive-foreground: oklch(0.985 0 0);
   --color-border: oklch(0.274 0.006 286.033);
   --color-input: oklch(0.274 0.006 286.033);
   --color-ring: oklch(0.552 0.016 285.938);
@@ -140,70 +102,21 @@
   --color-sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
-/* Base styles */
-* {
-  border-color: var(--color-border);
-}
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
 
-body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-}
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 
-/* Utility classes for theme colors */
-.bg-background {
-  background-color: var(--color-background);
-}
-.bg-foreground {
-  background-color: var(--color-foreground);
-}
-.bg-card {
-  background-color: var(--color-card);
-}
-.bg-primary {
-  background-color: var(--color-primary);
-}
-.bg-secondary {
-  background-color: var(--color-secondary);
-}
-.bg-muted {
-  background-color: var(--color-muted);
-}
-.bg-accent {
-  background-color: var(--color-accent);
-}
-.bg-destructive {
-  background-color: var(--color-destructive);
-}
-
-.text-foreground {
-  color: var(--color-foreground);
-}
-.text-muted-foreground {
-  color: var(--color-muted-foreground);
-}
-.text-primary {
-  color: var(--color-primary);
-}
-.text-primary-foreground {
-  color: var(--color-primary-foreground);
-}
-.text-secondary-foreground {
-  color: var(--color-secondary-foreground);
-}
-.text-accent-foreground {
-  color: var(--color-accent-foreground);
-}
-.text-destructive {
-  color: var(--color-destructive);
-}
-
-.border-border {
-  border-color: var(--color-border);
-}
-.border-input {
-  border-color: var(--color-input);
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
 /* Scrollbar styling */
@@ -226,78 +139,81 @@ body {
   background: var(--color-foreground);
 }
 
-/* Focus styles */
-:focus-visible {
-  outline: 2px solid var(--color-ring);
-  outline-offset: 2px;
-}
+/* Focus and cursor defaults (layered so utilities can override them) */
+@layer base {
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
 
-/* Cursor styles for interactive elements */
-button,
-[role='button'],
-[type='button'],
-[type='submit'],
-[type='reset'],
-a[href],
-summary,
-[tabindex]:not([tabindex='-1']) {
-  cursor: pointer;
-}
+  /* Cursor styles for interactive elements */
+  button,
+  [role='button'],
+  [type='button'],
+  [type='submit'],
+  [type='reset'],
+  a[href],
+  summary,
+  [tabindex]:not([tabindex='-1']) {
+    cursor: pointer;
+  }
 
-button:disabled,
-[role='button'][aria-disabled='true'],
-input:disabled,
-select:disabled,
-textarea:disabled,
-[disabled] {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+  button:disabled,
+  [role='button'][aria-disabled='true'],
+  input:disabled,
+  select:disabled,
+  textarea:disabled,
+  [disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 
-input[type='text'],
-input[type='email'],
-input[type='password'],
-input[type='search'],
-input[type='tel'],
-input[type='url'],
-input[type='number'],
-textarea,
-[contenteditable='true'] {
-  cursor: text;
-}
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='url'],
+  input[type='number'],
+  textarea,
+  [contenteditable='true'] {
+    cursor: text;
+  }
 
-input[type='range'] {
-  cursor: grab;
-}
+  input[type='range'] {
+    cursor: grab;
+  }
 
-input[type='range']:active {
-  cursor: grabbing;
-}
+  input[type='range']:active {
+    cursor: grabbing;
+  }
 
-.cursor-move,
-[draggable='true'] {
-  cursor: move;
-}
+  .cursor-move,
+  [draggable='true'] {
+    cursor: move;
+  }
 
-.cursor-grab {
-  cursor: grab;
-}
+  .cursor-grab {
+    cursor: grab;
+  }
 
-.cursor-grabbing {
-  cursor: grabbing;
-}
+  .cursor-grabbing {
+    cursor: grabbing;
+  }
 
-/* Loading cursor for loading states */
-.cursor-wait,
-[aria-busy='true'] {
-  cursor: wait;
-}
+  /* Loading cursor for loading states */
+  .cursor-wait,
+  [aria-busy='true'] {
+    cursor: wait;
+  }
 
-/* Help cursor for informational elements */
-abbr[title],
-[data-tooltip],
-.cursor-help {
-  cursor: help;
+  /* Help cursor for informational elements */
+  abbr[title],
+  [data-tooltip],
+  .cursor-help {
+    cursor: help;
+  }
 }
 
 /* Animation keyframes */
@@ -376,13 +292,13 @@ abbr[title],
 }
 
 .animate-fade-in {
-  animation: fade-in var(--animate-duration-normal) ease-out;
+  animation: fade-in 200ms ease-out;
 }
 .animate-fade-out {
-  animation: fade-out var(--animate-duration-normal) ease-out;
+  animation: fade-out 200ms ease-out;
 }
 .animate-scale-in {
-  animation: scale-in var(--animate-duration-normal) ease-out;
+  animation: scale-in 200ms ease-out;
 }
 .animate-spin {
   animation: spin 1s linear infinite;
@@ -421,4 +337,189 @@ abbr[title],
   -webkit-backdrop-filter: blur(var(--effects-blur));
 }
 
-/* Glassmorphism effects - applied via inline styles when enabled */
+/* Glassmorphism - enabled by the Effects panel (adds .vc-glass on <html>) */
+.vc-glass .effects-card,
+.vc-glass .effects-header,
+.vc-glass .effects-sidebar {
+  border-color: var(--effects-glass-border, rgb(255 255 255 / 0.2));
+  box-shadow: var(--effects-glass-shadow, 0 8px 32px 0 rgb(0 0 0 / 0.1));
+  background-image: linear-gradient(135deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.02));
+}
+
+/* ------------------------------------------------------------------------
+ * Preview component styles (data-style on the .vc-preview root)
+ * Components are identified by data-slot attributes.
+ * --------------------------------------------------------------------- */
+
+/* New York: compact controls, tighter radius */
+.vc-preview[data-style='new-york'] {
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: calc(var(--radius) - 1px);
+}
+.vc-preview[data-style='new-york'] [data-slot='button'] {
+  height: calc(var(--spacing) * 8);
+  font-size: var(--text-xs);
+}
+.vc-preview[data-style='new-york'] [data-slot='card'] {
+  border-radius: var(--radius-lg);
+}
+
+/* Miami: vivid gradient fills and a soft colour glow */
+.vc-preview[data-style='miami'] [data-slot='button'][data-variant='default'] {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-primary),
+    color-mix(in oklch, var(--color-primary) 55%, var(--color-chart-2))
+  );
+  box-shadow: 0 6px 20px -6px color-mix(in oklch, var(--color-primary) 60%, transparent);
+}
+.vc-preview[data-style='miami'] [data-slot='card'] {
+  border-radius: calc(var(--radius) + 8px);
+  box-shadow: 0 12px 32px -16px color-mix(in oklch, var(--color-primary) 45%, transparent);
+}
+.vc-preview[data-style='miami'] [data-slot='badge'] {
+  border-radius: 9999px;
+}
+
+/* Brutal: square corners, ink borders, hard offset shadows */
+.vc-preview[data-style='brutal'] {
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+.vc-preview[data-style='brutal']
+  :is(
+    [data-slot='card'],
+    [data-slot='button']:not([data-variant='ghost'], [data-variant='link']),
+    [data-slot='input'],
+    [data-slot='badge']
+  ) {
+  border: max(2px, var(--vc-border-width)) solid var(--color-foreground);
+}
+.vc-preview[data-style='brutal'] [data-slot='card'] {
+  box-shadow: 6px 6px 0 var(--color-foreground);
+}
+.vc-preview[data-style='brutal']
+  [data-slot='button']:not([data-variant='ghost'], [data-variant='link']) {
+  box-shadow: 3px 3px 0 var(--color-foreground);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition-property: transform, box-shadow;
+}
+.vc-preview[data-style='brutal']
+  [data-slot='button']:not([data-variant='ghost'], [data-variant='link']):active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+/* Soft: generous radius, borderless tonal surfaces */
+.vc-preview[data-style='soft'] {
+  --radius-md: calc(var(--radius) + 4px);
+  --radius-lg: calc(var(--radius) + 8px);
+  --radius-xl: calc(var(--radius) + 14px);
+}
+.vc-preview[data-style='soft'] [data-slot='card'] {
+  border-color: transparent;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.15);
+}
+.vc-preview[data-style='soft'] [data-slot='button'] {
+  border-radius: 9999px;
+}
+.vc-preview[data-style='soft'] [data-slot='input'] {
+  background-color: var(--color-muted);
+  border-color: transparent;
+}
+
+/* ------------------------------------------------------------------------
+ * Overlay animations driven by reka-ui data-state attributes
+ * --------------------------------------------------------------------- */
+@keyframes vc-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vc-overlay-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vc-content-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+@keyframes vc-content-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+@keyframes vc-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes vc-pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+.vc-overlay[data-state='open'] {
+  animation: vc-overlay-in 150ms ease-out;
+}
+.vc-overlay[data-state='closed'] {
+  animation: vc-overlay-out 120ms ease-in;
+}
+.vc-dialog[data-state='open'] {
+  animation: vc-content-in 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+.vc-dialog[data-state='closed'] {
+  animation: vc-content-out 120ms ease-in;
+}
+.vc-pop[data-state='open'],
+.vc-pop[data-state='delayed-open'],
+.vc-pop[data-state='instant-open'] {
+  animation: vc-pop-in 120ms ease-out;
+}
+.vc-pop[data-state='closed'] {
+  animation: vc-pop-out 100ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-overlay,
+  .vc-dialog,
+  .vc-pop {
+    animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------------
+ * Preview entrance animation - effects come from the Motion settings
+ * (opacity, translate, scale and blur start values are CSS variables)
+ * --------------------------------------------------------------------- */
+@keyframes vc-enter {
+  from {
+    opacity: var(--vc-enter-opacity, 0);
+    transform: translateY(var(--vc-enter-y, 8px)) scale(var(--vc-enter-scale, 0.96));
+    filter: blur(var(--vc-enter-blur, 0px));
+  }
+}
+
+.vc-enter,
+.vc-preview [role='tabpanel'][data-state='active'] {
+  animation: vc-enter var(--vc-motion-duration, 200ms) var(--vc-motion-easing, ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-enter,
+  .vc-preview [role='tabpanel'] {
+    animation: none;
+  }
+}

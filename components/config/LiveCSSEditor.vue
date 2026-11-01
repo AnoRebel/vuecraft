@@ -1,118 +1,124 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
+import { toast } from 'vue-sonner'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { generateCSSVariables } from '~/utils/cssGenerator'
+import { COLOR_KEYS, toTokenName } from '~/utils/themeTokens'
+import type { CustomThemeTokens } from '~/types/config'
 import { Button } from '~/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { cn } from '~/lib/utils'
 
-const { config, copyToClipboard, copied } = useDesignSystem()
+const { config, copyToClipboard, setTheme } = useDesignSystem()
 
 const activeTab = ref<'variables' | 'full'>('variables')
 const isEditing = ref(false)
 const editedCSS = ref('')
-const hasChanges = ref(false)
+const copied = ref(false)
 
-// Generate CSS from config
-const generatedCSS = computed(() => {
-  return generateCSSVariables(config)
-})
+const generatedCSS = computed(() => generateCSSVariables(config))
 
-// Extract just the CSS variables part
+// Just the :root and .dark blocks
 const cssVariablesOnly = computed(() => {
   const css = generatedCSS.value
-  // Find the :root section
-  const rootMatch = css.match(/:root\s*\{([^}]+)\}/s)
-  const darkMatch = css.match(/\.dark\s*\{([^}]+)\}/s)
-
-  let result = ''
-  if (rootMatch) {
-    result += `:root {\n${rootMatch[1]}\n}\n\n`
-  }
-  if (darkMatch) {
-    result += `.dark {\n${darkMatch[1]}\n}`
-  }
-  return result.trim() || generatedCSS.value
+  const root = css.match(/:root\s*\{([^}]+)\}/)
+  const dark = css.match(/\.dark\s*\{([^}]+)\}/)
+  const parts = []
+  if (root) parts.push(`:root {${root[1]}}`)
+  if (dark) parts.push(`.dark {${dark[1]}}`)
+  return parts.join('\n\n') || css
 })
 
-// Currently displayed CSS
-const displayedCSS = computed(() => {
-  if (isEditing.value && hasChanges.value) {
-    return editedCSS.value
-  }
-  return activeTab.value === 'variables' ? cssVariablesOnly.value : generatedCSS.value
-})
+const displayedCSS = computed(() =>
+  activeTab.value === 'variables' ? cssVariablesOnly.value : generatedCSS.value
+)
 
-// Start editing
-function startEditing() {
-  editedCSS.value = displayedCSS.value
-  isEditing.value = true
-  hasChanges.value = false
+const COLOR_TOKENS = new Set(COLOR_KEYS.map((k) => toTokenName(k)))
+
+function declarations(css: string, selector: RegExp): Record<string, string> {
+  const block = css.match(selector)?.[1] ?? ''
+  const out: Record<string, string> = {}
+  for (const m of block.matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)) {
+    out[m[1]!] = m[2]!.trim()
+  }
+  return out
 }
 
-// Cancel editing
+function stripPrefix(name: string): string {
+  const prefix = config.export.cssVariablesPrefix ? `${config.export.cssVariablesPrefix}-` : ''
+  return prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name
+}
+
+function startEditing() {
+  editedCSS.value = cssVariablesOnly.value
+  isEditing.value = true
+}
+
 function cancelEditing() {
   isEditing.value = false
-  hasChanges.value = false
 }
 
-// Apply CSS changes (inject into preview)
+/** Parse edited :root / .dark variables into the theme configuration */
 function applyChanges() {
-  if (!editedCSS.value.trim()) return
+  const light = declarations(editedCSS.value, /:root\s*\{([^}]+)\}/)
+  const dark = declarations(editedCSS.value, /\.dark\s*\{([^}]+)\}/)
 
-  // Inject the edited CSS
-  let styleEl = document.getElementById('live-css-editor-styles') as HTMLStyleElement | null
-  if (!styleEl) {
-    styleEl = document.createElement('style')
-    styleEl.id = 'live-css-editor-styles'
-    document.head.appendChild(styleEl)
-  }
-  styleEl.textContent = editedCSS.value
+  const custom: CustomThemeTokens = JSON.parse(JSON.stringify(config.theme.custom ?? {}))
+  const shadowsLight: Record<string, string> = {}
+  const shadowsDark: Record<string, string> = {}
+  let applied = 0
 
-  hasChanges.value = true
-}
-
-// Reset to generated
-function resetToGenerated() {
-  const styleEl = document.getElementById('live-css-editor-styles')
-  if (styleEl) {
-    styleEl.remove()
-  }
-  isEditing.value = false
-  hasChanges.value = false
-}
-
-// Copy CSS
-async function copyCSS() {
-  await copyToClipboard(displayedCSS.value)
-}
-
-// Handle textarea input
-function handleInput(event: Event) {
-  const target = event.target as HTMLTextAreaElement
-  editedCSS.value = target.value
-}
-
-// Watch for config changes to update the preview
-watch(
-  () => config,
-  () => {
-    if (!isEditing.value) {
-      // Re-inject generated CSS
-      const styleEl = document.getElementById('live-css-editor-styles') as HTMLStyleElement | null
-      if (styleEl) {
-        styleEl.remove()
+  for (const [mode, vars] of [
+    ['light', light],
+    ['dark', dark],
+  ] as const) {
+    for (const [rawName, value] of Object.entries(vars)) {
+      const name = stripPrefix(rawName)
+      if (COLOR_TOKENS.has(name)) {
+        custom[mode] = { ...(custom[mode] ?? {}), [name]: value }
+        applied++
+      } else if (name.startsWith('shadow-')) {
+        ;(mode === 'light' ? shadowsLight : shadowsDark)[name.slice(7)] = value
+        applied++
+      } else if (mode === 'light') {
+        if (name === 'radius') custom.radius = value
+        else if (name === 'font-sans') custom.fontSans = value
+        else if (name === 'font-heading') custom.fontHeading = value
+        else if (name === 'font-mono') custom.fontMono = value
+        else continue
+        applied++
       }
     }
-  },
-  { deep: true }
-)
+  }
+  if (Object.keys(shadowsLight).length) {
+    custom.shadows = { light: shadowsLight, dark: { ...shadowsLight, ...shadowsDark } }
+  }
+
+  if (!applied) {
+    toast.error('No theme variables found', {
+      description: 'Edit the values inside the :root and .dark blocks.',
+    })
+    return
+  }
+  setTheme({ custom })
+  isEditing.value = false
+  toast.success(`Applied ${applied} variable${applied === 1 ? '' : 's'} to the theme`)
+}
+
+function resetToGenerated() {
+  editedCSS.value = cssVariablesOnly.value
+}
+
+async function copyCSS() {
+  copied.value = await copyToClipboard(isEditing.value ? editedCSS.value : displayedCSS.value)
+  setTimeout(() => (copied.value = false), 1500)
+}
 </script>
 
 <template>
   <div class="border rounded-lg overflow-hidden">
     <!-- Header -->
-    <div class="flex items-center justify-between bg-muted/50 px-3 py-2 border-b">
+    <div class="flex flex-wrap items-center justify-between gap-2 bg-muted/50 px-3 py-2 border-b">
       <div class="flex items-center gap-2">
         <h3 class="text-sm font-medium">Live CSS Editor</h3>
         <Tabs v-model="activeTab" class="h-7">
@@ -149,10 +155,10 @@ watch(
     <div class="relative">
       <textarea
         v-if="isEditing"
-        :value="editedCSS"
+        v-model="editedCSS"
+        aria-label="Theme CSS variables"
         class="w-full h-[300px] p-3 font-mono text-xs bg-background resize-none focus:outline-none"
         spellcheck="false"
-        @input="handleInput"
       />
       <pre
         v-else
@@ -163,14 +169,6 @@ watch(
           )
         "
       ><code>{{ displayedCSS }}</code></pre>
-
-      <!-- Edit Mode Indicator -->
-      <div
-        v-if="isEditing && hasChanges"
-        class="absolute top-2 right-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded text-xs"
-      >
-        Modified
-      </div>
     </div>
   </div>
 </template>

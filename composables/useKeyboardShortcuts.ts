@@ -1,273 +1,109 @@
 /**
- * Keyboard Shortcuts for Vuecraft
- * Provides power-user shortcuts for common actions
+ * Keyboard shortcuts for Vuecraft.
+ *
+ * Modifier shortcuts use Ctrl (Cmd on macOS). Single-key shortcuts only fire
+ * when no text field has focus and no dialog is open, and browser shortcuts
+ * such as reload (Ctrl+R) and bookmark (Ctrl+D) are left alone.
  */
-
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useMagicKeys } from '@vueuse/core'
+import { onMounted, onUnmounted } from 'vue'
 
 export interface Shortcut {
+  /** Display form, e.g. "Ctrl+Shift+Z" or "?" */
   key: string
-  label: string
   description: string
-  action: () => void
-  category: 'general' | 'editing' | 'navigation' | 'export'
+  category: 'General' | 'Editing' | 'Export' | 'Preview'
 }
 
-// Shared state for dialog visibility
-const shortcutsDialogOpen = ref(false)
+export const SHORTCUTS: Shortcut[] = [
+  { key: '?', description: 'Show keyboard shortcuts', category: 'General' },
+  { key: 'D', description: 'Toggle dark mode', category: 'General' },
+  { key: 'Ctrl+S', description: 'Save configuration', category: 'General' },
+  { key: 'Ctrl+Z', description: 'Undo', category: 'Editing' },
+  { key: 'Ctrl+Shift+Z', description: 'Redo (also Ctrl+Y)', category: 'Editing' },
+  { key: 'R', description: 'Randomize theme', category: 'Editing' },
+  { key: 'Ctrl+E', description: 'Export theme', category: 'Export' },
+  { key: 'Ctrl+I', description: 'Import configuration', category: 'Export' },
+  { key: 'Ctrl+Shift+S', description: 'Share link', category: 'Export' },
+  { key: '1 – 7', description: 'Switch preview template', category: 'Preview' },
+  { key: '↑', description: 'Inspector: select parent element', category: 'Preview' },
+  { key: 'Esc', description: 'Unpin, then exit the inspector', category: 'Preview' },
+]
 
-export function useKeyboardShortcuts() {
-  const keys = useMagicKeys()
-  const registeredShortcuts = ref<Shortcut[]>([])
-  const isEnabled = ref(true)
-
-  /**
-   * Check if we're in an input field
-   */
-  function isInputFocused(): boolean {
-    const activeElement = document.activeElement
-    if (!activeElement) return false
-
-    const tagName = activeElement.tagName.toLowerCase()
-    return (
-      tagName === 'input' ||
-      tagName === 'textarea' ||
-      tagName === 'select' ||
-      (activeElement as HTMLElement).isContentEditable
-    )
-  }
-
-  /**
-   * Register a shortcut
-   */
-  function registerShortcut(shortcut: Shortcut): void {
-    registeredShortcuts.value.push(shortcut)
-  }
-
-  /**
-   * Unregister a shortcut by key
-   */
-  function unregisterShortcut(key: string): void {
-    registeredShortcuts.value = registeredShortcuts.value.filter((s) => s.key !== key)
-  }
-
-  /**
-   * Enable/disable all shortcuts
-   */
-  function setEnabled(enabled: boolean): void {
-    isEnabled.value = enabled
-  }
-
-  /**
-   * Toggle shortcuts dialog
-   */
-  function toggleShortcutsDialog(): void {
-    shortcutsDialogOpen.value = !shortcutsDialogOpen.value
-  }
-
-  /**
-   * Open shortcuts dialog
-   */
-  function openShortcutsDialog(): void {
-    shortcutsDialogOpen.value = true
-  }
-
-  /**
-   * Close shortcuts dialog
-   */
-  function closeShortcutsDialog(): void {
-    shortcutsDialogOpen.value = false
-  }
-
-  /**
-   * Get all registered shortcuts grouped by category
-   */
-  function getShortcutsByCategory(): Record<string, Shortcut[]> {
-    return registeredShortcuts.value.reduce(
-      (acc, shortcut) => {
-        if (!acc[shortcut.category]) {
-          acc[shortcut.category] = []
-        }
-        acc[shortcut.category]!.push(shortcut)
-        return acc
-      },
-      {} as Record<string, Shortcut[]>
-    )
-  }
-
-  /**
-   * Format key for display (platform-aware)
-   */
-  function formatKey(key: string): string {
-    const isMac =
-      typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
-
-    return key
-      .replace(/ctrl/gi, isMac ? '⌃' : 'Ctrl')
-      .replace(/cmd|meta/gi, isMac ? '⌘' : 'Win')
-      .replace(/alt/gi, isMac ? '⌥' : 'Alt')
-      .replace(/shift/gi, isMac ? '⇧' : 'Shift')
-      .replace(/\+/g, ' + ')
-      .replace(/escape/gi, 'Esc')
-  }
-
-  return {
-    // State
-    shortcutsDialogOpen,
-    registeredShortcuts,
-    isEnabled,
-
-    // Actions
-    registerShortcut,
-    unregisterShortcut,
-    setEnabled,
-    toggleShortcutsDialog,
-    openShortcutsDialog,
-    closeShortcutsDialog,
-    getShortcutsByCategory,
-
-    // Utilities
-    formatKey,
-    isInputFocused,
-
-    // VueUse keys for custom handling
-    keys,
-  }
+export function isMacPlatform(): boolean {
+  return typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
 }
 
-/**
- * Setup default Vuecraft shortcuts
- * Call this in a component with access to all required composables
- */
-export function setupDefaultShortcuts(options: {
+/** Render a shortcut for the current platform */
+export function formatShortcut(key: string): string {
+  if (!isMacPlatform()) return key
+  return key
+    .replace(/Ctrl\+/g, '⌘')
+    .replace(/Shift\+/g, '⇧')
+    .replace(/Alt\+/g, '⌥')
+}
+
+function isTyping(): boolean {
+  const el = document.activeElement as HTMLElement | null
+  if (!el) return false
+  const tag = el.tagName
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable
+}
+
+function dialogOpen(): boolean {
+  return !!document.querySelector('[role="dialog"][data-state="open"]')
+}
+
+export interface ShortcutHandlers {
   onUndo: () => void
   onRedo: () => void
   onSave: () => void
   onExport: () => void
   onImport: () => void
+  onShare: () => void
   onToggleDarkMode: () => void
-  onRandomize?: () => void
-  onPreviewTemplate?: (index: number) => void
-}) {
-  const { registerShortcut, isInputFocused, openShortcutsDialog } = useKeyboardShortcuts()
+  onRandomize: () => void
+  onShowShortcuts: () => void
+  onPreviewTemplate: (index: number) => void
+}
 
-  // Register all default shortcuts
-  const defaultShortcuts: Shortcut[] = [
-    {
-      key: 'Ctrl+Z',
-      label: 'Undo',
-      description: 'Undo last change',
-      action: options.onUndo,
-      category: 'editing',
-    },
-    {
-      key: 'Ctrl+Shift+Z',
-      label: 'Redo',
-      description: 'Redo last undone change',
-      action: options.onRedo,
-      category: 'editing',
-    },
-    {
-      key: 'Ctrl+S',
-      label: 'Save',
-      description: 'Save current configuration',
-      action: options.onSave,
-      category: 'general',
-    },
-    {
-      key: 'Ctrl+E',
-      label: 'Export',
-      description: 'Open export dialog',
-      action: options.onExport,
-      category: 'export',
-    },
-    {
-      key: 'Ctrl+I',
-      label: 'Import',
-      description: 'Open import dialog',
-      action: options.onImport,
-      category: 'export',
-    },
-    {
-      key: 'Ctrl+D',
-      label: 'Toggle Dark Mode',
-      description: 'Switch between light and dark mode',
-      action: options.onToggleDarkMode,
-      category: 'general',
-    },
-    {
-      key: '?',
-      label: 'Show Shortcuts',
-      description: 'Display keyboard shortcuts help',
-      action: openShortcutsDialog,
-      category: 'general',
-    },
-  ]
-
-  if (options.onRandomize) {
-    defaultShortcuts.push({
-      key: 'Ctrl+R',
-      label: 'Randomize',
-      description: 'Generate random theme',
-      action: options.onRandomize,
-      category: 'editing',
-    })
-  }
-
-  // Register all shortcuts
-  defaultShortcuts.forEach(registerShortcut)
-
-  // Setup keyboard event listener
-  function handleKeyDown(e: KeyboardEvent): void {
-    // Don't trigger shortcuts in input fields (except for specific ones)
-    if (isInputFocused() && e.key !== 'Escape') return
-
-    const ctrl = e.ctrlKey || e.metaKey
-    const shift = e.shiftKey
+/** Register the global shortcut listener for the lifetime of the calling component */
+export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.defaultPrevented || e.repeat) return
+    const mod = e.ctrlKey || e.metaKey
     const key = e.key.toLowerCase()
 
-    // Build key combination string
-    let combo = ''
-    if (ctrl) combo += 'Ctrl+'
-    if (shift) combo += 'Shift+'
-    combo += key.charAt(0).toUpperCase() + key.slice(1)
-
-    // Check for matching shortcut
-    for (const shortcut of defaultShortcuts) {
-      const shortcutCombo = shortcut.key.replace(/\s/g, '')
-      if (shortcutCombo.toLowerCase() === combo.toLowerCase()) {
+    if (mod && !e.altKey) {
+      // Let native undo/redo work inside text fields
+      if (isTyping() && ['z', 'y'].includes(key)) return
+      let action: (() => void) | null = null
+      if (key === 'z' && !e.shiftKey) action = handlers.onUndo
+      else if ((key === 'z' && e.shiftKey) || key === 'y') action = handlers.onRedo
+      else if (key === 's' && e.shiftKey) action = handlers.onShare
+      else if (key === 's') action = handlers.onSave
+      else if (key === 'e') action = handlers.onExport
+      else if (key === 'i') action = handlers.onImport
+      if (action) {
         e.preventDefault()
-        shortcut.action()
-        return
+        action()
       }
+      return
     }
 
-    // Handle ? for shortcuts dialog (no modifier)
-    if (e.key === '?' && !ctrl && !shift) {
+    if (e.altKey || isTyping() || dialogOpen()) return
+
+    if (e.key === '?') {
       e.preventDefault()
-      openShortcutsDialog()
-    }
-
-    // Handle Escape to close dialogs
-    if (e.key === 'Escape') {
-      // This will be handled by individual dialogs
-    }
-
-    // Handle number keys for preview templates
-    if (options.onPreviewTemplate && !ctrl && !shift && /^[1-5]$/.test(e.key)) {
-      const index = parseInt(e.key) - 1
-      options.onPreviewTemplate(index)
+      handlers.onShowShortcuts()
+    } else if (key === 'd') {
+      handlers.onToggleDarkMode()
+    } else if (key === 'r') {
+      handlers.onRandomize()
+    } else if (/^[1-7]$/.test(e.key)) {
+      handlers.onPreviewTemplate(Number(e.key) - 1)
     }
   }
 
-  onMounted(() => {
-    window.addEventListener('keydown', handleKeyDown)
-  })
-
-  onUnmounted(() => {
-    window.removeEventListener('keydown', handleKeyDown)
-  })
-
-  return defaultShortcuts
+  onMounted(() => window.addEventListener('keydown', handleKeyDown))
+  onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
 }

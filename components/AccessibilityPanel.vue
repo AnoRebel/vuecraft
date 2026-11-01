@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { watchDebounced } from '@vueuse/core'
+import { toast } from 'vue-sonner'
+import { useDesignSystem } from '~/composables/useDesignSystem'
+import { useColorMode } from '~/composables/useColorMode'
 import {
   useAccessibilityChecker,
   type AccessibilityIssue,
@@ -9,88 +13,62 @@ import { Button } from '~/components/ui/button'
 const { generateReport, getContrastBadgeClass, getScoreClass, formatRatio, getLevelLabel } =
   useAccessibilityChecker()
 
+const { config, setCustomColors, undo } = useDesignSystem()
+const { isDark } = useColorMode()
+
 const report = ref<ReturnType<typeof generateReport> | null>(null)
 const isLoading = ref(false)
 const appliedFixes = ref<Set<string>>(new Set())
 
 async function runCheck() {
   isLoading.value = true
-  appliedFixes.value.clear()
   // Small delay to let CSS variables update
   await new Promise((resolve) => setTimeout(resolve, 100))
   report.value = generateReport()
   isLoading.value = false
 }
 
-// Apply a single accessibility fix
+function tokenFor(issue: AccessibilityIssue): string | null {
+  const match = issue.pair.foreground.match(/var\(--color-([\w-]+)\)/)
+  return match?.[1] ?? null
+}
+
+// Fixes are stored in the configuration for the current colour mode
 function applyFix(issue: AccessibilityIssue) {
-  if (!issue.suggestedColor || typeof document === 'undefined') return
-
-  // Extract CSS variable name from the foreground var
-  const match = issue.pair.foreground.match(/var\((--[\w-]+)\)/)
-  if (!match?.[1]) return
-
-  const varName = match[1]
-  document.documentElement.style.setProperty(varName, issue.suggestedColor)
+  const token = tokenFor(issue)
+  if (!issue.suggestedColor || !token) return
+  setCustomColors(isDark.value ? 'dark' : 'light', { [token]: issue.suggestedColor })
   appliedFixes.value.add(issue.pair.name)
-
-  // Re-check after applying
-  setTimeout(runCheck, 150)
+  toast.success(`Fixed ${issue.pair.name}`, { action: { label: 'Undo', onClick: undo } })
 }
 
-// Apply all fixes at once
 function applyAllFixes() {
-  if (!report.value || typeof document === 'undefined') return
-
+  if (!report.value) return
+  const colors: Record<string, string> = {}
   for (const issue of report.value.issues) {
-    if (issue.suggestedColor) {
-      const match = issue.pair.foreground.match(/var\((--[\w-]+)\)/)
-      if (match?.[1]) {
-        document.documentElement.style.setProperty(match[1], issue.suggestedColor)
-        appliedFixes.value.add(issue.pair.name)
-      }
+    const token = tokenFor(issue)
+    if (issue.suggestedColor && token) {
+      colors[token] = issue.suggestedColor
+      appliedFixes.value.add(issue.pair.name)
     }
   }
-
-  // Re-check after applying all
-  setTimeout(runCheck, 150)
+  const count = Object.keys(colors).length
+  if (!count) return
+  setCustomColors(isDark.value ? 'dark' : 'light', colors)
+  toast.success(`Applied ${count} contrast fix${count === 1 ? '' : 'es'}`, {
+    action: { label: 'Undo', onClick: undo },
+  })
 }
 
-// Reset a fix (remove the override) - available for future use
-function _resetFix(issue: AccessibilityIssue) {
-  if (typeof document === 'undefined') return
+onMounted(runCheck)
 
-  const match = issue.pair.foreground.match(/var\((--[\w-]+)\)/)
-  if (!match?.[1]) return
+// Re-run whenever the theme or colour mode changes (after styles are applied)
+watchDebounced(
+  () => [JSON.stringify(config.theme), isDark.value],
+  () => runCheck(),
+  { debounce: 200 }
+)
 
-  document.documentElement.style.removeProperty(match[1])
-  appliedFixes.value.delete(issue.pair.name)
-
-  // Re-check after reset
-  setTimeout(runCheck, 150)
-}
-
-// Reset all fixes
-function resetAllFixes() {
-  if (!report.value || typeof document === 'undefined') return
-
-  for (const issue of report.value.issues) {
-    const match = issue.pair.foreground.match(/var\((--[\w-]+)\)/)
-    if (match?.[1]) {
-      document.documentElement.style.removeProperty(match[1])
-    }
-  }
-  appliedFixes.value.clear()
-
-  // Re-check after reset
-  setTimeout(runCheck, 150)
-}
-
-onMounted(() => {
-  runCheck()
-})
-
-// Re-check when theme changes
 defineExpose({ runCheck })
 </script>
 
@@ -130,16 +108,6 @@ defineExpose({ runCheck })
         <div class="flex items-center justify-between">
           <h4 class="text-xs font-medium text-muted-foreground uppercase">Issues</h4>
           <div class="flex gap-2">
-            <Button
-              v-if="appliedFixes.size > 0"
-              variant="ghost"
-              size="sm"
-              class="h-6 px-2 text-xs"
-              @click="resetAllFixes"
-            >
-              <Icon name="lucide:undo-2" class="h-3 w-3 mr-1" />
-              Reset All
-            </Button>
             <Button variant="outline" size="sm" class="h-6 px-2 text-xs" @click="applyAllFixes">
               <Icon name="lucide:wand-2" class="h-3 w-3 mr-1" />
               Fix All

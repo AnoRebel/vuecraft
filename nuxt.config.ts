@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import previewIconList from './config/previewIconList.json'
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-12-01',
   devtools: { enabled: true },
@@ -28,6 +30,8 @@ export default defineNuxtConfig({
     host: 'https://umami.anorebel.net',
     autoTrack: true,
     proxy: 'cloak',
+    // Only load the tracker when a site id is configured
+    enabled: Boolean(process.env.NUXT_UMAMI_SITE_ID),
     // useDirective: true,
     // ignoreLocalhost: true,
     // excludeQueryParams: false,
@@ -49,9 +53,6 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    session: {
-      password: process.env.NUXT_SESSION_PASSWORD || 'a-secure-password-of-at-least-32-characters',
-    },
     rybbit: {
       siteId: process.env.NUXT_RYBBIT_SITE_ID || '',
     },
@@ -120,33 +121,32 @@ export default defineNuxtConfig({
     ],
   },
 
-  css: ['~/assets/css/main.css'],
+  css: ['vue-sonner/style.css', '~/assets/css/main.css'],
 
   vite: {
     plugins: [(await import('@tailwindcss/vite')).default()],
   },
 
   icon: {
-    serverBundle: 'remote',
+    // Icons are bundled from the locally installed @iconify-json collections,
+    // so the UI does not depend on the Iconify CDN at runtime.
+    serverBundle: {
+      collections: ['lucide', 'mdi', 'ph', 'tabler', 'heroicons', 'radix-icons'],
+    },
     clientBundle: {
       scan: true,
+      // Preview icons are chosen at runtime from the selected icon library
+      icons: previewIconList,
+      sizeLimitKb: 1024,
     },
   },
 
+  // Builder chrome fonts. Fonts chosen for a theme are loaded on demand at
+  // runtime (utils/fontLoader.ts).
   fonts: {
     families: [
-      { name: 'Inter', provider: 'google' },
-      { name: 'Noto Sans', provider: 'google' },
-      { name: 'Nunito Sans', provider: 'google' },
-      { name: 'Figtree', provider: 'google' },
-      { name: 'Roboto', provider: 'google' },
-      { name: 'Raleway', provider: 'google' },
-      { name: 'DM Sans', provider: 'google' },
-      { name: 'Public Sans', provider: 'google' },
-      { name: 'Outfit', provider: 'google' },
-      { name: 'JetBrains Mono', provider: 'google' },
-      { name: 'Fira Code', provider: 'google' },
-      { name: 'Source Code Pro', provider: 'google' },
+      { name: 'Inter', provider: 'google', global: true },
+      { name: 'JetBrains Mono', provider: 'google', global: true },
     ],
     defaults: {
       weights: [400, 500, 600, 700],
@@ -197,15 +197,23 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
         { rel: 'canonical', href: 'https://vuecraft.anorebel.net' },
       ],
-      script: process.env.NUXT_RYBBIT_SITE_ID
-        ? [
-            {
-              src: 'https://rybbit.anorebel.net/api/script.js',
-              defer: true,
-              'data-site-id': process.env.NUXT_RYBBIT_SITE_ID,
-            },
-          ]
-        : [],
+      script: [
+        // Apply the stored colour mode and cached theme before first paint
+        {
+          key: 'vc-theme-boot',
+          tagPosition: 'head',
+          innerHTML: `(function(){try{var d=document.documentElement,m=localStorage.getItem('vuecraft-color-mode');if(m==='dark'||((!m||m==='auto')&&matchMedia('(prefers-color-scheme: dark)').matches))d.classList.add('dark');var c=localStorage.getItem('vuecraft-theme-css');if(c){var s=document.createElement('style');s.id='vc-theme';s.textContent=c;document.head.appendChild(s)}if(localStorage.getItem('vuecraft-glass')==='1')d.classList.add('vc-glass')}catch(e){}})()`,
+        },
+        ...(process.env.NUXT_RYBBIT_SITE_ID
+          ? [
+              {
+                src: 'https://rybbit.anorebel.net/api/script.js',
+                defer: true,
+                'data-site-id': process.env.NUXT_RYBBIT_SITE_ID,
+              },
+            ]
+          : []),
+      ],
     },
   },
 

@@ -240,7 +240,7 @@ export function useThemeGallery() {
       author: metadata.author,
       description: metadata.description,
       tags: metadata.tags,
-      config: structuredClone(config),
+      config: JSON.parse(JSON.stringify(config)),
       preview: metadata.preview,
       stats: {
         forks: 0,

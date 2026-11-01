@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // ref not needed - ref is unused
+import type { SerializedConfig } from '~/types/config'
 import { useThemeGallery } from '~/composables/useThemeGallery'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
@@ -11,7 +12,7 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
-  (e: 'apply', config: unknown): void
+  (e: 'apply', config: SerializedConfig): void
 }>()
 
 const {
@@ -46,14 +47,16 @@ function handleFork() {
 
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogContent class="max-w-4xl max-h-[80vh] flex flex-col">
+    <DialogContent class="max-w-4xl max-h-[90dvh] flex flex-col">
       <DialogHeader>
         <DialogTitle>Theme Gallery</DialogTitle>
       </DialogHeader>
 
-      <div class="flex gap-4 mt-4 flex-1 overflow-hidden">
+      <div
+        class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto md:flex-row md:overflow-hidden"
+      >
         <!-- Sidebar: Filters -->
-        <div class="w-48 shrink-0 space-y-4">
+        <div class="shrink-0 space-y-4 md:w-48">
           <div>
             <Input
               :model-value="filter.search"
@@ -96,7 +99,7 @@ function handleFork() {
         </div>
 
         <!-- Main: Theme Grid -->
-        <div class="flex-1 overflow-auto">
+        <div class="flex-1 md:overflow-auto">
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <div
               v-for="theme in filteredThemes"
@@ -152,7 +155,10 @@ function handleFork() {
         </div>
 
         <!-- Detail Panel -->
-        <div v-if="selectedTheme" class="w-64 shrink-0 border-l pl-4 space-y-4">
+        <div
+          v-if="selectedTheme"
+          class="shrink-0 space-y-4 border-t pt-4 md:w-64 md:border-l md:border-t-0 md:pl-4 md:pt-0"
+        >
           <div>
             <h3 class="font-semibold">{{ selectedTheme.name }}</h3>
             <p class="text-sm text-muted-foreground">by {{ selectedTheme.author }}</p>

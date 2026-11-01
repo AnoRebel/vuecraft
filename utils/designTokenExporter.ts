@@ -3,50 +3,21 @@
  * Export themes to various design token formats
  */
 
-import type { DesignSystemConfig } from '~/types/config'
+import type { DesignSystemConfigInput } from '~/types/config'
+import { resolveTheme, COLOR_KEYS, toTokenName } from '~/utils/themeTokens'
 import { parseOklch, oklchToRgb, rgbToHex } from './colorUtils'
 
-export type ExportFormat =
-  | 'figma'
-  | 'style-dictionary'
-  | 'css-in-js'
-  | 'json-tokens'
-  | 'tailwind-config'
+export type TokenExportFormat =
+  'figma' | 'style-dictionary' | 'css-in-js' | 'json-tokens' | 'tailwind-config'
 
 /**
- * Get all CSS variables from the current theme
+ * Theme variables (light mode) resolved from the configuration
  */
-function getThemeVariables(config: DesignSystemConfig): Record<string, string> {
-  // This would ideally read from the generated CSS, but we'll construct them
+function getThemeVariables(config: DesignSystemConfigInput): Record<string, string> {
+  const t = resolveTheme(config)
   const vars: Record<string, string> = {}
-
-  // Add some base variables (these would come from the theme generation)
-  vars['--background'] = 'oklch(1 0 0)'
-  vars['--foreground'] = 'oklch(0.141 0.005 285.823)'
-  vars['--primary'] = `oklch(0.21 0.006 285.885)`
-  vars['--primary-foreground'] = 'oklch(0.985 0 0)'
-  vars['--secondary'] = 'oklch(0.967 0.001 286.375)'
-  vars['--secondary-foreground'] = 'oklch(0.21 0.006 285.885)'
-  vars['--muted'] = 'oklch(0.967 0.001 286.375)'
-  vars['--muted-foreground'] = 'oklch(0.552 0.016 285.938)'
-  vars['--accent'] = 'oklch(0.967 0.001 286.375)'
-  vars['--accent-foreground'] = 'oklch(0.21 0.006 285.885)'
-  vars['--destructive'] = 'oklch(0.577 0.245 27.325)'
-  vars['--destructive-foreground'] = 'oklch(0.577 0.245 27.325)'
-  vars['--border'] = 'oklch(0.92 0.004 286.32)'
-  vars['--input'] = 'oklch(0.92 0.004 286.32)'
-  vars['--ring'] = 'oklch(0.708 0.022 261.325)'
-  vars['--radius'] =
-    config.theme.radius === 'none'
-      ? '0'
-      : config.theme.radius === 'sm'
-        ? '0.25rem'
-        : config.theme.radius === 'md'
-          ? '0.375rem'
-          : config.theme.radius === 'lg'
-            ? '0.5rem'
-            : '0.75rem'
-
+  for (const key of COLOR_KEYS) vars[`--${toTokenName(key)}`] = t.colors.light[key]
+  vars['--radius'] = t.radius
   return vars
 }
 
@@ -64,7 +35,7 @@ function convertToHex(value: string): string {
 /**
  * Generate Figma Tokens plugin format
  */
-export function generateFigmaTokens(config: DesignSystemConfig): string {
+export function generateFigmaTokens(config: DesignSystemConfigInput): string {
   const vars = getThemeVariables(config)
 
   const tokens: Record<string, Record<string, { value: string; type: string }>> = {
@@ -107,7 +78,7 @@ export function generateFigmaTokens(config: DesignSystemConfig): string {
 /**
  * Generate Style Dictionary format
  */
-export function generateStyleDictionary(config: DesignSystemConfig): string {
+export function generateStyleDictionary(config: DesignSystemConfigInput): string {
   const vars = getThemeVariables(config)
 
   const tokens: Record<string, unknown> = {
@@ -151,7 +122,7 @@ export function generateStyleDictionary(config: DesignSystemConfig): string {
 /**
  * Generate CSS-in-JS theme object (styled-components, emotion, etc.)
  */
-export function generateCSSInJS(config: DesignSystemConfig): string {
+export function generateCSSInJS(config: DesignSystemConfigInput): string {
   const vars = getThemeVariables(config)
 
   const theme: Record<string, unknown> = {
@@ -201,7 +172,7 @@ export type Theme = typeof theme;`
  * Generate W3C Design Tokens format
  * https://design-tokens.github.io/community-group/format/
  */
-export function generateW3CDesignTokens(config: DesignSystemConfig): string {
+export function generateW3CDesignTokens(config: DesignSystemConfigInput): string {
   const vars = getThemeVariables(config)
 
   const tokens: Record<string, unknown> = {
@@ -250,7 +221,7 @@ export function generateW3CDesignTokens(config: DesignSystemConfig): string {
 /**
  * Generate Tailwind CSS config
  */
-export function generateTailwindConfig(config: DesignSystemConfig): string {
+export function generateTailwindConfig(config: DesignSystemConfigInput): string {
   const vars = getThemeVariables(config)
 
   const colors: Record<string, string> = {}
@@ -281,7 +252,10 @@ export default {
 /**
  * Main export function
  */
-export function generateDesignTokens(config: DesignSystemConfig, format: ExportFormat): string {
+export function generateDesignTokens(
+  config: DesignSystemConfigInput,
+  format: TokenExportFormat
+): string {
   switch (format) {
     case 'figma':
       return generateFigmaTokens(config)
@@ -301,7 +275,7 @@ export function generateDesignTokens(config: DesignSystemConfig, format: ExportF
 /**
  * Get file extension for format
  */
-export function getFormatExtension(format: ExportFormat): string {
+export function getFormatExtension(format: TokenExportFormat): string {
   switch (format) {
     case 'figma':
     case 'style-dictionary':
@@ -319,7 +293,7 @@ export function getFormatExtension(format: ExportFormat): string {
 /**
  * Get format description
  */
-export function getFormatDescription(format: ExportFormat): string {
+export function getFormatDescription(format: TokenExportFormat): string {
   switch (format) {
     case 'figma':
       return 'Figma Tokens plugin format'

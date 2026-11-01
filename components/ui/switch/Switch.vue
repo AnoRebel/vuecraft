@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
 import { computed } from 'vue'
 import { cn } from '~/lib/utils'
 
 interface Props {
-  class?: string
+  class?: HTMLAttributes['class']
   modelValue?: boolean
   disabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  class: '',
   modelValue: false,
   disabled: false,
 })
@@ -33,11 +35,13 @@ function toggle() {
   <button
     type="button"
     role="switch"
+    data-slot="switch"
+    :data-state="isChecked ? 'checked' : 'unchecked'"
     :aria-checked="isChecked"
     :disabled="disabled"
     :class="
       cn(
-        'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+        'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50',
         isChecked ? 'bg-primary' : 'bg-input',
         props.class
       )

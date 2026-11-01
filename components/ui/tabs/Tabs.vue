@@ -1,36 +1,23 @@
 <script setup lang="ts">
-import { provide, ref } from 'vue'
+import type { HTMLAttributes } from 'vue'
+import { TabsRoot } from 'reka-ui'
 import { cn } from '~/lib/utils'
 
-interface Props {
-  class?: string
-  defaultValue?: string
-  modelValue?: string
-}
+const props = withDefaults(
+  defineProps<{ class?: HTMLAttributes['class']; defaultValue?: string; modelValue?: string }>(),
+  { class: '', defaultValue: undefined, modelValue: undefined }
+)
 
-const props = withDefaults(defineProps<Props>(), {
-  defaultValue: '',
-})
-
-const emit = defineEmits<{
-  'update:modelValue': [value: string]
-}>()
-
-const activeTab = ref(props.modelValue ?? props.defaultValue)
-
-function setActiveTab(value: string) {
-  activeTab.value = value
-  emit('update:modelValue', value)
-}
-
-provide('tabs', {
-  activeTab,
-  setActiveTab,
-})
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 </script>
 
 <template>
-  <div :class="cn('', props.class)">
+  <TabsRoot
+    :model-value="props.modelValue"
+    :default-value="props.defaultValue"
+    :class="cn('flex flex-col gap-2', props.class)"
+    @update:model-value="(v) => emit('update:modelValue', String(v))"
+  >
     <slot />
-  </div>
+  </TabsRoot>
 </template>

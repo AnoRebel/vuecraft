@@ -6,67 +6,21 @@ import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
 import { Slider } from '~/components/ui/slider'
 import { Switch } from '~/components/ui/switch'
+import {
+  applyEffects,
+  DEFAULT_EFFECTS,
+  EFFECTS_STORAGE_KEY,
+  type EffectsSettings,
+} from '~/utils/effects'
 
-// Persist effects settings
-interface EffectsSettings {
-  headerTransparency: number
-  sidebarTransparency: number
-  cardTransparency: number
-  blurAmount: number
-  enableBlur: boolean
-  enableGlassmorphism: boolean
-}
+const defaultSettings: EffectsSettings = { ...DEFAULT_EFFECTS }
 
-const defaultSettings: EffectsSettings = {
-  headerTransparency: 100,
-  sidebarTransparency: 100,
-  cardTransparency: 100,
-  blurAmount: 8,
-  enableBlur: false,
-  enableGlassmorphism: false,
-}
+const settings = useStorage<EffectsSettings>(EFFECTS_STORAGE_KEY, defaultSettings, undefined, {
+  mergeDefaults: true,
+})
 
-const settings = useStorage<EffectsSettings>('vuecraft-effects', defaultSettings)
-
-// Apply effects to CSS variables
-function applyEffects() {
-  if (typeof document === 'undefined') return
-
-  const root = document.documentElement
-
-  // Header transparency (0-100)
-  const headerAlpha = settings.value.headerTransparency / 100
-  root.style.setProperty('--effects-header-opacity', headerAlpha.toString())
-
-  // Sidebar transparency (0-100)
-  const sidebarAlpha = settings.value.sidebarTransparency / 100
-  root.style.setProperty('--effects-sidebar-opacity', sidebarAlpha.toString())
-
-  // Card transparency (0-100)
-  const cardAlpha = settings.value.cardTransparency / 100
-  root.style.setProperty('--effects-card-opacity', cardAlpha.toString())
-
-  // Blur amount
-  const blurValue = settings.value.enableBlur ? `${settings.value.blurAmount}px` : '0px'
-  root.style.setProperty('--effects-blur', blurValue)
-
-  // Glassmorphism effect
-  if (settings.value.enableGlassmorphism) {
-    root.style.setProperty('--effects-glass-bg', 'rgba(255, 255, 255, 0.1)')
-    root.style.setProperty('--effects-glass-border', 'rgba(255, 255, 255, 0.2)')
-    root.style.setProperty('--effects-glass-shadow', '0 8px 32px 0 rgba(0, 0, 0, 0.1)')
-  } else {
-    root.style.removeProperty('--effects-glass-bg')
-    root.style.removeProperty('--effects-glass-border')
-    root.style.removeProperty('--effects-glass-shadow')
-  }
-}
-
-// Watch for changes and apply
-watch(settings, applyEffects, { deep: true })
-
-// Apply on mount
-onMounted(applyEffects)
+watch(settings, (value) => applyEffects(value), { deep: true })
+onMounted(() => applyEffects(settings.value))
 
 // Reset to defaults
 function resetEffects() {

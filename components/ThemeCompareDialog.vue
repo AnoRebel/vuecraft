@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useThemeComparison } from '~/composables/useThemeComparison'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 
-defineProps<{
+const props = defineProps<{
   open: boolean
 }>()
 
@@ -45,13 +45,16 @@ function loadRight() {
   loadPresetTheme('right', rightPreset.value)
 }
 
-// Auto-load on open
-const loaded = ref(false)
-if (!loaded.value) {
-  loadLeft()
-  loadRight()
-  loaded.value = true
-}
+// Load fresh themes every time the dialog opens
+watch(
+  () => props.open,
+  (open) => {
+    if (!open) return
+    loadLeft()
+    loadRight()
+  },
+  { immediate: true }
+)
 
 const categoryLabels: Record<string, string> = {
   theme: 'Theme',
@@ -65,38 +68,42 @@ function handleClose() {
   emit('update:open', false)
   clear()
 }
+
+function usePresetLeft() {
+  leftSource.value = 'preset'
+  loadLeft()
+}
+
+function useCurrentLeft() {
+  leftSource.value = 'current'
+  loadLeft()
+}
 </script>
 
 <template>
   <Dialog :open="open" @update:open="handleClose">
-    <DialogContent class="max-w-4xl max-h-[80vh] flex flex-col">
+    <DialogContent class="max-w-4xl max-h-[90dvh] flex flex-col">
       <DialogHeader>
         <DialogTitle>Compare Themes</DialogTitle>
       </DialogHeader>
 
       <div class="flex-1 overflow-hidden mt-4">
         <!-- Theme Selectors -->
-        <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="grid gap-4 mb-4 sm:grid-cols-2">
           <div class="space-y-2">
             <label class="text-sm font-medium">Left Theme</label>
             <div class="flex gap-2">
               <Button
                 :variant="leftSource === 'current' ? 'default' : 'outline'"
                 size="sm"
-                @click="
-                  leftSource = 'current'
-                  loadLeft()
-                "
+                @click="useCurrentLeft"
               >
                 Current
               </Button>
               <select
                 v-model="leftPreset"
                 class="flex-1 h-9 rounded-md border bg-background px-3 text-sm"
-                @change="
-                  leftSource = 'preset'
-                  loadLeft()
-                "
+                @change="usePresetLeft"
               >
                 <option v-for="preset in availablePresets" :key="preset.name" :value="preset.name">
                   {{ preset.label }}

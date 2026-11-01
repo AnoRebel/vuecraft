@@ -55,7 +55,7 @@ export function useThemeComparison() {
       id: 'current',
       name: 'Current Theme',
       source: 'current',
-      config: structuredClone(config),
+      config: JSON.parse(JSON.stringify(config)),
     }
 
     if (side === 'left') {
@@ -113,7 +113,7 @@ export function useThemeComparison() {
       id: `saved-${id}`,
       name,
       source: 'saved',
-      config: structuredClone(config),
+      config: JSON.parse(JSON.stringify(config)),
     }
 
     if (side === 'left') {
@@ -135,7 +135,7 @@ export function useThemeComparison() {
       id: `imported-${Date.now()}`,
       name,
       source: 'imported',
-      config: structuredClone(config),
+      config: JSON.parse(JSON.stringify(config)),
     }
 
     if (side === 'left') {

@@ -18,10 +18,11 @@ export interface ColorBlindnessOption {
   prevalence: string
 }
 
-export function useColorBlindnessSimulation() {
-  const activeSimulation = ref<ColorBlindnessType>('normal')
-  const isSimulating = computed(() => activeSimulation.value !== 'normal')
+// Shared so the selector and the preview frame see the same simulation
+const activeSimulation = ref<ColorBlindnessType>('normal')
+const isSimulating = computed(() => activeSimulation.value !== 'normal')
 
+export function useColorBlindnessSimulation() {
   /**
    * Available color blindness types with information
    */

@@ -2,7 +2,7 @@
  * Email/password registration handler
  */
 
-import { createError } from 'h3'
+import { createError } from 'nuxt/server'
 import { findUserByEmail, createUser } from '~/server/utils/auth'
 
 interface RegisterBody {
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 
   if (!body.email || !body.password || !body.name) {
     throw createError({
-      statusCode: 400,
+      status: 400,
       message: 'Email, password, and name are required',
     })
   }
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(body.email)) {
     throw createError({
-      statusCode: 400,
+      status: 400,
       message: 'Invalid email format',
     })
   }
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
   // Validate password strength
   if (body.password.length < 6) {
     throw createError({
-      statusCode: 400,
+      status: 400,
       message: 'Password must be at least 6 characters',
     })
   }
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
   const existingUser = findUserByEmail(body.email)
   if (existingUser) {
     throw createError({
-      statusCode: 400,
+      status: 400,
       message: 'Email already registered',
     })
   }

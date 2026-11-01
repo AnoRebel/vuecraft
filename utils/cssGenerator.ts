@@ -1,14 +1,14 @@
-import type {
-  DesignSystemConfigInput,
-  RadiusValue,
-  ShadowIntensity,
-  FontScale,
-  SpacingScale,
-  AnimationSpeed,
-  BorderWidth,
-} from '~/types/config'
-import { getThemeColors } from '~/config/themes'
-import { RADIUS_OPTIONS, ANIMATION_SPEEDS, BORDER_WIDTHS } from '~/config/defaults'
+import type { DesignSystemConfigInput } from '~/types/config'
+import {
+  motionThemeDeclarations,
+  REDUCED_MOTION_CSS,
+  resolveTheme,
+  colorDeclarations,
+  COLOR_KEYS,
+  SHADOW_KEYS,
+  toTokenName,
+  type ResolvedTheme,
+} from '~/utils/themeTokens'
 import {
   generateNuxtUIExportPackage,
   generateNuxtUIAppConfig,
@@ -16,298 +16,207 @@ import {
 } from './nuxtUIGenerator'
 import { generateTailwindExportPackage, generateTailwindCSS } from './tailwindGenerator'
 
-// Font family mappings
-const FONT_FAMILY_MAP: Record<string, string> = {
-  inter: '"Inter", ui-sans-serif, system-ui, sans-serif',
-  'noto-sans': '"Noto Sans", ui-sans-serif, system-ui, sans-serif',
-  'nunito-sans': '"Nunito Sans", ui-sans-serif, system-ui, sans-serif',
-  figtree: '"Figtree", ui-sans-serif, system-ui, sans-serif',
-  roboto: '"Roboto", ui-sans-serif, system-ui, sans-serif',
-  raleway: '"Raleway", ui-sans-serif, system-ui, sans-serif',
-  'dm-sans': '"DM Sans", ui-sans-serif, system-ui, sans-serif',
-  'public-sans': '"Public Sans", ui-sans-serif, system-ui, sans-serif',
-  outfit: '"Outfit", ui-sans-serif, system-ui, sans-serif',
-  geist: '"Geist", ui-sans-serif, system-ui, sans-serif',
+// Tailwind v4 text scale (rem) - rescaled inside the preview by the font scale
+const TEXT_SCALE: Record<string, number> = {
+  xs: 0.75,
+  sm: 0.875,
+  base: 1,
+  lg: 1.125,
+  xl: 1.25,
+  '2xl': 1.5,
+  '3xl': 1.875,
+  '4xl': 2.25,
+  '5xl': 3,
 }
 
-const MONO_FONT_FAMILY_MAP: Record<string, string> = {
-  'jetbrains-mono': '"JetBrains Mono", ui-monospace, monospace',
-  'geist-mono': '"Geist Mono", ui-monospace, monospace',
-  'fira-code': '"Fira Code", ui-monospace, monospace',
-  'source-code-pro': '"Source Code Pro", ui-monospace, monospace',
+// Component styles adjust density on top of the spacing scale
+const STYLE_SPACING: Record<string, number> = {
+  default: 1,
+  'new-york': 0.9,
+  miami: 1,
+  brutal: 1,
+  soft: 1.05,
 }
 
-// Get radius value
-function getRadiusValue(radius: RadiusValue): string {
-  const option = RADIUS_OPTIONS.find((r) => r.name === radius)
-  return option?.value ?? '0.5rem'
+function shadowVars(theme: ResolvedTheme, mode: 'light' | 'dark', prefix: string): string {
+  return SHADOW_KEYS.map((k) => `  --${prefix}shadow-${k}: ${theme.shadows[mode][k]};`).join('\n')
 }
 
-// Get shadow values based on intensity
-function getShadowValues(intensity: ShadowIntensity): {
-  sm: string
-  md: string
-  lg: string
-  xl: string
-} {
-  switch (intensity) {
-    case 'none':
-      return {
-        sm: 'none',
-        md: 'none',
-        lg: 'none',
-        xl: 'none',
-      }
-    case 'subtle':
-      return {
-        sm: '0 1px 1px 0 rgb(0 0 0 / 0.03)',
-        md: '0 2px 3px -1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05)',
-        lg: '0 4px 6px -2px rgb(0 0 0 / 0.05), 0 2px 3px -2px rgb(0 0 0 / 0.05)',
-        xl: '0 8px 10px -3px rgb(0 0 0 / 0.05), 0 4px 5px -3px rgb(0 0 0 / 0.05)',
-      }
-    case 'default':
-      return {
-        sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-      }
-    case 'strong':
-      return {
-        sm: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-        md: '0 6px 10px -2px rgb(0 0 0 / 0.15), 0 3px 6px -3px rgb(0 0 0 / 0.15)',
-        lg: '0 15px 20px -5px rgb(0 0 0 / 0.15), 0 6px 8px -6px rgb(0 0 0 / 0.15)',
-        xl: '0 25px 35px -8px rgb(0 0 0 / 0.2), 0 10px 15px -8px rgb(0 0 0 / 0.15)',
-      }
-  }
-}
+/**
+ * CSS applied at runtime to the builder itself.
+ *
+ * Colours, radius and fonts are global so floating UI (dialogs, popovers)
+ * matches the theme. Everything that changes density or component look is
+ * scoped to `.vc-preview`, the live preview root, so the builder chrome stays
+ * usable whatever the user picks.
+ */
+export function generateRuntimeCSS(config: DesignSystemConfigInput): string {
+  const t = resolveTheme(config)
+  const spacing = 0.25 * t.spacingScale * (STYLE_SPACING[config.components.style] ?? 1)
+  const textVars = Object.entries(TEXT_SCALE)
+    .map(([k, v]) => `  --text-${k}: ${+(v * t.fontScale).toFixed(4)}rem;`)
+    .join('\n')
+  const shadowUtilities = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl']
+    .map((k) => `  :where(.vc-preview) .shadow-${k} { --tw-shadow: var(--vc-shadow-${k}); }`)
+    .join('\n')
 
-// Get font scale multiplier (exported for future use)
-export function getFontScaleMultiplier(scale: FontScale): number {
-  switch (scale) {
-    case 'compact':
-      return 0.875
-    case 'default':
-      return 1
-    case 'relaxed':
-      return 1.125
-    case 'spacious':
-      return 1.25
-  }
-}
+  // Declare Tailwind's layer order first: this stylesheet can be injected
+  // before Tailwind's own CSS (cached theme on reload), and the first
+  // statement that mentions a layer fixes its position in the cascade.
+  return `@layer theme, base, components, utilities;
 
-// Get spacing scale multiplier (exported for future use)
-export function getSpacingScaleMultiplier(scale: SpacingScale): number {
-  switch (scale) {
-    case 'compact':
-      return 0.875
-    case 'default':
-      return 1
-    case 'comfortable':
-      return 1.125
-    case 'spacious':
-      return 1.25
-  }
-}
-
-// Get animation duration
-function getAnimationDuration(speed: AnimationSpeed): string {
-  const option = ANIMATION_SPEEDS.find((a) => a.name === speed)
-  return option?.duration ?? '200ms'
-}
-
-// Get border width
-function getBorderWidth(width: BorderWidth): string {
-  const option = BORDER_WIDTHS.find((b) => b.name === width)
-  return option?.value ?? '1px'
-}
-
-// Generate CSS variables from config
-export function generateCSSVariables(config: DesignSystemConfigInput): string {
-  const colors = getThemeColors(config.theme.baseColor, config.theme.accentTheme)
-  const radius = getRadiusValue(config.theme.radius)
-  const shadows = getShadowValues(config.theme.shadowIntensity)
-  const fontFamily = FONT_FAMILY_MAP[config.typography.fontFamily] ?? FONT_FAMILY_MAP['inter']
-  const monoFontFamily =
-    MONO_FONT_FAMILY_MAP[config.typography.monoFontFamily] ?? MONO_FONT_FAMILY_MAP['jetbrains-mono']
-  const animationDuration = getAnimationDuration(config.components.animationSpeed)
-  const borderWidth = getBorderWidth(config.components.borderWidth)
-
-  // Generate CSS that directly sets --color-* variables for runtime application
-  // This bypasses Tailwind's @theme which is compile-time only
-  const lightVars = `
-  /* Light mode colors - using --color-* directly for Tailwind CSS v4 */
-  --color-background: ${colors.light.background};
-  --color-foreground: ${colors.light.foreground};
-  --color-card: ${colors.light.card};
-  --color-card-foreground: ${colors.light.cardForeground};
-  --color-popover: ${colors.light.popover};
-  --color-popover-foreground: ${colors.light.popoverForeground};
-  --color-primary: ${colors.light.primary};
-  --color-primary-foreground: ${colors.light.primaryForeground};
-  --color-secondary: ${colors.light.secondary};
-  --color-secondary-foreground: ${colors.light.secondaryForeground};
-  --color-muted: ${colors.light.muted};
-  --color-muted-foreground: ${colors.light.mutedForeground};
-  --color-accent: ${colors.light.accent};
-  --color-accent-foreground: ${colors.light.accentForeground};
-  --color-destructive: ${colors.light.destructive};
-  --color-destructive-foreground: ${colors.light.destructiveForeground};
-  --color-border: ${colors.light.border};
-  --color-input: ${colors.light.input};
-  --color-ring: ${colors.light.ring};
-
-  /* Chart colors */
-  --color-chart-1: ${colors.light.chart1};
-  --color-chart-2: ${colors.light.chart2};
-  --color-chart-3: ${colors.light.chart3};
-  --color-chart-4: ${colors.light.chart4};
-  --color-chart-5: ${colors.light.chart5};
-
-  /* Sidebar colors */
-  --color-sidebar: ${colors.light.sidebar};
-  --color-sidebar-foreground: ${colors.light.sidebarForeground};
-  --color-sidebar-primary: ${colors.light.sidebarPrimary};
-  --color-sidebar-primary-foreground: ${colors.light.sidebarPrimaryForeground};
-  --color-sidebar-accent: ${colors.light.sidebarAccent};
-  --color-sidebar-accent-foreground: ${colors.light.sidebarAccentForeground};
-  --color-sidebar-border: ${colors.light.sidebarBorder};
-  --color-sidebar-ring: ${colors.light.sidebarRing};`
-
-  const darkVars = `
-  /* Dark mode colors */
-  --color-background: ${colors.dark.background};
-  --color-foreground: ${colors.dark.foreground};
-  --color-card: ${colors.dark.card};
-  --color-card-foreground: ${colors.dark.cardForeground};
-  --color-popover: ${colors.dark.popover};
-  --color-popover-foreground: ${colors.dark.popoverForeground};
-  --color-primary: ${colors.dark.primary};
-  --color-primary-foreground: ${colors.dark.primaryForeground};
-  --color-secondary: ${colors.dark.secondary};
-  --color-secondary-foreground: ${colors.dark.secondaryForeground};
-  --color-muted: ${colors.dark.muted};
-  --color-muted-foreground: ${colors.dark.mutedForeground};
-  --color-accent: ${colors.dark.accent};
-  --color-accent-foreground: ${colors.dark.accentForeground};
-  --color-destructive: ${colors.dark.destructive};
-  --color-destructive-foreground: ${colors.dark.destructiveForeground};
-  --color-border: ${colors.dark.border};
-  --color-input: ${colors.dark.input};
-  --color-ring: ${colors.dark.ring};
-
-  /* Chart colors */
-  --color-chart-1: ${colors.dark.chart1};
-  --color-chart-2: ${colors.dark.chart2};
-  --color-chart-3: ${colors.dark.chart3};
-  --color-chart-4: ${colors.dark.chart4};
-  --color-chart-5: ${colors.dark.chart5};
-
-  /* Sidebar colors */
-  --color-sidebar: ${colors.dark.sidebar};
-  --color-sidebar-foreground: ${colors.dark.sidebarForeground};
-  --color-sidebar-primary: ${colors.dark.sidebarPrimary};
-  --color-sidebar-primary-foreground: ${colors.dark.sidebarPrimaryForeground};
-  --color-sidebar-accent: ${colors.dark.sidebarAccent};
-  --color-sidebar-accent-foreground: ${colors.dark.sidebarAccentForeground};
-  --color-sidebar-border: ${colors.dark.sidebarBorder};
-  --color-sidebar-ring: ${colors.dark.sidebarRing};`
-
-  const sharedVars = `
-  /* Shared variables */
-  --radius: ${radius};
+:root {
+${colorDeclarations(t.colors.light, 'color-')}
+  --radius: ${t.radius};
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
-  /* Typography */
-  --font-sans: ${fontFamily};
-  --font-mono: ${monoFontFamily};
-
-  /* Shadows */
-  --shadow-sm: ${shadows.sm};
-  --shadow-md: ${shadows.md};
-  --shadow-lg: ${shadows.lg};
-  --shadow-xl: ${shadows.xl};
-
-  /* Animation */
-  --animation-duration: ${animationDuration};
-
-  /* Borders */
-  --border-width: ${borderWidth};`
-
-  return `@import "tailwindcss";
-
-@theme {
-  /* Theme configuration for Tailwind CSS v4 */
-  --color-background: var(--color-background);
-  --color-foreground: var(--color-foreground);
-  --color-card: var(--color-card);
-  --color-card-foreground: var(--color-card-foreground);
-  --color-popover: var(--color-popover);
-  --color-popover-foreground: var(--color-popover-foreground);
-  --color-primary: var(--color-primary);
-  --color-primary-foreground: var(--color-primary-foreground);
-  --color-secondary: var(--color-secondary);
-  --color-secondary-foreground: var(--color-secondary-foreground);
-  --color-muted: var(--color-muted);
-  --color-muted-foreground: var(--color-muted-foreground);
-  --color-accent: var(--color-accent);
-  --color-accent-foreground: var(--color-accent-foreground);
-  --color-destructive: var(--color-destructive);
-  --color-destructive-foreground: var(--color-destructive-foreground);
-  --color-border: var(--color-border);
-  --color-input: var(--color-input);
-  --color-ring: var(--color-ring);
-
-  /* Chart colors */
-  --color-chart-1: var(--color-chart-1);
-  --color-chart-2: var(--color-chart-2);
-  --color-chart-3: var(--color-chart-3);
-  --color-chart-4: var(--color-chart-4);
-  --color-chart-5: var(--color-chart-5);
-
-  /* Sidebar colors */
-  --color-sidebar: var(--color-sidebar);
-  --color-sidebar-foreground: var(--color-sidebar-foreground);
-  --color-sidebar-primary: var(--color-sidebar-primary);
-  --color-sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
-  --color-sidebar-accent: var(--color-sidebar-accent);
-  --color-sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
-  --color-sidebar-border: var(--color-sidebar-border);
-  --color-sidebar-ring: var(--color-sidebar-ring);
-
-  /* Radius */
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-
-  /* Fonts */
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-}
-
-:root {
-${sharedVars}
-${lightVars}
+  --radius-2xl: calc(var(--radius) + 8px);
+  --font-sans: ${t.fontSans};
+  --font-heading: ${t.fontHeading};
+  --font-mono: ${t.fontMono};
+${shadowVars(t, 'light', 'vc-')}
 }
 
 .dark {
-${darkVars}
+${colorDeclarations(t.colors.dark, 'color-')}
+${shadowVars(t, 'dark', 'vc-')}
 }
 
-/* Base styles */
-* {
-  border-color: var(--color-border);
+@layer utilities {
+${shadowUtilities}
+  :where(.vc-preview) .shadow { --tw-shadow: var(--vc-shadow-sm); }
 }
 
-body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+.vc-preview {
+  --spacing: ${+spacing.toFixed(4)}rem;
+${textVars}
+  --default-transition-duration: ${t.reducedMotion ? '0ms' : t.animationDuration};
+  --default-transition-timing-function: ${t.animationEasing};
+  --vc-motion-duration: ${t.reducedMotion ? '0ms' : t.animationDuration};
+  --vc-motion-easing: ${t.animationEasing};
+  --vc-enter-opacity: ${t.enter.opacity};
+  --vc-enter-y: ${t.enter.y};
+  --vc-enter-scale: ${t.enter.scale};
+  --vc-enter-blur: ${t.enter.blur};
+  --vc-border-width: ${t.borderWidth};
+  --vc-heading-weight: ${t.headingWeight};
+  --vc-ring-width: ${t.focusRingWidth};
+  --vc-ring-offset: ${t.focusRingOffset};
+  --vc-icon-size: ${t.iconSize};
+  --vc-icon-stroke: ${t.iconStroke};
+  --vc-container: ${t.containerWidth};
+  --vc-sidebar-width: ${t.sidebarWidth};
+  --vc-header-height: ${t.headerHeight};
   font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: ${t.bodyLineHeight};
 }
+
+.vc-preview :is(h1, h2, h3, h4, h5, h6, [data-slot='card-title']) {
+  font-family: var(--font-heading);
+  font-weight: var(--vc-heading-weight);
+}
+
+.vc-preview p {
+  line-height: ${t.bodyLineHeight};
+}
+
+.vc-preview .border {
+  border-width: var(--vc-border-width);
+}
+
+.vc-preview :focus-visible {
+  outline: var(--vc-ring-width) solid var(--color-ring);
+  outline-offset: var(--vc-ring-offset);
+}
+
+${
+  t.reducedMotion
+    ? `.vc-preview *,
+.vc-preview *::before,
+.vc-preview *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+`
+    : ''
+}.vc-preview .vc-icon {
+  width: var(--vc-icon-size);
+  height: var(--vc-icon-size);
+}
+
+.vc-preview :is(.vc-icon, .iconify) :is(path, line, circle, rect, polyline, polygon) {
+  stroke-width: var(--vc-icon-stroke);
+}
+`
+}
+
+/**
+ * shadcn-vue (Tailwind v4) theme CSS for export.
+ * Follows the shadcn v4 layout: raw tokens on :root/.dark, mapped to Tailwind
+ * utilities with `@theme inline`.
+ */
+export function generateCSSVariables(config: DesignSystemConfigInput): string {
+  const t = resolveTheme(config)
+  const prefix = config.export.cssVariablesPrefix ? `${config.export.cssVariablesPrefix}-` : ''
+  const themeColors = COLOR_KEYS.map(
+    (k) => `  --color-${toTokenName(k)}: var(--${prefix}${toTokenName(k)});`
+  ).join('\n')
+  const themeShadows = SHADOW_KEYS.map((k) => `  --shadow-${k}: var(--${prefix}shadow-${k});`).join(
+    '\n'
+  )
+
+  return `@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --${prefix}radius: ${t.radius};
+${colorDeclarations(t.colors.light, prefix)}
+  --${prefix}font-sans: ${t.fontSans};
+  --${prefix}font-heading: ${t.fontHeading};
+  --${prefix}font-mono: ${t.fontMono};
+${shadowVars(t, 'light', prefix)}
+}
+
+.dark {
+${colorDeclarations(t.colors.dark, prefix)}
+${shadowVars(t, 'dark', prefix)}
+}
+
+@theme inline {
+${themeColors}
+  --radius-sm: calc(var(--${prefix}radius) - 4px);
+  --radius-md: calc(var(--${prefix}radius) - 2px);
+  --radius-lg: var(--${prefix}radius);
+  --radius-xl: calc(var(--${prefix}radius) + 4px);
+  --font-sans: var(--${prefix}font-sans);
+  --font-heading: var(--${prefix}font-heading);
+  --font-mono: var(--${prefix}font-mono);
+${themeShadows}
+  --default-transition-duration: ${t.animationDuration};
+${motionThemeDeclarations(t)}
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    line-height: ${t.bodyLineHeight};
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: ${t.headingWeight};
+  }
+}
+
+${REDUCED_MOTION_CSS}
 `
 }
 
@@ -470,7 +379,7 @@ export function getUILibraryInfo(uiLibrary: string): {
     case 'nuxt-ui':
       return {
         name: 'Nuxt UI',
-        badge: 'Nuxt UI v3',
+        badge: 'Nuxt UI v4',
         cssFilename: 'main.css',
         configFilename: 'app.config.ts',
       }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { Button } from '~/components/ui/button'
@@ -11,14 +11,25 @@ import ComponentsConfig from './ComponentsConfig.vue'
 import IconsConfig from './IconsConfig.vue'
 import LayoutConfig from './LayoutConfig.vue'
 import EffectsConfig from './EffectsConfig.vue'
+import MotionConfig from './MotionConfig.vue'
 import ComponentSelection from './ComponentSelection.vue'
 import ExportConfig from './ExportConfig.vue'
 import SortableSectionList from './SortableSectionList.vue'
 import AccessibilityPanel from '~/components/AccessibilityPanel.vue'
 import ColorPalettePanel from '~/components/ColorPalettePanel.vue'
-import ThemeGalleryDialog from '~/components/ThemeGalleryDialog.vue'
+import { toast } from 'vue-sonner'
+import { useBuilderUi } from '~/composables/useBuilderUi'
 
-const { resetAll, randomize } = useDesignSystem()
+defineProps<{ closable?: boolean }>()
+const emit = defineEmits<{ (e: 'close'): void }>()
+
+const { resetAll, randomize, undo } = useDesignSystem()
+const { openDialog } = useBuilderUi()
+
+function handleReset() {
+  resetAll()
+  toast('All settings reset', { action: { label: 'Undo', onClick: undo } })
+}
 
 // Search and filter state
 const searchQuery = ref('')
@@ -39,6 +50,7 @@ const sectionCategories: Record<string, string> = {
   effects: 'appearance',
   typography: 'typography',
   components: 'components',
+  motion: 'components',
   icons: 'components',
   layout: 'components',
   selection: 'components',
@@ -48,7 +60,6 @@ const sectionCategories: Record<string, string> = {
 }
 
 // Feature dialogs
-const showGallery = ref(false)
 const showSectionSettings = ref(false)
 
 // Section visibility and order preferences (persisted)
@@ -64,6 +75,7 @@ const defaultSections: SectionConfig[] = [
   { id: 'effects', label: 'Effects', visible: true },
   { id: 'typography', label: 'Typography', visible: true },
   { id: 'components', label: 'Components', visible: true },
+  { id: 'motion', label: 'Motion', visible: true },
   { id: 'icons', label: 'Icons', visible: true },
   { id: 'layout', label: 'Layout', visible: true },
   { id: 'selection', label: 'Component Selection', visible: true },
@@ -73,6 +85,21 @@ const defaultSections: SectionConfig[] = [
 ]
 
 const sectionConfigs = useStorage<SectionConfig[]>('vuecraft-section-config', defaultSections)
+
+// Sections added in newer versions are appended to layouts saved earlier
+onMounted(() => {
+  const known = new Set(sectionConfigs.value.map((s) => s.id))
+  const missing = defaultSections.filter((s) => !known.has(s.id))
+  if (missing.length) {
+    const next = [...sectionConfigs.value]
+    for (const section of missing) {
+      const after = defaultSections.findIndex((d) => d.id === section.id) - 1
+      const anchor = next.findIndex((s) => s.id === defaultSections[after]?.id)
+      next.splice(anchor >= 0 ? anchor + 1 : next.length, 0, { ...section })
+    }
+    sectionConfigs.value = next
+  }
+})
 
 // Get visible sections in order with search and category filtering
 const visibleSections = computed(() => {
@@ -111,77 +138,48 @@ function resetSections() {
 </script>
 
 <template>
-  <div class="flex flex-col h-full overflow-hidden">
+  <div class="flex h-full flex-col overflow-hidden">
     <!-- Header -->
-    <div class="flex items-center justify-between border-b px-3 py-2 min-w-0 flex-shrink-0">
-      <h2 class="font-semibold flex-shrink-0 text-sm">Configuration</h2>
-      <div class="flex gap-0.5 flex-shrink-0" data-tour-guide="shuffle-reset-buttons">
-        <!-- Section Settings Toggle -->
+    <div class="flex min-w-0 shrink-0 items-center justify-between gap-2 border-b px-3 py-2">
+      <h2 class="shrink-0 text-sm font-semibold">Configuration</h2>
+      <div class="flex shrink-0 items-center gap-0.5" data-tour-guide="shuffle-reset-buttons">
         <Button
           variant="ghost"
-          size="icon"
-          class="h-8 w-8"
+          size="icon-sm"
           :class="{ 'bg-muted': showSectionSettings }"
+          :aria-pressed="showSectionSettings"
+          aria-label="Customize sections"
           title="Customize sections"
           @click="showSectionSettings = !showSectionSettings"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
-            />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <Icon name="lucide:list-checks" />
         </Button>
         <Button
           variant="ghost"
-          size="icon"
-          class="h-8 w-8"
-          title="Shuffle theme"
+          size="icon-sm"
+          aria-label="Shuffle theme"
+          title="Shuffle theme (R)"
           @click="randomize"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22" />
-            <path d="m18 2 4 4-4 4" />
-            <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
-            <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" />
-            <path d="m18 14 4 4-4 4" />
-          </svg>
+          <Icon name="lucide:shuffle" />
         </Button>
-        <Button variant="ghost" size="icon" class="h-8 w-8" title="Reset all" @click="resetAll">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
-          </svg>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Reset all settings"
+          title="Reset all"
+          @click="handleReset"
+        >
+          <Icon name="lucide:rotate-ccw" />
+        </Button>
+        <Button
+          v-if="closable"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Close configuration"
+          @click="emit('close')"
+        >
+          <Icon name="lucide:x" />
         </Button>
       </div>
     </div>
@@ -236,7 +234,7 @@ function resetSections() {
     </div>
 
     <!-- Config Sections -->
-    <div class="flex-1 overflow-y-auto px-3">
+    <div class="min-h-0 flex-1 overflow-y-auto px-3">
       <div class="py-2 space-y-2">
         <template v-for="section in visibleSections" :key="section.id">
           <PresetThemes v-if="section.id === 'presets'" />
@@ -244,23 +242,8 @@ function resetSections() {
 
           <!-- Quick Actions (after theme) -->
           <div v-if="section.id === 'theme'" class="mb-4 mt-2">
-            <Button variant="outline" size="sm" class="w-full" @click="showGallery = true">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="mr-2"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                <circle cx="9" cy="9" r="2" />
-                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-              </svg>
+            <Button variant="outline" size="sm" class="w-full" @click="openDialog('gallery')">
+              <Icon name="lucide:layout-grid" />
               Browse Theme Gallery
             </Button>
           </div>
@@ -268,6 +251,7 @@ function resetSections() {
           <EffectsConfig v-else-if="section.id === 'effects'" />
           <TypographyConfig v-else-if="section.id === 'typography'" />
           <ComponentsConfig v-else-if="section.id === 'components'" />
+          <MotionConfig v-else-if="section.id === 'motion'" />
           <IconsConfig v-else-if="section.id === 'icons'" />
           <LayoutConfig v-else-if="section.id === 'layout'" />
           <ComponentSelection v-else-if="section.id === 'selection'" />
@@ -287,7 +271,29 @@ function resetSections() {
       </div>
     </div>
 
-    <!-- Theme Gallery Dialog -->
-    <ThemeGalleryDialog v-model:open="showGallery" @apply="showGallery = false" />
+    <!-- Credits -->
+    <footer
+      class="flex shrink-0 items-center justify-center gap-1.5 border-t px-3 py-2 text-xs text-muted-foreground"
+    >
+      <span>Made with</span>
+      <Icon name="lucide:heart" class="size-3 text-red-500" aria-label="love" />
+      <span>by</span>
+      <a
+        href="https://github.com/AnoRebel"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="font-medium text-foreground hover:text-primary"
+        >AnoRebel</a
+      >
+      <span aria-hidden="true">·</span>
+      <a
+        href="https://github.com/AnoRebel/vuecraft"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1 hover:text-primary"
+      >
+        <Icon name="mdi:github" class="size-3" />GitHub
+      </a>
+    </footer>
   </div>
 </template>

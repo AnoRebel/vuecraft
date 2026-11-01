@@ -3,6 +3,7 @@
  * Uses nuxt-auth-utils defineWebAuthnAuthenticateEventHandler
  */
 
+import { createError } from 'nuxt/server'
 import {
   findUserById,
   getCredentialsByEmail,
@@ -23,7 +24,7 @@ export default defineWebAuthnAuthenticateEventHandler({
     const challenge = consumeChallenge(attemptId)
     if (!challenge) {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'Challenge expired or not found. Please try again.',
       })
     }
@@ -36,7 +37,7 @@ export default defineWebAuthnAuthenticateEventHandler({
 
     if (!credentials.length) {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'No passkey found for this email. Please register first.',
       })
     }
@@ -53,7 +54,7 @@ export default defineWebAuthnAuthenticateEventHandler({
 
     if (!credential) {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'Credential not found',
       })
     }
@@ -76,7 +77,7 @@ export default defineWebAuthnAuthenticateEventHandler({
     const dbCredential = getCredentialById(credential.id)
     if (!dbCredential) {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'Credential not found',
       })
     }
@@ -84,7 +85,7 @@ export default defineWebAuthnAuthenticateEventHandler({
     const user = findUserById(dbCredential.userId)
     if (!user) {
       throw createError({
-        statusCode: 400,
+        status: 400,
         message: 'User not found',
       })
     }

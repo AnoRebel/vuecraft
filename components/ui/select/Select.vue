@@ -1,5 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import type { HTMLAttributes } from 'vue'
+import {
+  SelectContent,
+  SelectItem,
+  SelectItemIndicator,
+  SelectItemText,
+  SelectPortal,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectViewport,
+} from 'reka-ui'
 import { cn } from '~/lib/utils'
 
 interface Option {
@@ -9,130 +20,75 @@ interface Option {
   disabled?: boolean
 }
 
-interface Props {
-  class?: string
-  modelValue?: string
-  options: Option[]
-  placeholder?: string
-  disabled?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: '',
-  placeholder: 'Select an option',
-  disabled: false,
-})
-
-const emit = defineEmits<{
-  'update:modelValue': [value: string]
-}>()
-
-const isOpen = ref(false)
-const triggerRef = ref<HTMLButtonElement>()
-
-const selectedOption = computed(() => props.options.find((opt) => opt.value === props.modelValue))
-
-function toggle() {
-  if (!props.disabled) {
-    isOpen.value = !isOpen.value
+const props = withDefaults(
+  defineProps<{
+    class?: HTMLAttributes['class']
+    modelValue?: string
+    options: Option[]
+    placeholder?: string
+    disabled?: boolean
+    id?: string
+    ariaLabel?: string
+  }>(),
+  {
+    class: '',
+    modelValue: '',
+    placeholder: 'Select an option',
+    disabled: false,
+    id: undefined,
+    ariaLabel: undefined,
   }
-}
+)
 
-function select(option: Option) {
-  if (!option.disabled) {
-    emit('update:modelValue', option.value)
-    isOpen.value = false
-  }
-}
-
-function close() {
-  isOpen.value = false
-}
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 </script>
 
 <template>
-  <div v-click-outside="close" class="relative">
-    <button
-      ref="triggerRef"
-      type="button"
-      role="combobox"
-      :aria-expanded="isOpen"
-      :disabled="disabled"
+  <SelectRoot
+    :model-value="props.modelValue || undefined"
+    :disabled="props.disabled"
+    @update:model-value="(v) => emit('update:modelValue', String(v))"
+  >
+    <SelectTrigger
+      :id="props.id"
+      data-slot="select"
+      :aria-label="props.ariaLabel"
       :class="
         cn(
-          'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+          'flex h-9 w-full items-center justify-between gap-2 whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&>span]:truncate',
           props.class
         )
       "
-      @click="toggle"
     >
-      <span :class="{ 'text-muted-foreground': !selectedOption }">
-        {{ selectedOption?.label ?? placeholder }}
-      </span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="opacity-50"
-        :class="{ 'rotate-180': isOpen }"
+      <SelectValue :placeholder="props.placeholder" />
+      <Icon name="lucide:chevron-down" class="size-4 shrink-0 opacity-50" />
+    </SelectTrigger>
+    <SelectPortal>
+      <SelectContent
+        position="popper"
+        :side-offset="4"
+        class="vc-pop relative z-[200] max-h-[min(24rem,var(--reka-select-content-available-height))] w-[var(--reka-select-trigger-width)] min-w-32 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
       >
-        <path d="m6 9 6 6 6-6" />
-      </svg>
-    </button>
-
-    <Transition
-      enter-active-class="transition ease-out duration-100"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-75"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
-    >
-      <div
-        v-if="isOpen"
-        class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-      >
-        <div
-          v-for="option in options"
-          :key="option.value"
-          role="option"
-          :aria-selected="option.value === modelValue"
-          :class="
-            cn(
-              'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
-              { 'bg-accent': option.value === modelValue },
-              { 'opacity-50 cursor-not-allowed': option.disabled }
-            )
-          "
-          @click="select(option)"
-        >
-          <span>{{ option.label }}</span>
-          <span
-            v-if="option.value === modelValue"
-            class="absolute right-2 flex h-3.5 w-3.5 items-center justify-center"
+        <SelectViewport class="p-1">
+          <SelectItem
+            v-for="option in props.options"
+            :key="option.value"
+            :value="option.value"
+            :disabled="option.disabled"
+            class="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          </span>
-        </div>
-      </div>
-    </Transition>
-  </div>
+            <span class="flex flex-col">
+              <SelectItemText>{{ option.label }}</SelectItemText>
+              <span v-if="option.description" class="text-xs text-muted-foreground">
+                {{ option.description }}
+              </span>
+            </span>
+            <SelectItemIndicator class="absolute right-2 inline-flex items-center">
+              <Icon name="lucide:check" class="size-4" />
+            </SelectItemIndicator>
+          </SelectItem>
+        </SelectViewport>
+      </SelectContent>
+    </SelectPortal>
+  </SelectRoot>
 </template>

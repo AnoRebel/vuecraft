@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { onKeyStroke } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { useResponsivePreview } from '~/composables/useResponsivePreview'
-import { generateCSSVariables } from '~/utils/cssGenerator'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Button } from '~/components/ui/button'
 import { Tooltip } from '~/components/ui/tooltip'
@@ -11,214 +11,227 @@ import PreviewCards from './PreviewCards.vue'
 import PreviewForms from './PreviewForms.vue'
 import PreviewAuth from './PreviewAuth.vue'
 import PreviewComponents from './PreviewComponents.vue'
+import PreviewColors from './PreviewColors.vue'
+import PreviewTypography from './PreviewTypography.vue'
 import ElementInspector from './ElementInspector.vue'
+import ElementInspectorPanel from './ElementInspectorPanel.vue'
+import { useElementInspector } from '~/composables/useElementInspector'
 import ResponsivePreviewControls from '~/components/ResponsivePreviewControls.vue'
+import { useColorBlindnessSimulation } from '~/composables/useColorBlindnessSimulation'
+import { useBuilderUi } from '~/composables/useBuilderUi'
 
 const { config } = useDesignSystem()
 const { isResponsive, zoom, currentDimensions } = useResponsivePreview()
 
-const activeTemplate = ref('dashboard')
-const inspectorEnabled = ref(false)
+const TEMPLATES = [
+  { value: 'dashboard', label: 'Dashboard', icon: 'lucide:layout-dashboard' },
+  { value: 'cards', label: 'Cards', icon: 'lucide:layout-grid' },
+  { value: 'forms', label: 'Forms', icon: 'lucide:text-cursor-input' },
+  { value: 'auth', label: 'Auth', icon: 'lucide:log-in' },
+  { value: 'components', label: 'Components', icon: 'lucide:component' },
+  { value: 'colors', label: 'Colors', icon: 'lucide:palette' },
+  { value: 'typography', label: 'Typography', icon: 'lucide:type' },
+] as const
+
+const { activeTemplate, showCSSPanel, showCSSDialog } = useBuilderUi()
+const { activeSimulation, simulationOptions, setSimulation, getCSSFilter, getSVGFilters } =
+  useColorBlindnessSimulation()
+const svgFilters = getSVGFilters()
+
+function toggleCode() {
+  if (window.matchMedia('(min-width: 1024px)').matches) showCSSPanel.value = !showCSSPanel.value
+  else showCSSDialog.value = true
+}
+const {
+  enabled: inspectorEnabled,
+  pinned,
+  setEnabled: setInspector,
+  setContainer,
+  selectParent,
+  escape: escapeInspector,
+} = useElementInspector()
+const isFullscreen = ref(false)
+const scrollRef = ref<HTMLElement | null>(null)
 const previewContainerRef = ref<HTMLElement | null>(null)
 
-// Generate CSS variables from config - this computed will reactively update
-const generatedCSS = computed(() => {
-  // Access specific config properties to ensure reactivity
-  const { theme, typography, components, icons, layout } = config
-  return generateCSSVariables({
-    theme,
-    typography,
-    components,
-    icons,
-    layout,
-    export: config.export,
-  })
-})
-
-// Compute preview container styles with zoom applied correctly
-const containerStyles = computed(() => {
-  if (isResponsive.value) {
-    return {}
-  }
-
-  const dims = currentDimensions.value
+const frameStyles = computed(() => {
   const scale = zoom.value / 100
-
-  // Get width and height
-  const width = typeof dims.width === 'number' ? dims.width : undefined
-  const height = typeof dims.height === 'number' ? dims.height : undefined
-
-  return {
-    width: width ? `${width}px` : undefined,
-    height: height ? `${height}px` : undefined,
-    transform: scale !== 1 ? `scale(${scale})` : undefined,
-    transformOrigin: 'top center',
+  const styles: Record<string, string> = {}
+  if (scale !== 1) styles.zoom = String(scale)
+  const filter = getCSSFilter()
+  if (filter !== 'none') styles.filter = filter
+  if (!isResponsive.value) {
+    const { width, height } = currentDimensions.value
+    if (typeof width === 'number') styles.width = `${width}px`
+    if (typeof height === 'number') styles.minHeight = `${height}px`
   }
+  return styles
 })
 
-// Inject the generated CSS into a style tag
-const styleId = 'design-system-preview-styles'
+watch(previewContainerRef, (el) => setContainer(el), { immediate: true })
 
-function updatePreviewStyles() {
-  // Only run on client side - document is undefined during SSR
-  if (import.meta.server) return
-
-  let styleEl = document.getElementById(styleId) as HTMLStyleElement | null
-  if (!styleEl) {
-    styleEl = document.createElement('style')
-    styleEl.id = styleId
-    document.head.appendChild(styleEl)
-  }
-
-  // Extract just the CSS variables part (not the @import and @theme)
-  const css = generatedCSS.value
-  // Apply to the preview container
-  styleEl.textContent = css.replace('@import "tailwindcss";', '')
+function isTyping() {
+  const el = document.activeElement as HTMLElement | null
+  return !!el && (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable)
 }
 
-// Watch the generated CSS directly - this is more reliable than watching config
-watch(
-  generatedCSS,
-  () => {
-    updatePreviewStyles()
-  },
-  { immediate: true }
-)
-
-onMounted(() => {
-  // Ensure styles are applied after hydration
-  nextTick(() => {
-    updatePreviewStyles()
-  })
+onKeyStroke('Escape', (e) => {
+  if (document.querySelector('[role="dialog"][data-state="open"]')) return
+  if (escapeInspector()) e.preventDefault()
+  else if (isFullscreen.value) isFullscreen.value = false
 })
+
+onKeyStroke('ArrowUp', (e) => {
+  if (!pinned.value || isTyping()) return
+  e.preventDefault()
+  selectParent()
+})
+
+onBeforeUnmount(() => setInspector(false))
 </script>
 
 <template>
-  <div class="flex h-full flex-col" data-tour-guide="preview-panel">
-    <!-- Preview Header -->
-    <div
-      class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-2 sm:px-4 py-2 sm:py-3 gap-2 sm:gap-0"
-    >
-      <Tabs v-model="activeTemplate" class="w-full sm:w-auto">
-        <TabsList
-          class="w-full sm:w-auto grid grid-cols-5 sm:flex"
-          data-tour-guide="preview-templates"
-        >
-          <TabsTrigger value="dashboard" class="text-xs sm:text-sm px-2 sm:px-3">
-            <span class="hidden sm:inline">Dashboard</span>
-            <span class="sm:hidden">Dash</span>
-          </TabsTrigger>
-          <TabsTrigger value="cards" class="text-xs sm:text-sm px-2 sm:px-3">Cards</TabsTrigger>
-          <TabsTrigger value="forms" class="text-xs sm:text-sm px-2 sm:px-3">Forms</TabsTrigger>
-          <TabsTrigger value="auth" class="text-xs sm:text-sm px-2 sm:px-3">Auth</TabsTrigger>
-          <TabsTrigger value="components" class="text-xs sm:text-sm px-2 sm:px-3">
-            <span class="hidden sm:inline">Components</span>
-            <span class="sm:hidden">Comp</span>
-          </TabsTrigger>
-        </TabsList>
+  <div
+    class="@container/panel relative flex h-full min-h-0 flex-col bg-background"
+    :class="{ 'fixed inset-0 z-[90]': isFullscreen }"
+    data-tour-guide="preview-panel"
+  >
+    <!-- Preview header -->
+    <div class="flex flex-wrap items-center gap-2 border-b px-2 py-2 sm:px-4">
+      <Tabs v-model="activeTemplate" class="min-w-0 flex-1 md:basis-full @[78rem]/panel:basis-auto">
+        <div class="-mx-1 overflow-x-auto px-1 [scrollbar-width:none]">
+          <TabsList class="w-max" data-tour-guide="preview-templates">
+            <TabsTrigger
+              v-for="t in TEMPLATES"
+              :key="t.value"
+              :value="t.value"
+              class="px-2 text-xs sm:px-3 sm:text-sm"
+            >
+              <span class="sm:hidden"><Icon :name="t.icon" class="size-3.5" /></span>
+              <span>{{ t.label }}</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </Tabs>
-      <div class="flex items-center gap-2 sm:ml-4 w-full sm:w-auto justify-end">
-        <!-- Responsive Preview Controls - Hidden on mobile -->
-        <div class="hidden md:flex items-center">
+
+      <div class="ml-auto flex items-center gap-1">
+        <div class="hidden md:flex">
           <ResponsivePreviewControls />
         </div>
-        <!-- Element Inspector Toggle -->
-        <Tooltip content="Element Inspector" side="bottom">
+        <Tooltip content="Element inspector" side="bottom">
           <Button
             variant="ghost"
-            size="icon"
-            :class="{ 'bg-blue-500/10 text-blue-500': inspectorEnabled }"
-            @click="inspectorEnabled = !inspectorEnabled"
+            size="icon-sm"
+            :class="{ 'bg-accent text-accent-foreground': inspectorEnabled }"
+            :aria-pressed="inspectorEnabled"
+            aria-label="Element inspector"
+            @click="setInspector(!inspectorEnabled)"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8" />
-              <path d="M3 16.2V21m0 0h4.8M3 21l6-6" />
-              <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6" />
-              <path d="M3 7.8V3m0 0h4.8M3 3l6 6" />
-            </svg>
+            <Icon name="lucide:crosshair" />
+          </Button>
+        </Tooltip>
+        <label class="sr-only" for="vision-sim">Color vision simulation</label>
+        <select
+          id="vision-sim"
+          :value="activeSimulation"
+          class="hidden h-8 rounded-md border border-input bg-background px-2 text-xs xl:block"
+          title="Color vision simulation"
+          @change="
+            setSimulation(($event.target as HTMLSelectElement).value as typeof activeSimulation)
+          "
+        >
+          <option v-for="o in simulationOptions" :key="o.value" :value="o.value">
+            {{ o.value === 'normal' ? 'Normal vision' : o.label }}
+          </option>
+        </select>
+        <Tooltip content="Theme CSS" side="bottom">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            :aria-pressed="showCSSPanel"
+            aria-label="Show theme CSS"
+            :class="{ 'bg-accent text-accent-foreground': showCSSPanel }"
+            @click="toggleCode"
+          >
+            <Icon name="lucide:code-xml" />
+          </Button>
+        </Tooltip>
+        <Tooltip
+          :content="isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen preview'"
+          side="bottom"
+        >
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            :aria-pressed="isFullscreen"
+            :aria-label="isFullscreen ? 'Exit fullscreen' : 'Fullscreen preview'"
+            @click="isFullscreen = !isFullscreen"
+          >
+            <Icon :name="isFullscreen ? 'lucide:minimize-2' : 'lucide:maximize-2'" />
           </Button>
         </Tooltip>
       </div>
     </div>
 
-    <!-- Preview Content -->
-    <div
-      class="flex-1 overflow-auto bg-muted/30 flex items-start justify-center p-4"
-      :class="{ 'p-0': isResponsive }"
-    >
+    <!-- SVG filters used by the colour vision simulation -->
+    <div class="hidden" aria-hidden="true" v-html="svgFilters" />
+
+    <!-- Preview viewport (relative wrapper anchors the inspector panel) -->
+    <div class="relative flex min-h-0 flex-1 flex-col">
       <div
-        ref="previewContainerRef"
-        class="bg-background overflow-auto shadow-lg transition-all duration-200 relative"
-        :class="{
-          'w-full h-full shadow-none': isResponsive,
-          'border rounded-lg': !isResponsive,
-          'cursor-crosshair': inspectorEnabled,
-        }"
-        :style="containerStyles"
+        ref="scrollRef"
+        class="relative min-h-0 flex-1 overflow-auto bg-muted/40"
+        :class="[isResponsive ? 'p-0' : 'p-3 sm:p-6', isFullscreen ? '' : 'pb-20 lg:pb-0']"
       >
-        <PreviewDashboard v-if="activeTemplate === 'dashboard'" />
-        <PreviewCards v-else-if="activeTemplate === 'cards'" />
-        <PreviewForms v-else-if="activeTemplate === 'forms'" />
-        <PreviewAuth v-else-if="activeTemplate === 'auth'" />
-        <PreviewComponents v-else-if="activeTemplate === 'components'" />
-
-        <!-- Element Inspector Overlay -->
-        <ElementInspector
-          :enabled="inspectorEnabled"
-          :container-ref="previewContainerRef"
-          @close="inspectorEnabled = false"
-        />
-      </div>
-    </div>
-
-    <!-- Inspector Mode Indicator -->
-    <div
-      v-if="inspectorEnabled"
-      class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-blue-500 text-white text-xs rounded-full shadow-lg flex items-center gap-2"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="12"
-        height="12"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8" />
-        <path d="M3 16.2V21m0 0h4.8M3 21l6-6" />
-        <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6" />
-        <path d="M3 7.8V3m0 0h4.8M3 3l6 6" />
-      </svg>
-      <span>Inspector Mode</span>
-      <button class="ml-1 hover:bg-white/20 rounded p-0.5" @click="inspectorEnabled = false">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+        <div
+          ref="previewContainerRef"
+          class="vc-preview @container relative mx-auto bg-background text-foreground transition-[width] duration-200"
+          :class="{
+            'w-full min-h-full': isResponsive,
+            'max-w-none rounded-lg border shadow-lg': !isResponsive,
+            'cursor-crosshair': inspectorEnabled,
+          }"
+          :data-style="config.components.style"
+          :data-icons="config.icons.library"
+          :style="frameStyles"
         >
-          <path d="M18 6 6 18" />
-          <path d="m6 6 12 12" />
-        </svg>
-      </button>
+          <div
+            :key="activeTemplate"
+            class="vc-enter mx-auto w-full"
+            style="max-width: var(--vc-container)"
+          >
+            <PreviewDashboard v-if="activeTemplate === 'dashboard'" />
+            <PreviewCards v-else-if="activeTemplate === 'cards'" />
+            <PreviewForms v-else-if="activeTemplate === 'forms'" />
+            <PreviewAuth v-else-if="activeTemplate === 'auth'" />
+            <PreviewComponents v-else-if="activeTemplate === 'components'" />
+            <PreviewColors v-else-if="activeTemplate === 'colors'" />
+            <PreviewTypography v-else-if="activeTemplate === 'typography'" />
+          </div>
+
+          <ElementInspector />
+        </div>
+
+        <!-- Inspector mode indicator -->
+        <div
+          v-if="inspectorEnabled"
+          class="sticky bottom-4 left-0 z-10 mx-auto mt-4 flex w-max items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-xs text-background shadow-lg"
+        >
+          <Icon name="lucide:crosshair" class="size-3" />
+          <span>{{
+            pinned ? 'Esc to unpin · ↑ parent' : 'Click an element to inspect · Esc to exit'
+          }}</span>
+          <button
+            type="button"
+            class="ml-1 rounded p-0.5 hover:bg-background/20"
+            aria-label="Exit inspector mode"
+            @click="setInspector(false)"
+          >
+            <Icon name="lucide:x" class="size-3" />
+          </button>
+        </div>
+      </div>
+      <ElementInspectorPanel />
     </div>
   </div>
 </template>
