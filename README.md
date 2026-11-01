@@ -47,7 +47,8 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes), [tweakcn](http
 - **Saved Configurations**: Save, rename, load and delete named themes in the browser
 - **Keyboard Shortcuts**: Undo/redo, export, import, share, dark mode, randomize and template switching
 - **Theme Gallery**: Browse and fork community themes
-- **Drag-and-Drop Sections**: Reorder configuration sections with drag-and-drop
+- **Organised Settings**: Seven tabs (Themes, Colors, Style, Type, Motion, Layout, Export) with compact controls, collapsible advanced groups and a settings search that jumps to any option
+- **Section Settings**: Show, hide and reorder the sections inside each tab (drag-and-drop or arrow buttons)
 - **Resizable Sidebar**: Adjust the configuration panel width to your preference
 - **Searchable Presets**: Filter themes by name, category, or color
 
@@ -329,6 +330,8 @@ Elegant rose pink metallic theme.
 | ![Rose Gold Light](/public/screenshots/rose-gold-light.png) | ![Rose Gold Dark](/public/screenshots/rose-gold-dark.png) |
 
 ## ⚙️ Configuration Groups
+
+Settings live in tabs on the left of the builder. Use **Search settings** at the top of the panel to jump to any option.
 
 ### Theme
 

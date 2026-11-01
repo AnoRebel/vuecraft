@@ -523,3 +523,16 @@
     animation: none;
   }
 }
+
+/* Briefly highlight a setting reached through the settings search */
+@keyframes vc-setting-flash {
+  0%,
+  60% {
+    box-shadow: 0 0 0 2px var(--color-ring);
+    background-color: color-mix(in oklch, var(--color-ring) 10%, transparent);
+  }
+}
+.vc-setting-flash {
+  border-radius: var(--radius-md);
+  animation: vc-setting-flash 1.4s ease-out;
+}
