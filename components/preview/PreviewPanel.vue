@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { onKeyStroke } from '@vueuse/core'
 import { useDesignSystem } from '~/composables/useDesignSystem'
 import { useResponsivePreview } from '~/composables/useResponsivePreview'
@@ -14,6 +14,8 @@ import PreviewComponents from './PreviewComponents.vue'
 import PreviewColors from './PreviewColors.vue'
 import PreviewTypography from './PreviewTypography.vue'
 import ElementInspector from './ElementInspector.vue'
+import ElementInspectorPanel from './ElementInspectorPanel.vue'
+import { useElementInspector } from '~/composables/useElementInspector'
 import ResponsivePreviewControls from '~/components/ResponsivePreviewControls.vue'
 import { useColorBlindnessSimulation } from '~/composables/useColorBlindnessSimulation'
 import { useBuilderUi } from '~/composables/useBuilderUi'
@@ -40,7 +42,14 @@ function toggleCode() {
   if (window.matchMedia('(min-width: 1024px)').matches) showCSSPanel.value = !showCSSPanel.value
   else showCSSDialog.value = true
 }
-const inspectorEnabled = ref(false)
+const {
+  enabled: inspectorEnabled,
+  pinned,
+  setEnabled: setInspector,
+  setContainer,
+  selectParent,
+  escape: escapeInspector,
+} = useElementInspector()
 const isFullscreen = ref(false)
 const scrollRef = ref<HTMLElement | null>(null)
 const previewContainerRef = ref<HTMLElement | null>(null)
@@ -59,15 +68,31 @@ const frameStyles = computed(() => {
   return styles
 })
 
-onKeyStroke('Escape', () => {
-  if (inspectorEnabled.value) inspectorEnabled.value = false
+watch(previewContainerRef, (el) => setContainer(el), { immediate: true })
+
+function isTyping() {
+  const el = document.activeElement as HTMLElement | null
+  return !!el && (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable)
+}
+
+onKeyStroke('Escape', (e) => {
+  if (document.querySelector('[role="dialog"][data-state="open"]')) return
+  if (escapeInspector()) e.preventDefault()
   else if (isFullscreen.value) isFullscreen.value = false
 })
+
+onKeyStroke('ArrowUp', (e) => {
+  if (!pinned.value || isTyping()) return
+  e.preventDefault()
+  selectParent()
+})
+
+onBeforeUnmount(() => setInspector(false))
 </script>
 
 <template>
   <div
-    class="@container/panel flex h-full min-h-0 flex-col bg-background"
+    class="@container/panel relative flex h-full min-h-0 flex-col bg-background"
     :class="{ 'fixed inset-0 z-[90]': isFullscreen }"
     data-tour-guide="preview-panel"
   >
@@ -97,11 +122,10 @@ onKeyStroke('Escape', () => {
           <Button
             variant="ghost"
             size="icon-sm"
-            class="hidden md:inline-flex"
             :class="{ 'bg-accent text-accent-foreground': inspectorEnabled }"
             :aria-pressed="inspectorEnabled"
             aria-label="Element inspector"
-            @click="inspectorEnabled = !inspectorEnabled"
+            @click="setInspector(!inspectorEnabled)"
           >
             <Icon name="lucide:crosshair" />
           </Button>
@@ -152,57 +176,62 @@ onKeyStroke('Escape', () => {
     <!-- SVG filters used by the colour vision simulation -->
     <div class="hidden" aria-hidden="true" v-html="svgFilters" />
 
-    <!-- Preview viewport -->
-    <div
-      ref="scrollRef"
-      class="relative min-h-0 flex-1 overflow-auto bg-muted/40"
-      :class="[isResponsive ? 'p-0' : 'p-3 sm:p-6', isFullscreen ? '' : 'pb-20 lg:pb-0']"
-    >
+    <!-- Preview viewport (relative wrapper anchors the inspector panel) -->
+    <div class="relative flex min-h-0 flex-1 flex-col">
       <div
-        ref="previewContainerRef"
-        class="vc-preview @container relative mx-auto bg-background text-foreground transition-[width] duration-200"
-        :class="{
-          'w-full min-h-full': isResponsive,
-          'max-w-none rounded-lg border shadow-lg': !isResponsive,
-          'cursor-crosshair': inspectorEnabled,
-        }"
-        :data-style="config.components.style"
-        :data-icons="config.icons.library"
-        :style="frameStyles"
+        ref="scrollRef"
+        class="relative min-h-0 flex-1 overflow-auto bg-muted/40"
+        :class="[isResponsive ? 'p-0' : 'p-3 sm:p-6', isFullscreen ? '' : 'pb-20 lg:pb-0']"
       >
-        <div class="mx-auto w-full" style="max-width: var(--vc-container)">
-          <PreviewDashboard v-if="activeTemplate === 'dashboard'" />
-          <PreviewCards v-else-if="activeTemplate === 'cards'" />
-          <PreviewForms v-else-if="activeTemplate === 'forms'" />
-          <PreviewAuth v-else-if="activeTemplate === 'auth'" />
-          <PreviewComponents v-else-if="activeTemplate === 'components'" />
-          <PreviewColors v-else-if="activeTemplate === 'colors'" />
-          <PreviewTypography v-else-if="activeTemplate === 'typography'" />
+        <div
+          ref="previewContainerRef"
+          class="vc-preview @container relative mx-auto bg-background text-foreground transition-[width] duration-200"
+          :class="{
+            'w-full min-h-full': isResponsive,
+            'max-w-none rounded-lg border shadow-lg': !isResponsive,
+            'cursor-crosshair': inspectorEnabled,
+          }"
+          :data-style="config.components.style"
+          :data-icons="config.icons.library"
+          :style="frameStyles"
+        >
+          <div
+            :key="activeTemplate"
+            class="vc-enter mx-auto w-full"
+            style="max-width: var(--vc-container)"
+          >
+            <PreviewDashboard v-if="activeTemplate === 'dashboard'" />
+            <PreviewCards v-else-if="activeTemplate === 'cards'" />
+            <PreviewForms v-else-if="activeTemplate === 'forms'" />
+            <PreviewAuth v-else-if="activeTemplate === 'auth'" />
+            <PreviewComponents v-else-if="activeTemplate === 'components'" />
+            <PreviewColors v-else-if="activeTemplate === 'colors'" />
+            <PreviewTypography v-else-if="activeTemplate === 'typography'" />
+          </div>
+
+          <ElementInspector />
         </div>
 
-        <ElementInspector
-          :enabled="inspectorEnabled"
-          :container-ref="previewContainerRef"
-          @close="inspectorEnabled = false"
-        />
-      </div>
-
-      <!-- Inspector mode indicator -->
-      <div
-        v-if="inspectorEnabled"
-        class="sticky bottom-4 left-0 z-10 mx-auto mt-4 flex w-max items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-xs text-background shadow-lg"
-      >
-        <Icon name="lucide:crosshair" class="size-3" />
-        <span>Inspector mode · Esc to exit</span>
-        <button
-          type="button"
-          class="ml-1 rounded p-0.5 hover:bg-background/20"
-          aria-label="Exit inspector mode"
-          @click="inspectorEnabled = false"
+        <!-- Inspector mode indicator -->
+        <div
+          v-if="inspectorEnabled"
+          class="sticky bottom-4 left-0 z-10 mx-auto mt-4 flex w-max items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-xs text-background shadow-lg"
         >
-          <Icon name="lucide:x" class="size-3" />
-        </button>
+          <Icon name="lucide:crosshair" class="size-3" />
+          <span>{{
+            pinned ? 'Esc to unpin · ↑ parent' : 'Click an element to inspect · Esc to exit'
+          }}</span>
+          <button
+            type="button"
+            class="ml-1 rounded p-0.5 hover:bg-background/20"
+            aria-label="Exit inspector mode"
+            @click="setInspector(false)"
+          >
+            <Icon name="lucide:x" class="size-3" />
+          </button>
+        </div>
       </div>
+      <ElementInspectorPanel />
     </div>
   </div>
 </template>
