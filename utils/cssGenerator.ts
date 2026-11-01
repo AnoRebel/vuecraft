@@ -58,7 +58,12 @@ export function generateRuntimeCSS(config: DesignSystemConfigInput): string {
     .map((k) => `  :where(.vc-preview) .shadow-${k} { --tw-shadow: var(--vc-shadow-${k}); }`)
     .join('\n')
 
-  return `:root {
+  // Declare Tailwind's layer order first: this stylesheet can be injected
+  // before Tailwind's own CSS (cached theme on reload), and the first
+  // statement that mentions a layer fixes its position in the cascade.
+  return `@layer theme, base, components, utilities;
+
+:root {
 ${colorDeclarations(t.colors.light, 'color-')}
   --radius: ${t.radius};
   --radius-sm: calc(var(--radius) - 4px);
