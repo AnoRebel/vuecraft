@@ -40,8 +40,9 @@ Inspired by [ui.shadcn.com/themes](https://ui.shadcn.com/themes), [tweakcn](http
 - **Theme History/Undo**: Full undo/redo support with 50-step history
 - **Brand Color Import**: Extract dominant colors from uploaded logos/images
 - **Color Blindness Simulation**: Preview for protanopia, deuteranopia, tritanopia, achromatopsia
-- **Element Inspector**: Hover to inspect preview elements, see component names, Tailwind classes, and CSS variables
+- **Element Inspector**: Hover to highlight preview elements, click to pin one and open a panel with its path (↑ selects the parent), component, box model, typography, the theme tokens it uses with text contrast, and its classes or a markup snippet to copy
 - **Theme Comparison**: Side-by-side diff view to compare themes
+- **Motion Designer**: Exact duration, easing presets or a custom cubic-bézier with a live curve, fade/slide/scale/blur entrance effects, reduced motion and a replayable demo; exported as an `animate-enter` utility
 - **Live CSS Editor**: Edit the generated variables and apply them back to the theme
 - **Saved Configurations**: Save, rename, load and delete named themes in the browser
 - **Keyboard Shortcuts**: Undo/redo, export, import, share, dark mode, randomize and template switching
@@ -166,19 +167,20 @@ bun run preview
 
 `Ctrl` is `⌘` on macOS. Single-key shortcuts only work when no text field is focused and no dialog is open.
 
-| Shortcut                  | Action                                 |
-| ------------------------- | -------------------------------------- |
-| `Ctrl+Z`                  | Undo                                   |
-| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo                                   |
-| `Ctrl+S`                  | Saved configurations                   |
-| `Ctrl+E`                  | Export                                 |
-| `Ctrl+I`                  | Import                                 |
-| `Ctrl+Shift+S`            | Share link                             |
-| `D`                       | Toggle dark mode                       |
-| `R`                       | Randomize theme                        |
-| `1` – `7`                 | Switch preview template                |
-| `?`                       | Show keyboard shortcuts                |
-| `Esc`                     | Close dialogs, inspector or fullscreen |
+| Shortcut                  | Action                                                       |
+| ------------------------- | ------------------------------------------------------------ |
+| `Ctrl+Z`                  | Undo                                                         |
+| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo                                                         |
+| `Ctrl+S`                  | Saved configurations                                         |
+| `Ctrl+E`                  | Export                                                       |
+| `Ctrl+I`                  | Import                                                       |
+| `Ctrl+Shift+S`            | Share link                                                   |
+| `D`                       | Toggle dark mode                                             |
+| `R`                       | Randomize theme                                              |
+| `1` – `7`                 | Switch preview template                                      |
+| `?`                       | Show keyboard shortcuts                                      |
+| `↑`                       | Inspector: select the parent element                         |
+| `Esc`                     | Close dialogs, unpin or exit the inspector, leave fullscreen |
 
 ## 📦 Export Options
 
@@ -355,6 +357,13 @@ Elegant rose pink metallic theme.
 ### Components
 
 - Style (Default, New York, Miami, Brutal, Soft), each changing buttons, cards, inputs and badges
+
+### Motion
+
+- Duration (0–1000 ms) and easing (presets or custom cubic-bézier)
+- Entrance effects: fade, slide, scale, blur
+- Reduced motion preview
+- Exported as `--default-transition-timing-function`, `--animate-enter` with `@keyframes enter`, and a `prefers-reduced-motion` rule
 - Border width
 - Animation speed
 - Focus ring configuration
