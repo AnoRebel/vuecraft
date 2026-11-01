@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { cn } from '~/lib/utils'
 
 interface Option {
@@ -8,59 +9,59 @@ interface Option {
   icon?: string
 }
 
-interface Props {
-  modelValue: string
-  options: Option[]
-  label?: string
-  columns?: 2 | 3 | 4 | 5
-}
+const props = withDefaults(
+  defineProps<{
+    modelValue: string
+    options: Option[]
+    label?: string
+    /** Kept for compatibility; segmented controls size to their content */
+    columns?: 2 | 3 | 4 | 5
+    id?: string
+  }>(),
+  { label: undefined, columns: 3, id: undefined }
+)
 
-withDefaults(defineProps<Props>(), {
-  columns: 3,
-  label: undefined,
-})
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: string]
-}>()
-
-function selectOption(name: string) {
-  emit('update:modelValue', name)
-}
-
-// Responsive grid columns - start with fewer columns on mobile
-const gridCols = {
-  2: 'grid-cols-2',
-  3: 'grid-cols-2 sm:grid-cols-3',
-  4: 'grid-cols-2 sm:grid-cols-4',
-  5: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
-}
+const selected = computed(() => props.options.find((o) => o.name === props.modelValue))
+const labelId = computed(() => (props.id ? `${props.id}-label` : undefined))
 </script>
 
 <template>
-  <div class="space-y-2">
-    <label v-if="label" class="text-sm font-medium">{{ label }}</label>
-    <div :class="cn('grid gap-2', gridCols[columns])">
+  <div :id="id" class="space-y-1.5">
+    <div v-if="label" class="flex items-baseline justify-between gap-2">
+      <span :id="labelId" class="text-sm font-medium">{{ label }}</span>
+    </div>
+    <div
+      role="radiogroup"
+      :aria-labelledby="labelId"
+      :aria-label="labelId ? undefined : label"
+      class="flex flex-wrap gap-0.5 rounded-lg bg-muted p-0.5"
+    >
       <button
         v-for="option in options"
         :key="option.name"
         type="button"
+        role="radio"
+        :aria-checked="modelValue === option.name"
         :aria-pressed="modelValue === option.name"
+        :title="option.description"
         :class="
           cn(
-            'flex flex-col items-center justify-center p-3 rounded-md border transition-all text-center',
+            'inline-flex min-h-7 flex-1 basis-[calc(25%-2px)] items-center justify-center gap-1 whitespace-nowrap rounded-md px-2 text-xs font-medium transition-colors',
             modelValue === option.name
-              ? 'border-primary bg-primary/10 text-primary'
-              : 'border-border hover:border-primary/50 hover:bg-accent'
+              ? 'bg-background text-foreground shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
           )
         "
-        @click="selectOption(option.name)"
+        @click="emit('update:modelValue', option.name)"
       >
-        <span class="text-sm font-medium">{{ option.label }}</span>
-        <span v-if="option.description" class="text-xs text-muted-foreground mt-1">
-          {{ option.description }}
-        </span>
+        <Icon v-if="option.icon" :name="option.icon" class="size-3.5" />
+        {{ option.label }}
       </button>
     </div>
+    <p v-if="selected?.description" class="text-xs text-muted-foreground">
+      {{ selected.description }}
+    </p>
   </div>
 </template>

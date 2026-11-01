@@ -21,28 +21,28 @@ const formatOptions = [
 </script>
 
 <template>
-  <ConfigSection title="Export" description="Output settings">
+  <ConfigSection title="Output" static>
     <div class="space-y-4">
       <!-- Framework Target -->
       <OptionPicker
+        id="setting-framework"
         :model-value="config.export.framework"
         :options="frameworkOptions"
         label="Framework"
-        :columns="2"
         @update:model-value="(v) => setExport({ framework: v as any })"
       />
 
       <!-- Export Format -->
       <OptionPicker
+        id="setting-export-format"
         :model-value="config.export.format"
         :options="formatOptions"
-        label="Export Format"
-        :columns="3"
+        label="Format"
         @update:model-value="(v) => setExport({ format: v as any })"
       />
 
       <!-- TypeScript -->
-      <div class="flex items-center justify-between">
+      <div id="setting-typescript" class="flex items-center justify-between gap-3">
         <div>
           <Label>TypeScript</Label>
           <p class="text-xs text-muted-foreground">Generate TypeScript compatible exports</p>
@@ -54,8 +54,8 @@ const formatOptions = [
       </div>
 
       <!-- CSS Variables Prefix -->
-      <div class="space-y-2">
-        <Label>CSS Variables Prefix</Label>
+      <div id="setting-prefix" class="space-y-1.5">
+        <Label>CSS variable prefix</Label>
         <Input
           :model-value="config.export.cssVariablesPrefix"
           placeholder="e.g., my-app"
