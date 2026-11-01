@@ -5,7 +5,12 @@
  * exporter read from `resolveTheme`, so what users see is exactly what they
  * export - including colours imported from presets and custom overrides.
  */
-import type { DesignSystemConfigInput, FontScale, SpacingScale } from '~/types/config'
+import type {
+  AnimationEffects,
+  DesignSystemConfigInput,
+  FontScale,
+  SpacingScale,
+} from '~/types/config'
 import { getThemeColors, type ThemeColors } from '~/config/themes'
 import {
   RADIUS_OPTIONS,
@@ -30,6 +35,10 @@ export interface ResolvedTheme {
   shadows: Record<ColorMode, ShadowScale>
   borderWidth: string
   animationDuration: string
+  animationEasing: string
+  /** Entrance animation start values (from the enabled effects) */
+  enter: { opacity: number; y: string; scale: number; blur: string }
+  reducedMotion: boolean
   fontScale: number
   spacingScale: number
   headingWeight: number
@@ -216,6 +225,18 @@ function fullShadowScale(partial: Record<string, string>, fallback: ShadowScale)
   }
 }
 
+const DEFAULT_EFFECTS: AnimationEffects = { fade: true, scale: true, slide: true, blur: false }
+
+function resolveEnter(effects: AnimationEffects | undefined): ResolvedTheme['enter'] {
+  const e = { ...DEFAULT_EFFECTS, ...(effects ?? {}) }
+  return {
+    opacity: e.fade ? 0 : 1,
+    y: e.slide ? '8px' : '0px',
+    scale: e.scale ? 0.96 : 1,
+    blur: e.blur ? '6px' : '0px',
+  }
+}
+
 export function resolveTheme(config: DesignSystemConfigInput): ResolvedTheme {
   const { theme, typography, components, icons, layout } = config
   const custom = theme.custom ?? null
@@ -242,7 +263,12 @@ export function resolveTheme(config: DesignSystemConfigInput): ResolvedTheme {
       BORDER_WIDTHS.find((b) => b.name === components.borderWidth)?.value ??
       '1px',
     animationDuration:
-      ANIMATION_SPEEDS.find((a) => a.name === components.animationSpeed)?.duration ?? '200ms',
+      typeof components.animationDuration === 'number'
+        ? `${Math.max(0, Math.min(2000, components.animationDuration))}ms`
+        : (ANIMATION_SPEEDS.find((a) => a.name === components.animationSpeed)?.duration ?? '200ms'),
+    animationEasing: components.animationEasing || 'cubic-bezier(0.4, 0, 0.2, 1)',
+    enter: resolveEnter(components.animationEffects),
+    reducedMotion: !!components.reducedMotion,
     fontScale: FONT_SCALE[typography.fontScale] ?? 1,
     spacingScale: SPACING_SCALE[layout.spacingScale] ?? 1,
     headingWeight: HEADING_WEIGHT[typography.headingWeight] ?? 600,
@@ -263,3 +289,36 @@ export function colorDeclarations(set: ColorSet, prefix = '', indent = '  '): st
 }
 
 export const SHADOW_KEYS = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const
+
+/**
+ * Motion block for exported theme CSS: an `animate-enter` utility built from
+ * the configured effects, duration and easing (place inside `@theme`).
+ */
+export function motionThemeDeclarations(t: ResolvedTheme, indent = '  '): string {
+  const e = t.enter
+  return [
+    `--default-transition-timing-function: ${t.animationEasing};`,
+    `--animate-enter: enter ${t.animationDuration} ${t.animationEasing} both;`,
+    '',
+    '@keyframes enter {',
+    '  from {',
+    `    opacity: ${e.opacity};`,
+    `    transform: translateY(${e.y}) scale(${e.scale});`,
+    `    filter: blur(${e.blur});`,
+    '  }',
+    '}',
+  ]
+    .map((l) => (l ? indent + l : l))
+    .join('\n')
+}
+
+/** Reduced motion rule appended to exported CSS */
+export const REDUCED_MOTION_CSS = `@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}`

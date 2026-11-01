@@ -32,6 +32,10 @@ export const DEFAULT_COMPONENTS_CONFIG: ComponentsConfig = {
   style: 'default',
   borderWidth: 'default',
   animationSpeed: 'default',
+  animationDuration: null,
+  animationEasing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  animationEffects: { fade: true, scale: true, slide: true, blur: false },
+  reducedMotion: false,
   focusRingWidth: 'default',
   focusRingOffset: 'default',
 }
