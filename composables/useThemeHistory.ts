@@ -13,7 +13,9 @@ export interface HistoryEntry {
 }
 
 const MAX_HISTORY_SIZE = 50
-const DEBOUNCE_MS = 500
+// Changes are already debounced (300ms) before they reach history, so only
+// merge snapshots that arrive almost together
+const DEBOUNCE_MS = 100
 
 // Shared state across the app
 const history = ref<HistoryEntry[]>([])
