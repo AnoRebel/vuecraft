@@ -26,7 +26,7 @@
     "@simplewebauthn/server": "^14.0.3",
     "@unhead/vue": "^3.4.3",
     "@vite-pwa/nuxt": "^1.1.1",
-    "@vue-dnd-kit/core": "^2.4.7",
+    "@vue-dnd-kit/core": "^3.0.1",
     "@vueuse/core": "^15.0.0",
     "@vueuse/nuxt": "^15.0.0",
     "class-variance-authority": "^0.7.1",
